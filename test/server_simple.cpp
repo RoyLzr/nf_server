@@ -8,6 +8,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include "../nf_server.h"
+
+
 
 #define max 128
 #define BUFLEN 128
@@ -95,6 +98,16 @@ void Server::run(int fd)
 
 int main(int argc, char *argv[])
 {
+    nf::NfServer *test =  new nf::NfServer();
+    char s[] = "test server";
+    test->set_server_name(s);
+   
+    test->run();
+
+    nf_server_t * data = test->get_server_data();
+    
+    std::cout << data->name << std::endl;
+ 
     Server server(1025);
     struct sockaddr_in server_address;
     server_address.sin_family = AF_INET;

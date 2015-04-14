@@ -28,6 +28,9 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <iostream>
+#include <netinet/tcp.h>
+#include <netdb.h>
+
 
 extern int connect_retry(int family, int type, int protcol, 
                          const struct sockaddr *addr, 
@@ -55,5 +58,5 @@ extern ssize_t readn(int fd, void *ptr, size_t n);
  *        
  */
 
-
+extern ssize_t net_socket(int domain, int type, int protocol);
 #endif

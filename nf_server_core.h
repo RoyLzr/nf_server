@@ -4,6 +4,8 @@
 #include "net.h"
 #include "string.h"
 
+
+
 typedef enum{
 
     INIT    = 0,
@@ -14,31 +16,46 @@ typedef enum{
 
 typedef int (* nf_callback_proc)();
 typedef int (* nf_handle_t)(void * req);
+typedef struct _nf_server_pdata_t nf_server_pdata_t;
+typedef struct _nf_server_t nf_server_t;
 
-typedef struct _nf_server_pdata_t
+struct _nf_server_pdata_t
 {
     pthread_t pid;
     size_t id;
     struct sockaddr_in client_addr;
 
     void *read_buf;
-    size_t read_siz;
+    size_t read_size;
     void *write_buf;
-    size_t write_siz;
-    
-}nf_server_pdata_t;
+    size_t write_size;
 
-typedef struct _nf_server_t
+    nf_server_t *server;
+    
+};
+
+struct _nf_server_t
 {
     size_t server_type;
     size_t connect_type; 
-    size_t pthread_num;
-    size_t run_thread_num;
+    size_t pthread_num;        //线程池开启线程总数
+    size_t run_thread_num;     //已经开启线程数
     size_t backlog;
-    std::string name;
+    size_t listen_port;
+    size_t need_join;
+    
+    size_t connect_to;
+    size_t read_to;
+    size_t write_to;
+    
+    size_t thread_read_buf;
+    size_t thread_write_buf;
+     
+    size_t stack_size; //线程栈大小
+    char name[256];
     
     int sock_family;
-    
+    int sev_socket; 
     
     nf_callback_proc cb_work;
     nf_server_pdata_t *pdata;
@@ -48,7 +65,7 @@ typedef struct _nf_server_t
 
     SERVER_STATUS_T status;
 
-}nf_server_t;
+};
 
 enum {
     NFSVR_LFPOOL = 0,    //建议用于多线程短连接                                                                   
@@ -61,7 +78,10 @@ enum{
     NFSVR_LONG_CONNEC
 };
 
-extern nf_server_t * nf_server_create(const std::string * sev_name);
+extern nf_server_t * nf_server_create(const char  *);
+extern int nf_server_bind(nf_server_t *);
+extern int nf_server_init(nf_server_t *);
+extern int nf_server_listen(nf_server_t *);
 
 
 

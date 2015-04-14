@@ -59,11 +59,18 @@ ssize_t sendn(int fd, const void *ptr, size_t n)
     return n - nleft;
 }
 
-extern ssize_t readn(int fd, void *ptr, size_t n)
+ssize_t readn(int fd, void *ptr, size_t n)
 {
     int result;
     result = recv(fd, ptr, n, MSG_WAITALL);
     return result;
 }
- 
+
+ssize_t net_socket(int domain, int type, int protocol)
+{
+    int fd = socket(domain, type, protocol);
+    if( fd < 0)
+        return -1;
+    return fd;
+}
 
