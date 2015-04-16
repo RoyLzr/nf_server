@@ -31,15 +31,15 @@ static int lfpool_once_op(int epfd, int fd, int timeout)
     if (nepoll_add(epfd, fd) < 0)
         return -1;
     
-    std::cout << "test1" << std::endl;
+    //std::cout << "test1" << std::endl;
     struct epoll_event events[1];
     if (epoll_wait(epfd, events, 1, timeout) < 0)
         return -1;
-    std::cout << "test2" << std::endl;
     
     //清空表
     if (nepoll_del(epfd, fd, 1) < 0)
         return -1;
+    //std::cout << "test2" << std::endl;
     return 0;
 }
 
@@ -70,11 +70,12 @@ void * lf_main(void * param)
        if( !sev->run || lfpool_once_op(pdata->epfd, sev->sev_socket, -1) < 0) 
        {
            std::cout << strerror(errno) << std::endl;
+           std::cout << "once op error : " << strerror(errno) << std::endl;
            pthread_mutex_unlock(&(pool->lock));
            goto EXIT;                
        }
        
-       if(!sev->run)
+       if( !sev->run )
        {
             pthread_mutex_unlock(&(pool->lock));
             goto EXIT;
@@ -90,18 +91,24 @@ void * lf_main(void * param)
        if(pdata->fd < 0)
        {
             pdata->fd = -1;
+            std::cout << strerror(errno) << std::endl;
+            std::cout << "accept fd error, maybe TIMEWAIT" << std::endl;
             continue;
        }
        //set worker socket
        set_sev_socketopt(sev, pdata->fd);
        //目前采用 阻塞 褪萁传输    
        set_fd_block(pdata->fd);
-      
+
        //work
        while(sev->run)
        { 
-            if(sev->nf_default_worker(pdata) < 0)
+            if(sev->cb_work(pdata) < 0)
+            {
+                if(errno != 2)
+                    std::cout << "work end error: " << strerror(errno) << std::endl;
                 break;
+            }
        }
  
        //更新 worker 数字       
@@ -156,7 +163,7 @@ int lfpool_run(nf_server_t * sev)
             }
         }
     }
-    sleep(20);
+    sleep(2000);
 
     return 0; 
 }

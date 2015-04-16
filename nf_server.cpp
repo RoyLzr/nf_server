@@ -1,6 +1,7 @@
 
 #include "nf_server.h"
 #include "nf_server_core.h"
+#include "pool_register.h"
 
 namespace nf
 {
@@ -24,6 +25,7 @@ namespace nf
         
         return 0;
     }
+
     nf_server_t * NfServer :: get_server_data()
     {
         return sev_data;
@@ -42,7 +44,7 @@ namespace nf
         {    std::cout << "listen error" << std::endl; return -1;}
         
         sev_data->need_join = 1; 
-    
-        return 0; 
+         
+        return g_pool[sev_data->server_type].run(sev_data); 
     } 
 }

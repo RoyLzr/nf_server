@@ -39,7 +39,7 @@ struct _nf_server_t
     size_t server_type;
     size_t connect_type; 
     size_t pthread_num;        //线程池开启线程总数
-    size_t run_thread_num;     //工作线程数
+    int run_thread_num;     //工作线程数
     size_t backlog;
     size_t listen_port;
     size_t need_join;
@@ -66,7 +66,7 @@ struct _nf_server_t
     nf_handle_t p_end;    
      
     nf_handle_t p_read;     
-    nf_handle_t p_wirte;     
+    nf_handle_t p_write;     
     
     void * pool;
     SERVER_STATUS_T status;
@@ -90,10 +90,10 @@ extern int nf_server_init(nf_server_t *);
 extern int nf_server_listen(nf_server_t *);
 extern int set_sev_socketopt(nf_server_t *, int);
 
-extern int nf_default_worker(nf_server_pdata_t *);
+extern int nf_default_worker(void *);
 
-extern int nf_default_write_buf(nf_server_pdata_t *);
+extern int nf_default_write_buf(void *);
 
-extern int nf_default_read_buf(nf_server_pdata_t *);
+extern int nf_default_read_buf(void *);
 
 #endif

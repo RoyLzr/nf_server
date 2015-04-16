@@ -26,7 +26,7 @@ nf_server_t * nf_server_create(const char * sev_name)
     sev->p_start = NULL;
     sev->p_end = NULL;
     sev->p_read = NULL;     
-    sev->p_wirte = NULL;     
+    sev->p_write = NULL;     
     
     sev->status = INIT;
 
@@ -52,7 +52,7 @@ int nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
      
     pdata->read_buf = NULL;
     pdata->write_buf = NULL;
-
+    
     pdata->ep_size = 1;
 
     if(sev->thread_read_buf == 0)
@@ -93,7 +93,7 @@ int nf_server_init(nf_server_t * sev)
 
     sev->pool = NULL;
     //线程数
-    sev->pthread_num = 150;
+    sev->pthread_num = 100;
     //线程栈
     //sev->stack_size = 10485760;  //10M
     sev->stack_size = 1; //默认值
@@ -200,7 +200,6 @@ int nf_server_listen(nf_server_t * sev)
     return g_pool[sev->server_type].listen(sev);
 }
 
-
 int nf_default_worker(void *req)
 {
     nf_server_pdata_t * pdata = (nf_server_pdata_t *)req;
@@ -209,22 +208,26 @@ int nf_default_worker(void *req)
         return -1;
     //读等待超时
 
-    int readto = ((nf_server_t *)req->server)->read_to;
-    nf_handle_t read_fun = ((nf_server_t *)req->server)->nf_default_read_buf;
-    nf_handle_t write_fun = ((nf_server_t *)req->server)->nf_default_write_buf;
-    
-    int readto = ((nf_server_t *)req->server)->read_to;
+    int readto = (((nf_server_pdata_t *)req)->server)->read_to;
+    nf_handle_t read_fun = (((nf_server_pdata_t *)req)->server)->p_read;
+    nf_handle_t write_fun = (((nf_server_pdata_t *)req)->server)->p_write;
+     
     const int size = pdata->ep_size;
     struct epoll_event events[size], ev;
-    
+   
+    set_fd_block(pdata->fd); 
+
+    readto = -1;
+ 
     while(1)
     {
-        ret = epoll_wait(pdata->epfd, events, size, read_to);
+        ret = epoll_wait(pdata->epfd, events, pdata->ep_size, readto);
         if(ret == 0)
             {std::cout << "read timeout error" << std::endl; return ret;}
         else if(ret < 0)
-            return ret; 
+            {std::cout << "line:226 core.cpp :" << strerror(errno) <<std::endl;   return ret;} 
         //events analyse
+        //std::cout << "get event" << std::endl;
         for(int i = 0; i < ret; i++)
         {
             if( events[i].events & EPOLLRDHUP)
@@ -232,15 +235,20 @@ int nf_default_worker(void *req)
                 std::cout << "event close fd error" << std::endl; 
                 return -1;
             }
-            else if( events[i].events & EPOLLIN )
+            else if( events[i].events & EPOLLERR )
             {
+                std::cout << "event fd  error" << std::endl; 
+                return -1;
+            }
+            else if( events[i].events & EPOLLIN )
+            {   
                 if( read_fun(pdata) < 0)
                     return -1;
                 else
                 {
                     ev.data.fd = pdata->fd;
                     ev.events = EPOLLOUT | EPOLLHUP | EPOLLERR;
-                    epoll_ctl(pdata->epfd, EPOLL_CTL_ADD, pdata->fd, &ev);
+                    epoll_ctl(pdata->epfd, EPOLL_CTL_MOD, pdata->fd, &ev);
                 }
             }
             else if( events[i].events & EPOLLOUT )
@@ -251,7 +259,7 @@ int nf_default_worker(void *req)
                 {
                     ev.data.fd = pdata->fd;
                     ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
-                    epoll_ctl(pdata->epfd, EPOLL_CTL_ADD, pdata->fd, &ev);
+                    epoll_ctl(pdata->epfd, EPOLL_CTL_MOD, pdata->fd, &ev);
                 }
             }
         }
@@ -259,12 +267,27 @@ int nf_default_worker(void *req)
     return 1;
 }
 
-int nf_default_read_buf()
+int nf_default_read_buf(void *data)
 {
-
+    nf_server_pdata_t *pdata = (nf_server_pdata_t *)data;
+    int ret;
+    if ( (ret = readn(pdata->fd, pdata->read_buf, 5)) <= 0)
+        return -1; 
+    std::cout << pdata->read_buf << " : read value" <<std::endl;
+    return ret;
 }
 
+int nf_default_write_buf(void *data)
+{
+    nf_server_pdata_t *pdata = (nf_server_pdata_t *)data;
+    pdata->write_buf = (char *)pdata->write_buf;
 
-
-
+    strncpy((char *)pdata->write_buf, (char *)pdata->read_buf, 5);
+    char * temp = (char *)pdata->write_buf;
+    temp[5] = '\0';
+    int ret;
+    if ( (ret = sendn(pdata->fd, pdata->write_buf, 5, 20)) <= 0 )
+        return -1;
+    return ret;
+}
 

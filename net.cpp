@@ -35,7 +35,7 @@ int connect_retry(int family, int type, int protcol,
     return -1; 
 }
 
-ssize_t sendn(int fd, const void *ptr, size_t n)
+ssize_t sendn(int fd, const void *ptr, size_t n, size_t maxtime)
 {
     size_t nleft;
     ssize_t nwrite;
@@ -139,15 +139,19 @@ int set_clc_fd(int fd, int flag, int closed)
     }
     
     if ( val & O_NONBLOCK)
-        val &= ~O_NONBLOCK;
-
-    if ( (fcntl(fd, F_SETFL, val)) < 0)
     {
-        std::cout << "fd get error" << std::endl;
-        if(closed == 0)
-            close(fd);
-        return -1;
+        val &= ~O_NONBLOCK;
+        //std::cout << "need change" << std::endl;
+        if ( (fcntl(fd, F_SETFL, val)) < 0)
+        {
+            std::cout << "fd get error" << std::endl;
+            if(closed == 0)
+                close(fd);
+            return -1;
+        
+        }
     }
+    
     return 0;
 }
 
