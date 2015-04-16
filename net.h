@@ -30,6 +30,8 @@
 #include <iostream>
 #include <netinet/tcp.h>
 #include <netdb.h>
+#include <pthread.h>
+#include <sys/epoll.h>
 
 
 extern int connect_retry(int family, int type, int protcol, 
@@ -59,4 +61,22 @@ extern ssize_t readn(int fd, void *ptr, size_t n);
  */
 
 extern ssize_t net_socket(int domain, int type, int protocol);
+
+extern int naccept(int, struct sockaddr *, socklen_t *);
+
+extern int nepoll_create(int);
+
+extern int nepoll_add(int, int);
+
+extern int nepoll_del(int, int, int closed = 1);
+
+extern int set_fd(int, int, int closed = 1);
+
+extern int set_clc_fd(int, int, int closed = 1);
+
+extern int set_fd_noblock(int);
+
+extern int set_fd_block(int);
+
+
 #endif

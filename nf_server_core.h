@@ -4,8 +4,6 @@
 #include "net.h"
 #include "string.h"
 
-
-
 typedef enum{
 
     INIT    = 0,
@@ -14,7 +12,7 @@ typedef enum{
     STOP    = 3
 }SERVER_STATUS_T;
 
-typedef int (* nf_callback_proc)();
+typedef int (* nf_callback_proc)(void *req);
 typedef int (* nf_handle_t)(void * req);
 typedef struct _nf_server_pdata_t nf_server_pdata_t;
 typedef struct _nf_server_t nf_server_t;
@@ -31,7 +29,9 @@ struct _nf_server_pdata_t
     size_t write_size;
 
     nf_server_t *server;
-    
+    int epfd;
+    int fd;
+    size_t ep_size;
 };
 
 struct _nf_server_t
@@ -39,7 +39,7 @@ struct _nf_server_t
     size_t server_type;
     size_t connect_type; 
     size_t pthread_num;        //线程池开启线程总数
-    size_t run_thread_num;     //已经开启线程数
+    size_t run_thread_num;     //工作线程数
     size_t backlog;
     size_t listen_port;
     size_t need_join;
@@ -50,19 +50,25 @@ struct _nf_server_t
     
     size_t thread_read_buf;
     size_t thread_write_buf;
-     
+    
+    size_t run;     
     size_t stack_size; //线程栈大小
     char name[256];
     
     int sock_family;
     int sev_socket; 
+    int epfd;
     
     nf_callback_proc cb_work;
     nf_server_pdata_t *pdata;
 
     nf_handle_t p_start;     
-    nf_handle_t p_end;     
-
+    nf_handle_t p_end;    
+     
+    nf_handle_t p_read;     
+    nf_handle_t p_wirte;     
+    
+    void * pool;
     SERVER_STATUS_T status;
 
 };
@@ -82,12 +88,12 @@ extern nf_server_t * nf_server_create(const char  *);
 extern int nf_server_bind(nf_server_t *);
 extern int nf_server_init(nf_server_t *);
 extern int nf_server_listen(nf_server_t *);
+extern int set_sev_socketopt(nf_server_t *, int);
 
+extern int nf_default_worker(nf_server_pdata_t *);
 
+extern int nf_default_write_buf(nf_server_pdata_t *);
 
-
-
-
-
+extern int nf_default_read_buf(nf_server_pdata_t *);
 
 #endif
