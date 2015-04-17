@@ -8,7 +8,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
-#include "../nf_server/net.h"
+#include "../net.h"
 
 
 
@@ -35,8 +35,10 @@ class Client
 
 int main(int argc, char *argv[])
 {
-    char buf[128];
-    for(int i = 0; i < 10; i++)
+    char buf[128] = "12345";
+    char readbuf[128];
+    while(1){
+    for(int i = 0; i < 1000; i++)
     {   Client client(1025, "127.0.0.1");
 
         struct sockaddr_in server_address;
@@ -49,11 +51,20 @@ int main(int argc, char *argv[])
         
         if (fd == -1)
             std::cout << "error" << std::endl;
+
         int n;
-        while(n = recv(fd, buf, 128, MSG_WAITALL) > 0){}
-        
-        std::cout << buf  <<  std::endl;
-        std::cout << n  <<  std::endl;
+        if (send(fd, buf, strlen(buf), 0) <= 0)
+            std::cout <<  "error"  << ": " << i << std::endl;
+            
+        memset(readbuf, 0, sizeof(readbuf)); 
+        if(n = recv(fd, readbuf, strlen(buf), MSG_WAITALL) > 0)
+            std::cout <<  readbuf  << ": " << i << std::endl;
+        else
+            std::cout <<  "error"  << ": " << i << std::endl;
+            
+        //std::cout << buf  <<  std::endl;
+        //std::cout << n  <<  std::endl;
         close(fd);
+    }
     }
 }

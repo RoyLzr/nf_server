@@ -153,7 +153,6 @@ int lfpool_run(nf_server_t * sev)
                     return -1;
                 }
             }
-            
             ret = pthread_create(&sev->pdata[i].pid, &thread_attr, lf_main, &sev->pdata[i]);
             if(ret != 0)
             {

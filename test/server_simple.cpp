@@ -101,25 +101,11 @@ int main(int argc, char *argv[])
     nf::NfServer *test =  new nf::NfServer();
     char s[] = "test server";
     test->set_server_name(s);
-   
-    test->run();
-
+    
+    if (test->run() < 0)
+        std::cout << strerror(errno) << std::endl; 
     nf_server_t * data = test->get_server_data();
     
+    std::cout << "normal end" << std::endl;
     std::cout << data->name << std::endl;
- 
-    Server server(1025);
-    struct sockaddr_in server_address;
-    server_address.sin_family = AF_INET;
-    server_address.sin_addr.s_addr = htonl(INADDR_ANY);
-    server_address.sin_port = htons(1025);
-    int fd = server.initserver(SOCK_STREAM, (struct sockaddr *)(&server_address), 
-                                  sizeof(server_address), 20);
-    if (fd == -1)
-    {
-        std::cout << "error" << std::endl;
-        exit(0);
-    }
-    server.run(fd);
-        
 }
