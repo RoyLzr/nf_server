@@ -57,8 +57,13 @@ int nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
 
     if(sev->thread_read_buf == 0)
         pdata->read_size = 1024;
+    else
+        pdata->read_size = sev->thread_read_buf;
+
     if(sev->thread_write_buf == 0)
         pdata->write_size = 1024;
+    else
+        pdata->write_size = sev->thread_write_buf;
 
     pdata->read_buf = malloc(sizeof(char) * pdata->read_size);
     if(pdata->read_buf == NULL)
@@ -82,22 +87,44 @@ int nf_server_init(nf_server_t * sev)
     if(sev == NULL)
         return -1;
     //监听端口
-    sev->listen_port = 1025;
+    sev->listen_port = (size_t)atoi((Singleton<ConfigParser>::
+                                     instance()->get("server", "listenPort")).c_str());
     //超时设置
-    sev->connect_to = 1000;
-    sev->read_to = 100;
-    sev->write_to = 100;
+    sev->connect_to = (size_t)atoi((Singleton<ConfigParser>::
+                                    instance()->get("server", "connectTo")).c_str());
+
+    sev->read_to = (size_t)atoi((Singleton<ConfigParser>::
+                                 instance()->get("server", "readTo")).c_str());
+
+    sev->write_to = (size_t)atoi((Singleton<ConfigParser>::
+                                  instance()->get("server", "writeTo")).c_str());
+
+    //connect 方法
+    sev->connect_type = (size_t)atoi((Singleton<ConfigParser>::
+                                      instance()->get("server", "connectType")).c_str());
     
     if (sev->connect_type == NFSVR_SHORT_CONNEC)
         sev->server_type = NFSVR_LFPOOL;
 
     sev->pool = NULL;
+
     //线程数
-    sev->pthread_num = 100;
+    sev->pthread_num = (size_t)atoi((Singleton<ConfigParser>::
+                                     instance()->get("server", "threadNum")).c_str());
+
     //线程栈
     //sev->stack_size = 10485760;  //10M
-    sev->stack_size = 1; //默认值
+    sev->stack_size = (size_t)atoi((Singleton<ConfigParser>:: 
+                                    instance()->get("server", "stackSize")).c_str());
 
+
+    //thread write/read buf size
+    sev->thread_read_buf = (size_t)atoi((Singleton<ConfigParser>:: 
+                                    instance()->get("thread", "threadReadBuf")).c_str());
+    sev->thread_write_buf = (size_t)atoi((Singleton<ConfigParser>:: 
+                                    instance()->get("thread", "threadWriteBuf")).c_str());
+   
+    
     //线程内容 初始化 
     sev->pdata = (nf_server_pdata_t *) malloc(sizeof(nf_server_pdata_t) * (sev->pthread_num + 2));
     if (sev->pdata == NULL)

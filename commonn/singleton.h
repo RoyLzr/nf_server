@@ -5,7 +5,6 @@
 #include <map>
 #include <pthread.h>
 
-
 class MutexLock
 {
     public:

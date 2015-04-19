@@ -91,11 +91,6 @@ void ConfigParser :: scan() const
 }
 
 
-int main()
-{
-    Singleton<ConfigParser>::instance()->parser_file("11.conf");
-    Singleton<ConfigParser>::instance()->scan();
-    Singleton<ConfigParser>::instance()->parser_file("22.conf");
-    Singleton<ConfigParser>::instance()->scan();
-    Singleton<ConfigParser>::destroy();
-}
+    //Singleton<ConfigParser>::instance()->parser_file("22.conf");
+    //Singleton<ConfigParser>::instance()->scan();
+    //Singleton<ConfigParser>::destroy();

@@ -14,6 +14,8 @@
 #include "nf_server_core.h"
 #include <iostream>
 #include <string.h>
+#include "commonn/singleton.h"
+#include "commonn/configParser.h"
 
 namespace nf
 {
@@ -23,9 +25,8 @@ namespace nf
             NfServer();
             virtual ~NfServer();
         //测试 暂时 使用 手动设置配置文件
-        //int load_conf(const string &);
         
-        int load_conf();
+        int load_conf(const std::string &);
 
         int run();
         /**
@@ -98,10 +99,5 @@ namespace nf
             
     };
 }
-
-
-
-
-
 
 #endif

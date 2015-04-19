@@ -31,6 +31,13 @@ namespace nf
         return sev_data;
     }
 
+    int NfServer :: load_conf(const std::string & conf_path)
+    {
+        Singleton<ConfigParser>::instance()->parser_file(conf_path);
+        Singleton<ConfigParser>::instance()->scan();
+        //Singleton<ConfigParser>::destroy();
+    }
+
     int NfServer :: run()
     {
         int ret;
@@ -42,7 +49,7 @@ namespace nf
         
         if( (ret = nf_server_listen(sev_data) ) < 0 )
         {    std::cout << "listen error" << std::endl; return -1;}
-        
+         
         sev_data->need_join = 1; 
          
         return g_pool[sev_data->server_type].run(sev_data); 
