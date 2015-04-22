@@ -2,7 +2,7 @@ server: net.o nf_server.o nf_server_core.o server_simple.o lfpool.o configParser
 	rm -rf libs; 
 	mkdir libs; 
 	g++  -o server server_simple.o net.o nf_server.o nf_server_core.o lfpool.o configParser.o -lpthread; 
-	ls | grep '.o' | xargs -I{} mv {} libs
+	ls | grep '\.o' | xargs -I{} mv {} libs
 net.o: ../net.h ../net.cpp
 	g++ -g -c ../net.cpp
 lfpool.o:../nf_server.h
@@ -17,7 +17,7 @@ server_simple.o: ../nf_server_core.h ../nf_server_core.cpp ../net.h ../net.cpp .
 	g++ -g -c server_simple.cpp
 
 clean:
-	ls | grep '.o' | xargs rm -rf
+	ls | grep '\.o' | xargs rm -rf
 	rm -rf server
 	rm -rf libs
 

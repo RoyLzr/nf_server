@@ -61,24 +61,90 @@ extern ssize_t readn(int fd, void *ptr, size_t n);
  */
 
 extern ssize_t net_socket(int domain, int type, int protocol);
+/**
+ *  socket()µÄ°ü×°º¯Êý
+ *  @note · socket
+ *        
+ */
 
 extern int naccept(int, struct sockaddr *, socklen_t *);
+/**
+ *  accept()µÄ°ü×°º¯Êý
+ *  @note get accept
+ *        
+ */
 
 extern int nepoll_create(int);
+/**
+ *  epoll_create()µÄ°ü×°º¯Êý
+ *  @note epoll_create
+ *        
+ */
 
 extern int nepoll_add(int, int);
+/**
+ *  epoll_ctl()µÄ°ü×°º¯Êý
+ *  @note add 
+ *   EPOLLIN | EPOLLHUP | EPOLLERR;
+ */
 
 extern int nepoll_add_one(int, int);
+/**
+ *  epoll_ctl()µÄ°ü×°º¯Êý
+ *  @note add 
+ *   EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLONESHOT;
+ */
 
 extern int nepoll_del(int, int, int closed = 1);
+/**
+ *  epoll_del()µÄ°ü×°º¯Êý
+ *  @note del 
+ *   param1: epfd   param2: fd
+ *   closed: error close fd or not
+ */
 
 extern int set_fd(int, int, int closed = 1);
+/**
+ *  fcntl()°ü×°º¯Êý
+ *  @note add 
+ *   param1: fd   param2: flag
+ *   closed: error close fd or not
+ */
 
 extern int set_clc_fd(int, int, int closed = 1);
+/**
+ *  fcntl()°ü×°º¯Êý
+ *  @note clear
+ *   param1: fd   param2: flag
+ *   closed: error close fd or not
+ */
 
 extern int set_fd_noblock(int);
+/**
+ *  set_fd()°ü×°º¯Êý
+ *  @note set noblock
+ *   param1: fd 
+ */
 
 extern int set_fd_block(int);
+/**
+ *  set_fd()°ü×°º¯Êý
+ *  @note set block
+ *   param1: fd 
+ */
 
+extern int get_line(int, void *, int);
+/**
+ *  readn()°ü×°º¯Êý
+ *  @note read data from stream as line
+ *        param1: fd, param2: buff, param3:size 
+ */
+
+extern ssize_t readn_PEER(int fd, void *ptr, size_t n);
+/**
+ *  readn()°ü×°º¯Êý
+ *  @note read data as MSG_PEEK
+ *        param1: fd, param2: buff, param3:size 
+ */
 
 #endif

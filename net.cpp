@@ -10,7 +10,6 @@
 
 #include "net.h"
 
-
 int connect_retry(int family, int type, int protcol, 
                   const struct sockaddr *addr, 
                   size_t len, size_t maxsleep)
@@ -68,6 +67,30 @@ ssize_t readn(int fd, void *ptr, size_t n)
     while(nleft > 0)
     {
         if((nread = recv(fd, ptr, nleft, 0)) < 0)
+        {
+            //第一次写失败了
+           if(nleft ==  n)
+                return -1;
+           else
+                break;
+        }
+        else if(nread == 0) // 写完了
+            break;
+        nleft -= nread;
+        ptr += nread;
+    }
+    return n - nleft;
+}
+
+ssize_t readn_PEER(int fd, void *ptr, size_t n)
+{
+    size_t nleft;
+    ssize_t nread;
+    //EAGAIN will end
+    nleft = n;
+    while(nleft > 0)
+    {
+        if((nread = recv(fd, ptr, nleft, MSG_PEEK)) < 0)
         {
             //第一次写失败了
            if(nleft ==  n)
@@ -201,5 +224,36 @@ int naccept(int fd, struct sockaddr * addr, socklen_t *len)
         { std::cout << strerror(errno) << std::endl;  return -1;}     
     }
     return cfd; 
+}
+
+
+//read line from socket
+//低效
+int get_line(int fd, void * tmp, int size)
+{
+    char c = '\0';
+    char * buf = (char *)tmp;
+    int rlen;
+    int i = 0;
+    while( (i < size -1) && (c != '\n'))
+    {
+        rlen = readn(fd, &c, 1);
+        if( rlen > 0)
+        {
+            if(c == '\r')
+            {
+                rlen = readn_PEER(fd, &c, 1);
+                if (c == '\n' && rlen > 0)
+                    readn(fd, &c, 1);
+                else
+                    c = '\n';
+            }
+            buf[i] = c;
+            i++;
+        }
+        else
+            c = '\n';
+    }
+    return i;
 }
 

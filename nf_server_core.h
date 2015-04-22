@@ -1,3 +1,8 @@
+/*
+ * brief nf_server data-structure
+ * author liuzhaorui
+ * email  liuzhaorui1@163.com
+ */
 #ifndef _NFSERVER_CORE_H
 #define _NFSERVER_CORE_H
 
