@@ -126,7 +126,7 @@ int nf_server_init(nf_server_t * sev)
    
     
     //线程内容 初始化 
-    sev->pdata = (nf_server_pdata_t *) malloc(sizeof(nf_server_pdata_t) * (sev->pthread_num + 2));
+    sev->pdata = (nf_server_pdata_t *) malloc(sizeof(nf_server_pdata_t) * (sev->pthread_num));
     if (sev->pdata == NULL)
         return -1;
     
@@ -137,7 +137,7 @@ int nf_server_init(nf_server_t * sev)
     if(sev->p_write == NULL)
         sev->p_write = nf_default_write_buf;
 
-    for(int i = 0; i < (sev->pthread_num + 2); i++)
+    for(int i = 0; i < (sev->pthread_num); i++)
     { 
        if( (ret = nf_pdata_init(&sev->pdata[i], sev) ) < 0 )
             return -1;
@@ -241,8 +241,6 @@ int nf_default_worker(void *req)
      
     const int size = pdata->ep_size;
     struct epoll_event events[size], ev;
-   
-    set_fd_block(pdata->fd); 
 
     readto = -1;
  
@@ -317,4 +315,3 @@ int nf_default_write_buf(void *data)
         return -1;
     return ret;
 }
-

@@ -10,8 +10,6 @@
 #include <errno.h>
 #include "../net.h"
 
-
-
 #define max 128
 class Client
 {

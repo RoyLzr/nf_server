@@ -39,7 +39,7 @@ ssize_t sendn(int fd, const void *ptr, size_t n, size_t maxtime)
 {
     size_t nleft;
     ssize_t nwrite;
-
+    //EAGAIN will end
     nleft = n;
     while(nleft > 0)
     {
@@ -61,9 +61,26 @@ ssize_t sendn(int fd, const void *ptr, size_t n, size_t maxtime)
 
 ssize_t readn(int fd, void *ptr, size_t n)
 {
-    int result;
-    result = recv(fd, ptr, n, MSG_WAITALL);
-    return result;
+    size_t nleft;
+    ssize_t nread;
+    //EAGAIN will end
+    nleft = n;
+    while(nleft > 0)
+    {
+        if((nread = recv(fd, ptr, nleft, 0)) < 0)
+        {
+            //第一次写失败了
+           if(nleft ==  n)
+                return -1;
+           else
+                break;
+        }
+        else if(nread == 0) // 写完了
+            break;
+        nleft -= nread;
+        ptr += nread;
+    }
+    return n - nleft;
 }
 
 ssize_t net_socket(int domain, int type, int protocol)
@@ -90,6 +107,14 @@ int nepoll_add(int epfd, int fd)
     return epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev);
 }
 
+int nepoll_add_one(int epfd, int fd)
+{
+    struct epoll_event ev;
+    int ret;
+    ev.data.fd = fd;
+    ev.events = EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLONESHOT;
+    return epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev);
+}
 
 int nepoll_del(int epfd, int fd, int closed)
 {

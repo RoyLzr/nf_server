@@ -12,7 +12,11 @@ namespace nf
     
     NfServer :: ~NfServer()
     {
-        std::cout << "deconstructor" << std::endl;
+        if (sev_data != NULL)
+        {
+            NfServer :: destroy();
+        }
+        sev_data = NULL;
     }
 
     int NfServer :: set_server_name(const char * sev_name)
@@ -53,5 +57,48 @@ namespace nf
         sev_data->need_join = 1; 
          
         return g_pool[sev_data->server_type].run(sev_data); 
+    }
+    
+    int NfServer :: stop()
+    {
+        sev_data->run = 0;
+        return 0;
+    }
+    
+    int NfServer :: join()
+    {
+        if(sev_data == NULL)
+            return -1;
+        if(!sev_data->need_join)
+            return 0;
+        return g_pool[sev_data->server_type].join(sev_data); 
+    }
+    
+    int NfServer :: destroy()
+    {
+        NfServer :: stop();
+        NfServer :: join();    
+        if ( sev_data->sev_socket >= 0)
+            close(sev_data->sev_socket);
+        g_pool[sev_data->server_type].destroy(sev_data);   
+        
+        printf("close thread ok\n"); 
+        if( sev_data->pdata != NULL)
+        { 
+            for(int i = 0; i < sev_data->pthread_num; i++)
+            {
+                std::cout << i << std::endl;
+                if( sev_data->pdata[i].read_buf != NULL)
+                    free(sev_data->pdata[i].read_buf);
+                if( sev_data->pdata[i].write_buf != NULL)
+                    free(sev_data->pdata[i].write_buf);
+            }
+        }
+        Singleton<ConfigParser>::destroy();
+        std::cout << "close thread ok" << std::endl;
+        free(sev_data->pdata);
+        free(sev_data);
+        std::cout << "close server succ" << std::endl;
+
     } 
 }

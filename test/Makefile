@@ -1,12 +1,14 @@
-server: net.o nf_server.o nf_server_core.o server_simple.o lfpool.o 
+server: net.o nf_server.o nf_server_core.o server_simple.o lfpool.o configParser.o 
 	rm -rf libs; 
 	mkdir libs; 
-	g++  -o server server_simple.o net.o nf_server.o nf_server_core.o lfpool.o -lpthread; 
+	g++  -o server server_simple.o net.o nf_server.o nf_server_core.o lfpool.o configParser.o -lpthread; 
 	ls | grep '.o' | xargs -I{} mv {} libs
 net.o: ../net.h ../net.cpp
 	g++ -g -c ../net.cpp
 lfpool.o:../nf_server.h
 	g++ -g -c ../lfpool.cpp 
+configParser.o:../commonn/configParser.cpp
+	g++ -g -c ../commonn/configParser.cpp 
 nf_server_core.o: ../nf_server_core.h ../nf_server_core.cpp ../net.h ../net.cpp
 	g++ -g -c ../nf_server_core.cpp
 nf_server.o: ../nf_server_core.h ../nf_server_core.cpp ../net.h ../net.cpp ../nf_server.h ../nf_server.cpp

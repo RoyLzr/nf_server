@@ -68,6 +68,8 @@ extern int nepoll_create(int);
 
 extern int nepoll_add(int, int);
 
+extern int nepoll_add_one(int, int);
+
 extern int nepoll_del(int, int, int closed = 1);
 
 extern int set_fd(int, int, int closed = 1);

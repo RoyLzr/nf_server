@@ -28,18 +28,12 @@ static int lfpool_once_op(int epfd, int fd, int timeout)
         if(errno != 2)
             return -1;
 
-    if (nepoll_add(epfd, fd) < 0)
+    if (nepoll_add_one(epfd, fd) < 0)
         return -1;
     
-    //std::cout << "test1" << std::endl;
     struct epoll_event events[1];
     if (epoll_wait(epfd, events, 1, timeout) < 0)
         return -1;
-    
-    //清空表
-    if (nepoll_del(epfd, fd, 1) < 0)
-        return -1;
-    //std::cout << "test2" << std::endl;
     return 0;
 }
 
@@ -82,12 +76,14 @@ void * lf_main(void * param)
        }
 
        pdata->fd = naccept(sev->sev_socket, (sockaddr *)&caddr, (socklen_t *)&clen);
-       sev->run_thread_num++; 
        //release become worker.
        pthread_mutex_unlock( &(pool->lock)); 
       
        pdata->client_addr = caddr; 
        //accept noblocking
+
+       set_fd_noblock(pdata->fd);
+
        if(pdata->fd < 0)
        {
             pdata->fd = -1;
@@ -98,25 +94,14 @@ void * lf_main(void * param)
        //set worker socket
        set_sev_socketopt(sev, pdata->fd);
        //目前采用 阻塞 褪萁传输    
-       set_fd_block(pdata->fd);
 
        //work
-       while(sev->run)
-       { 
-            if(sev->cb_work(pdata) < 0)
-            {
-                if(errno != 2)
-                    std::cout << "work end error: " << strerror(errno) << std::endl;
-                break;
-            }
+       if(sev->cb_work(pdata) < 0)
+       {
+            if(errno != 2)
+                std::cout << "work end error: " << strerror(errno) << std::endl;
        }
  
-       //更新 worker 数字       
-       pthread_mutex_lock(&(temp_pool.lock));
-       sev->run_thread_num--;
-       std::cout << "worker num : " << sev->run_thread_num << std::endl;
-       pthread_mutex_unlock(&(temp_pool.lock));
-       
        nepoll_del(pdata->epfd, pdata->fd); 
        close(pdata->fd);
        pdata->fd = -1;
@@ -131,6 +116,7 @@ void * lf_main(void * param)
 //启动线程池内线程
 int lfpool_run(nf_server_t * sev)
 {
+    sev->run_thread_num = 0;
     for(int i = 0; i < sev->pthread_num; ++i)
     {
         sev->pdata[i].id = i;
@@ -152,18 +138,24 @@ int lfpool_run(nf_server_t * sev)
                     std::cout << "set stack size error" << std::endl; 
                     return -1;
                 }
+                ret = pthread_create(&sev->pdata[i].pid, &thread_attr, lf_main, &sev->pdata[i]);
+                pthread_attr_destroy(&thread_attr);
             }
-            ret = pthread_create(&sev->pdata[i].pid, &thread_attr, lf_main, &sev->pdata[i]);
+            else
+            {
+                ret = pthread_create(&sev->pdata[i].pid, NULL, lf_main, &sev->pdata[i]);
+            }
             if(ret != 0)
             {
                 std::cout << "create thread error" << std::endl;
                 std::cout << strerror(errno) << std::endl;
                 return -1;
             }
+            sev->run_thread_num++;
         }
+        else
+        {   std::cout << "stacksize must > 0" << std::endl; return -1; }
     }
-    sleep(2000);
-
     return 0; 
 }
 
@@ -171,11 +163,26 @@ int lfpool_run(nf_server_t * sev)
 
 int lfpool_join(nf_server_t * sev)
 {
+
+    for(int i = 0; i < sev->run_thread_num; i++)
+    {
+        std::cout << i << std::endl;
+        pthread_join(sev->pdata[i].pid, NULL);
+        std::cout << "thread : " << sev->pdata[i].id << "return succ" << std::endl;  
+    }
     return 0;
 }
 
 int lfpool_destroy(nf_server_t * sev)
 {
+    lfpool_t * pool = (lfpool_t *)sev->pool;
+    if( pool == NULL)
+        return 0;
+    pthread_mutex_destroy(&pool->lock);    
+    printf("destroy mutex ok");
+    if ( sev->pool != NULL)
+        free(sev->pool);
+    sev->pool = NULL;    
     return 0;
 }
 
