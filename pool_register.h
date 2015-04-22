@@ -29,10 +29,10 @@ typedef int (*resume_pool)(nf_server_t *);
 //注册表
 struct _pool_t
 {
-	init_pool init;	//pool的初始化回调函数
+    init_pool init;	//pool的初始化回调函数
 	run_pool run;	//pool的运行回调函数
 	listen_pool listen;  // 开始监听
-	join_pool join;	//pool的join函数
+    join_pool join;	//pool的join函数
     destroy_pool destroy;
     get_pool_socknum get_socknum;
     get_pool_queuenum get_queuenum;
