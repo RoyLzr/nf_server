@@ -16,6 +16,7 @@
 #include <string.h>
 #include "commonn/singleton.h"
 #include "commonn/configParser.h"
+#include "commonn/Server.h"
 
 namespace nf
 {
@@ -24,11 +25,10 @@ namespace nf
         public:
             NfServer();
             virtual ~NfServer();
-        //≤‚ ‘ ‘› ±  π”√  ÷∂Ø…Ë÷√≈‰÷√Œƒº˛
         
-        int load_conf(const std::string &);
+        virtual int load_conf(const std::string &);
 
-        int run();
+        virtual int run();
         /**
           * @brief ‘À––nf∑˛ŒÒ∆˜  
           * @return  int 0 ≥…π¶ -1  ß∞‹   
@@ -36,7 +36,7 @@ namespace nf
           *    
           **/
         
-        int stop();
+        virtual int stop();
         /**
           * @brief ‘ stop server
           * @return  int 0 ≥…π¶ -1  ß∞‹   
@@ -44,7 +44,7 @@ namespace nf
           *    
           **/
         
-        int destroy(); 
+        virtual int destroy(); 
         /**
           * @brief ‘ destroy server
           * @return  int 0 ≥…π¶ -1  ß∞‹   
@@ -52,7 +52,7 @@ namespace nf
           *    
           **/
         
-        int join();
+        virtual int join();
         /**
           * @brief ‘ join server
           * @return  int 0 ≥…π¶ -1  ß∞‹   
@@ -60,7 +60,7 @@ namespace nf
           *    
           **/
         
-        int pause();
+        virtual int pause();
         /**
           * @brief pause server
           * @return  int 0 ≥…π¶ -1  ß∞‹   
@@ -68,7 +68,7 @@ namespace nf
           *    
           **/
         
-        int resume();
+        virtual int resume();
         /**
           * @brief ÷ÿ∆Ù server
           * @return  int 0 ≥…π¶ -1  ß∞‹   

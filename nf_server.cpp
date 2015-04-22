@@ -100,5 +100,13 @@ namespace nf
         free(sev_data);
         std::cout << "close server succ" << std::endl;
 
-    } 
+    }
+    
+    int NfServer :: pause()
+    {   return 0 ;}
+    
+    int NfServer :: resume()
+    {   return 0 ;}
+    
+     
 }
