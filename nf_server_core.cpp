@@ -64,6 +64,12 @@ int nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
         pdata->write_size = 1024;
     else
         pdata->write_size = sev->thread_write_buf;
+    
+    if(sev->thread_usr_buf == 0)
+        pdata->usr_size = 1024;
+    else
+        pdata->usr_size = sev->thread_usr_buf;
+
 
     pdata->read_buf = malloc(sizeof(char) * pdata->read_size);
     if(pdata->read_buf == NULL)
@@ -74,6 +80,11 @@ int nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
     if(pdata->write_buf == NULL)
         return -1;
     memset(pdata->write_buf, 0, sizeof(char) * pdata->write_size);
+    
+    pdata->usr_buf = malloc(sizeof(char) * pdata->usr_size);
+    if(pdata->usr_buf == NULL)
+        return -1;
+    memset(pdata->usr_buf, 0, sizeof(char) * pdata->usr_size);
 
     return 0;
 }
@@ -118,13 +129,15 @@ int nf_server_init(nf_server_t * sev)
                                     instance()->get("server", "stackSize")).c_str());
 
 
-    //thread write/read buf size
+    //thread write/read/usr buf size
     sev->thread_read_buf = (size_t)atoi((Singleton<ConfigParser>:: 
                                     instance()->get("thread", "threadReadBuf")).c_str());
     sev->thread_write_buf = (size_t)atoi((Singleton<ConfigParser>:: 
                                     instance()->get("thread", "threadWriteBuf")).c_str());
-   
-    
+    sev->thread_usr_buf = (size_t)atoi((Singleton<ConfigParser>:: 
+                                    instance()->get("thread", "threadUsrBuf")).c_str());
+  
+ 
     //线程内容 初始化 
     sev->pdata = (nf_server_pdata_t *) malloc(sizeof(nf_server_pdata_t) * (sev->pthread_num));
     if (sev->pdata == NULL)

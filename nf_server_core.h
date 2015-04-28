@@ -32,6 +32,8 @@ struct _nf_server_pdata_t
     size_t read_size;
     void *write_buf;
     size_t write_size;
+    void *usr_buf;
+    size_t usr_size;
 
     nf_server_t *server;
     int epfd;
@@ -55,6 +57,7 @@ struct _nf_server_t
     
     size_t thread_read_buf;
     size_t thread_write_buf;
+    size_t thread_usr_buf;
     
     size_t run;     
     size_t stack_size; //线程栈大小
