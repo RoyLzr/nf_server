@@ -27,6 +27,7 @@ struct _nf_server_pdata_t
     pthread_t pid;
     size_t id;
     struct sockaddr_in client_addr;
+    rio_t rio;
 
     void *read_buf;
     size_t read_size;

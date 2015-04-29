@@ -92,6 +92,8 @@ namespace nf
                     free(sev_data->pdata[i].read_buf);
                 if( sev_data->pdata[i].write_buf != NULL)
                     free(sev_data->pdata[i].write_buf);
+                if( sev_data->pdata[i].rio.rio_buf != NULL)
+                    free(sev_data->pdata[i].rio.rio_buf);
             }
         }
         Singleton<ConfigParser>::destroy();

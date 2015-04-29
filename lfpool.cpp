@@ -23,6 +23,7 @@ int lfpool_init(nf_server_t * sev)
 
 static int lfpool_once_op(int epfd, int fd, int timeout)
 {
+    int stat;
     //Çå¿Õ±í omit no such file error
     if (nepoll_del(epfd, fd, 1) < 0)
         if(errno != 2)
@@ -32,9 +33,14 @@ static int lfpool_once_op(int epfd, int fd, int timeout)
         return -1;
     
     struct epoll_event events[1];
-    if (epoll_wait(epfd, events, 1, timeout) < 0)
+    stat = epoll_wait(epfd, events, 1, timeout);
+
+    if ( stat < 0)
         return -1;
-    return 0;
+    else if (stat == 0)
+        return stat;
+
+    return 1;
 }
 
 
@@ -61,20 +67,26 @@ void * lf_main(void * param)
     {  //race leader
        pthread_mutex_lock(&(pool->lock));
     
-       if( !sev->run || lfpool_once_op(pdata->epfd, sev->sev_socket, -1) < 0) 
+       if( !sev->run ) 
        {
-           std::cout << strerror(errno) << std::endl;
-           std::cout << "once op error : " << strerror(errno) << std::endl;
            pthread_mutex_unlock(&(pool->lock));
            goto EXIT;                
        }
        
+       if( lfpool_once_op(pdata->epfd, sev->sev_socket, 5000) <= 0 ) 
+       {
+           std::cout << strerror(errno) << std::endl;
+           std::cout << "once op error : " << strerror(errno) << std::endl;
+           pthread_mutex_unlock(&(pool->lock));
+           continue;
+       }
+
        if( !sev->run )
        {
             pthread_mutex_unlock(&(pool->lock));
             goto EXIT;
        }
-
+        
        pdata->fd = naccept(sev->sev_socket, (sockaddr *)&caddr, (socklen_t *)&clen);
        //release become worker.
        pthread_mutex_unlock( &(pool->lock)); 
@@ -166,7 +178,7 @@ int lfpool_join(nf_server_t * sev)
 
     for(int i = 0; i < sev->run_thread_num; i++)
     {
-        std::cout << i << std::endl;
+        std::cout << "join: "<<i << std::endl;
         pthread_join(sev->pdata[i].pid, NULL);
         std::cout << "thread : " << sev->pdata[i].id << "return succ" << std::endl;  
     }

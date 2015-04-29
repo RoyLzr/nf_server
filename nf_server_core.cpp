@@ -70,7 +70,6 @@ int nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
     else
         pdata->usr_size = sev->thread_usr_buf;
 
-
     pdata->read_buf = malloc(sizeof(char) * pdata->read_size);
     if(pdata->read_buf == NULL)
         return -1;
@@ -86,6 +85,12 @@ int nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
         return -1;
     memset(pdata->usr_buf, 0, sizeof(char) * pdata->usr_size);
 
+    pdata->rio.rio_len = pdata->read_size;
+    pdata->rio.rio_buf = (char *)malloc(sizeof(char) * pdata->read_size);
+    if(pdata->rio.rio_buf == NULL)
+        return -1;
+    memset(pdata->rio.rio_buf, 0, sizeof(char) * pdata->usr_size);
+    
     return 0;
 }
 
@@ -307,9 +312,13 @@ int nf_default_worker(void *req)
 
 int nf_default_read_buf(void *data)
 {
+    
     nf_server_pdata_t *pdata = (nf_server_pdata_t *)data;
+    
+    rio_init(&(pdata->rio), pdata->fd);
+
     int ret;
-    if ( (ret = readn(pdata->fd, pdata->read_buf, 5)) <= 0)
+    if ( (ret = rio_readn(&(pdata->rio), pdata->read_buf, 5)) <= 0)
         return -1; 
     std::cout << pdata->read_buf << " : read value" <<std::endl;
     return ret;

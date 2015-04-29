@@ -50,7 +50,7 @@ int main(int argc, char *argv[])
     if (test->run() < 0)
         std::cout << strerror(errno) << std::endl; 
     
-    sleep(120);
+    sleep(30);
     
     test->stop();
     

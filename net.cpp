@@ -10,6 +10,97 @@
 
 #include "net.h"
 
+
+
+void rio_init(rio_t *rp, int fd)
+{
+    rp->rio_fd = fd;
+    rp->rio_cnt = 0;
+    rp->rio_bufptr = rp->rio_buf;
+}
+
+//带buf操作
+//先读一次到 buf 中，然后消耗buf中数据
+static ssize_t rio_read(rio_t *rp, char *buf, int n)
+{
+    int cnt = 0;
+
+    while( rp->rio_cnt <= n )
+    {
+        rp->rio_cnt = recv(rp->rio_fd, rp->rio_buf, 
+                           rp->rio_len, 0);
+        if( rp->rio_cnt < 0)
+        {
+            if( errno != EINTR)
+                return -1;
+        }
+        else if( rp->rio_cnt == 0)
+        {
+            return 0;
+        }
+        else
+            rp->rio_bufptr = rp->rio_buf;
+    }
+    
+    cnt = n;
+    if( rp->rio_cnt < n)
+        cnt = rp->rio_cnt;
+    memcpy(buf, rp->rio_bufptr, cnt);
+    rp->rio_bufptr += cnt;
+    rp->rio_cnt -= cnt;
+    return cnt;
+}
+
+ssize_t rio_readn(rio_t *rp, void *buf, int n)
+{
+    int nleft = n;
+    int nread;
+    char *tmp = (char *)buf;
+    
+    while( nleft > 0)
+    {
+        if( (nread = rio_read(rp, tmp, nleft)) < 0)
+        {
+            if( errno == EINTR)
+                nread = 0;
+            else
+                return -1;
+        }
+        else if( nread == 0)
+            break;
+        nleft -= nread;
+        tmp += nread;
+    }
+    return n - nleft;
+}
+
+ssize_t rio_readline(rio_t * rp, void *buf, int maxlen)
+{
+    int i, nread;
+    char c, *tmp = (char *)buf;
+    for( i = 1; i < maxlen; i++)
+    {
+        if( (nread = rio_read(rp, &c, 1)) == 1)
+        {
+            *tmp = c;
+            tmp++;
+            if(c == '\n')
+                break;
+        }
+        else if( nread == 0)
+        {
+            if( i == 1)
+                return 0;
+            else
+                break;
+        }
+        else
+            return -1;
+    }
+    *tmp = 0;
+    return i;
+}
+
 int connect_retry(int family, int type, int protcol, 
                   const struct sockaddr *addr, 
                   size_t len, size_t maxsleep)
@@ -45,13 +136,11 @@ ssize_t sendn(int fd, const void *ptr, size_t n, size_t maxtime)
         if((nwrite = send(fd, ptr, nleft, 0)) < 0)
         {
             //第一次写失败了
-           if(nleft ==  n)
-                return -1;
+           if(errno == EINTR)
+                nwrite = 0;
            else
                 break;
         }
-        else if(nwrite == 0) // 写完了
-            break;
         nleft -= nwrite;
         ptr += nwrite;
     }
@@ -68,11 +157,12 @@ ssize_t readn(int fd, void *ptr, size_t n)
     {
         if((nread = recv(fd, ptr, nleft, 0)) < 0)
         {
-            //第一次写失败了
-           if(nleft ==  n)
-                return -1;
-           else
+           if(errno ==  EINTR)
+                nread = 0; 
+           else if(errno == EAGAIN)
                 break;
+           else
+                return -1; //中间失败返回-1
         }
         else if(nread == 0) // 写完了
             break;
@@ -92,11 +182,10 @@ ssize_t readn_PEER(int fd, void *ptr, size_t n)
     {
         if((nread = recv(fd, ptr, nleft, MSG_PEEK)) < 0)
         {
-            //第一次写失败了
-           if(nleft ==  n)
-                return -1;
+           if(nleft == EINTR)
+                nread = 0;
            else
-                break;
+                return -1;
         }
         else if(nread == 0) // 写完了
             break;
@@ -228,8 +317,8 @@ int naccept(int fd, struct sockaddr * addr, socklen_t *len)
 
 
 //read line from socket
-//低效
-int get_line(int fd, void * tmp, int size)
+//低效 无 buf
+int read_line(int fd, void * tmp, int size)
 {
     char c = '\0';
     char * buf = (char *)tmp;

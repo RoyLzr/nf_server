@@ -34,6 +34,28 @@
 #include <sys/epoll.h>
 
 
+typedef struct _rio_t 
+{
+    int rio_fd;
+    int rio_cnt;
+    size_t rio_len;
+    char *rio_bufptr;
+    char *rio_buf;
+} rio_t;
+
+
+extern void rio_init(rio_t *rp, int fd);
+
+
+
+ssize_t rio_readn(rio_t *rp, void *buf, int n);
+
+
+
+ssize_t rio_readline(rio_t * rp, void *buf, int maxlen);
+
+
+
 extern int connect_retry(int family, int type, int protcol, 
                          const struct sockaddr *addr, 
                          size_t len, size_t maxsleep = 64);
@@ -133,7 +155,7 @@ extern int set_fd_block(int);
  *   param1: fd 
  */
 
-extern int get_line(int, void *, int);
+extern int read_line(int, void *, int);
 /**
  *  readn()°ü×°º¯Êý
  *  @note read data from stream as line
