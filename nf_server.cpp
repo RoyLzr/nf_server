@@ -109,6 +109,48 @@ namespace nf
     
     int NfServer :: resume()
     {   return 0 ;}
+        
+    int NfServer :: set_work_callback(nf_callback_proc run)
+    {
+        if( sev_data == NULL)
+            return -1;
+        sev_data->cb_work = run;
+        return 1;
+    }
+        
+    int NfServer :: set_server_startfun( nf_handle_t start )
+    {   return 0 ;}
+        
+    int NfServer :: set_thread_startfun( nf_handle_t start ) 
+    {
+        if( sev_data == NULL)
+            return -1;
+        sev_data->p_start = start;
+        return 1;
+    }
+        
+    int NfServer :: set_thread_endfun( nf_handle_t end )
+    {
+        if( sev_data == NULL)
+            return -1;
+        sev_data->p_end = end;
+        return 1;
+    }
+        
+    int NfServer :: set_work_readfun( nf_handle_t read) 
+    {
+        if( sev_data == NULL)
+            return -1;
+        sev_data->p_read = read;
+        return 1;
+    }
+        
+    int NfServer :: set_work_writefun( nf_handle_t write)
+    {
+        if( sev_data == NULL)
+            return -1;
+        sev_data->p_write = write;
+        return 1;
+    }
     
-     
 }

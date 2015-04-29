@@ -76,7 +76,7 @@ namespace nf
           *    
           **/
          
-        int set_work_callback(nf_callback_proc run);
+        virtual int set_work_callback(nf_callback_proc run);
         /**
           * @brief callback º¯Êý
           * @return  int 0 ³É¹¦ -1 Ê§°Ü   
@@ -84,11 +84,15 @@ namespace nf
           *    
           **/
 
-        int set_server_startfun(nf_handle_t start);
+        virtual int set_server_startfun(nf_handle_t start);
         
-        int set_thread_startfun(nf_handle_t start); 
+        virtual int set_thread_startfun(nf_handle_t start); 
         
-        int set_thread_endfun(nf_handle_t end); 
+        virtual int set_thread_endfun(nf_handle_t end); 
+        
+        virtual int set_work_readfun( nf_handle_t ); 
+        
+        virtual int set_work_writefun( nf_handle_t ); 
    
         int set_server_name(const char *);
         
