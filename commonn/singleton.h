@@ -62,11 +62,16 @@ class Singleton
     private:
         static T * _instance;
         static bool _initialized;
+        static MutexLock Lock;
 };
+
 template<class T>
 bool Singleton<T>::_initialized = false;
 
 template<class T>
 T * Singleton<T>::_instance = NULL;
+
+template<class T>
+MutexLock Singleton<T>::Lock;
 
 #endif
