@@ -63,17 +63,17 @@ static const struct _pool_t g_pool[] = {
 		lfpool_pause,
 		lfpool_resume
 	},
-	{
-		sapool_init,
-		sapool_run,
-		sapool_listen,
-		sapool_join,
-		sapool_destroy,
-		sapool_get_socknum,
-		sapool_get_queuenum,
-		sapool_pause,
-		sapool_resume
-	},
+//	{
+//		sapool_init,
+//		sapool_run,
+//		sapool_listen,
+//		sapool_join,
+//		sapool_destroy,
+//		sapool_get_socknum,
+//		sapool_get_queuenum,
+//		sapool_pause,
+//		sapool_resume
+//	},
 };
 
 #endif

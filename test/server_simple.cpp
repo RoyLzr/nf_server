@@ -20,7 +20,7 @@ int nf_default_read(void *data)
     int ret;
     if ( (ret = readn(pdata->fd, pdata->read_buf, 5)) <= 0)
         return -1;
-    std::cout << pdata->read_buf << " : read value" <<std::endl;
+    std::cout << pdata->read_buf <<std::endl;
     return ret;
 }
 int nf_default_write(void *data)
@@ -49,9 +49,7 @@ int main(int argc, char *argv[])
      
     if (test->run() < 0)
         std::cout << strerror(errno) << std::endl; 
-    
-    sleep(30);
-    
+    sleep(65534); 
     test->stop();
     
     test->destroy();
