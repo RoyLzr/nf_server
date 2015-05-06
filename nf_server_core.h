@@ -62,6 +62,15 @@ struct _nf_server_t
     
     size_t run;     
     size_t stack_size; //线程栈大小
+
+    size_t listen_prio; //sapool
+    size_t work_prio;   //sapool
+
+    size_t sock_num;  //sapool
+    size_t queue_len; //sapool
+    size_t check_interval;  //sapool
+    size_t timeout; //sapool
+ 
     char name[256];
     
     int sock_family;
@@ -84,7 +93,7 @@ struct _nf_server_t
 
 enum {
     NFSVR_LFPOOL = 0,    //建议用于多线程短连接                                                                   
-    NFSVR_PCPOOL,        //建议用于多线程长连接      
+    NFSVR_SAPOOL,        //建议用于多线程长连接      
     NFSVR_POOL_NUM,     //当前有多少个pool    
 };   
 

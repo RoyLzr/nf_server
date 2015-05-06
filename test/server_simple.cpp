@@ -49,9 +49,9 @@ int main(int argc, char *argv[])
      
     if (test->run() < 0)
         std::cout << strerror(errno) << std::endl; 
-    sleep(65534); 
+    sleep(5);
     test->stop();
-    
+     
     test->destroy();
     
     free(test);

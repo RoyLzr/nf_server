@@ -20,6 +20,14 @@ nf_server_t * nf_server_create(const char * sev_name)
    
     sev->stack_size = 10485760;  //10M
     sev->sev_socket = -1;    
+    
+    sev->listen_prio = 10;
+    sev->work_prio = 5;  
+
+    sev->sock_num = 500;  
+    sev->queue_len = 200;
+    sev->check_interval = 5;
+    sev->timeout = 60;
 
     sev->cb_work = NULL;
     sev->pdata = NULL;
@@ -45,6 +53,7 @@ nf_server_t * nf_server_create(const char * sev_name)
 
 int nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
 {
+    //thread contains readbuff writebuf usr_buf to use
     pdata->pid = 0;
     pdata->id = 0;
     pdata->server = sev;
@@ -119,9 +128,10 @@ int nf_server_init(nf_server_t * sev)
     sev->connect_type = (size_t)atoi((Singleton<ConfigParser>::
                                       instance()->get("server", "connectType")).c_str());
     
-    if (sev->connect_type == NFSVR_SHORT_CONNEC)
-        sev->server_type = NFSVR_LFPOOL;
-
+    //server_type
+    sev->server_type = (size_t)atoi((Singleton<ConfigParser>::
+                                     instance()->get("server", "type")).c_str());
+    //init by pool.init()
     sev->pool = NULL;
 
     //线程数
@@ -166,7 +176,7 @@ int nf_server_init(nf_server_t * sev)
 
 int set_sev_socketopt(nf_server_t *sev, int fd)
 {
-    //目前设计 为 write-write-read 模式，默认关 TCPDELAY, do not acculate syn
+    //目前设计 为 write-write-read 模式，默认关 TCPDELAY, close Nagel
     const int on = 1;
     setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
     
@@ -193,6 +203,7 @@ int set_sev_socketopt(nf_server_t *sev, int fd)
 
 int nf_server_bind(nf_server_t * sev)
 {
+    //set svr : listen socket 
     const int on = 1;
     struct sockaddr_in addr;
     int ret;
@@ -261,7 +272,8 @@ int nf_default_worker(void *req)
     struct epoll_event events[size], ev;
 
     readto = -1;
- 
+    
+    //event loop 
     while(1)
     {
         ret = epoll_wait(pdata->epfd, events, pdata->ep_size, readto);

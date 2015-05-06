@@ -25,7 +25,7 @@ static ssize_t rio_read(rio_t *rp, char *buf, int n)
 {
     int cnt = 0;
 
-    while( rp->rio_cnt <= n )
+    while( rp->rio_cnt <= 0 )
     {
         rp->rio_cnt = recv(rp->rio_fd, rp->rio_buf, 
                            rp->rio_len, 0);
@@ -42,9 +42,10 @@ static ssize_t rio_read(rio_t *rp, char *buf, int n)
             rp->rio_bufptr = rp->rio_buf;
     }
     
-    cnt = n;
     if( rp->rio_cnt < n)
         cnt = rp->rio_cnt;
+    else
+        cnt = n;
     memcpy(buf, rp->rio_bufptr, cnt);
     rp->rio_bufptr += cnt;
     rp->rio_cnt -= cnt;

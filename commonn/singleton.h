@@ -28,9 +28,6 @@ class MutexLock
         pthread_mutex_t mutex;
 };
 
-
-static MutexLock Lock;
-
 template <class T>
 class Singleton
 {
