@@ -39,6 +39,10 @@ int nf_default_write(void *data)
 
 int main(int argc, char *argv[])
 {
+    
+    signal(SIGINT, default_hand);
+    signal(SIGHUP, default_hand);
+
     nf::NfServer *test =  new nf::NfServer();
     char s[] = "test server";
     test->set_server_name(s);
@@ -49,10 +53,15 @@ int main(int argc, char *argv[])
      
     if (test->run() < 0)
         std::cout << strerror(errno) << std::endl; 
-    sleep(5);
+    
+    int time = sleep(65535);
+    
     test->stop();
      
     test->destroy();
     
     free(test);
+    
+    std::cout << "run time : " << 65535 - time << std::endl;    
+
 }

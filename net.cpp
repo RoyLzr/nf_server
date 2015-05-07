@@ -347,3 +347,9 @@ int read_line(int fd, void * tmp, int size)
     return i;
 }
 
+void default_hand(int sig)
+{
+    std::cout << "default sig fun" << std::endl;
+    return;
+}
+

@@ -32,6 +32,7 @@
 #include <netdb.h>
 #include <pthread.h>
 #include <sys/epoll.h>
+#include <signal.h>
 
 
 typedef struct _rio_t 
@@ -168,5 +169,7 @@ extern ssize_t readn_PEER(int fd, void *ptr, size_t n);
  *  @note read data as MSG_PEEK
  *        param1: fd, param2: buff, param3:size 
  */
+
+extern void default_hand(int sig);
 
 #endif
