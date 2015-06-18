@@ -3,7 +3,63 @@
 #include <unistd.h>
 #include "pool_register.h"
 
-nf_server_t * nf_server_create(const char * sev_name)
+static pthread_key_t pkey;
+static pthread_once_t ponce = PTHREAD_ONCE_INIT;
+
+static void 
+create_key_once(void)
+{
+    pthread_key_create(&pkey, NULL);
+}
+
+int 
+set_pthread_data(nf_server_pdata_t *data)
+{
+	void *ptr = NULL;
+	pthread_once(&ponce, create_key_once);
+	if ((ptr = pthread_getspecific(pkey)) == NULL) 
+    {
+		ptr = data;
+		pthread_setspecific(pkey, ptr);
+	}
+	return 0;
+}
+
+nf_server_pdata_t * 
+get_pdata()
+{
+	void * ptr = pthread_getspecific(pkey);
+	return (nf_server_pdata_t *) ptr;
+}
+
+void * 
+nf_server_get_read_buf()
+{
+	nf_server_pdata_t *ptr = get_pdata();
+	if (ptr == NULL) 
+    {
+        std :: cout << "empty read buf" << std :: endl;
+        return NULL;
+    }
+	else
+		return ptr->read_buf;
+}
+
+void * 
+nf_server_get_write_buf()
+{
+	nf_server_pdata_t *ptr = get_pdata();
+	if (ptr == NULL) 
+    {
+        std :: cout << "empty read buf" << std :: endl;
+        return NULL;
+    }
+	else
+		return ptr->write_buf;
+}
+
+nf_server_t * 
+nf_server_create(const char * sev_name)
 {
     nf_server_t *sev = (nf_server_t *)malloc(sizeof(nf_server_t));
     if(sev == NULL)
@@ -51,7 +107,8 @@ nf_server_t * nf_server_create(const char * sev_name)
     return sev;
 }
 
-int nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
+int 
+nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
 {
     //thread contains readbuff writebuf usr_buf to use
     pdata->pid = 0;
@@ -94,16 +151,18 @@ int nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
         return -1;
     memset(pdata->usr_buf, 0, sizeof(char) * pdata->usr_size);
 
-    pdata->rio.rio_len = pdata->read_size;
-    pdata->rio.rio_buf = (char *)malloc(sizeof(char) * pdata->read_size);
-    if(pdata->rio.rio_buf == NULL)
+    pdata->rio.rio_ptr = (char *)malloc(sizeof(char) * pdata->read_size);
+    rio_init(&pdata->rio, pdata->fd, pdata->read_size);
+
+    if(pdata->rio.rio_ptr == NULL)
         return -1;
-    memset(pdata->rio.rio_buf, 0, sizeof(char) * pdata->usr_size);
+    memset(pdata->rio.rio_ptr, 0, sizeof(char) * pdata->usr_size);
     
     return 0;
 }
 
-int nf_server_init(nf_server_t * sev)
+int 
+nf_server_init(nf_server_t * sev)
 {
     int ret = 0;
     
@@ -170,23 +229,20 @@ int nf_server_init(nf_server_t * sev)
        if( (ret = nf_pdata_init(&sev->pdata[i], sev) ) < 0 )
             return -1;
     }
-
     return 0;
 }
 
 int set_sev_socketopt(nf_server_t *sev, int fd)
 {
-    //目前设计 为 write-write-read 模式，默认关 TCPDELAY, close Nagel
     const int on = 1;
     setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
     
-    //短链接 默认开启 linger设置, time_wait control
     if( sev->connect_type == NFSVR_SHORT_CONNEC)
     {
         struct linger li;
         memset(&li, 0, sizeof(li)); 
         li.l_onoff = 1;
-        li.l_linger = 1;
+        li.l_linger = 2;
         setsockopt(fd, SOL_SOCKET, SO_LINGER, (const char*)&li, sizeof(li) );     
     }
     
@@ -252,17 +308,15 @@ int nf_server_listen(nf_server_t * sev)
     //listen 函数为空
     if( g_pool[sev->server_type].listen == NULL)
         return 0;
-
     return g_pool[sev->server_type].listen(sev);
 }
 
 int nf_default_worker(void *req)
 {
     nf_server_pdata_t * pdata = (nf_server_pdata_t *)req;
-    int ret = nepoll_add(pdata->epfd, pdata->fd);
+    int ret = net_ep_add_in(pdata->epfd, pdata->fd);
     if( ret < 0)
         return -1;
-    //读等待超时
 
     int readto = (((nf_server_pdata_t *)req)->server)->read_to;
     nf_handle_t read_fun = (((nf_server_pdata_t *)req)->server)->p_read;
@@ -292,7 +346,7 @@ int nf_default_worker(void *req)
             }
             else if( events[i].events & EPOLLERR )
             {
-                std::cout << "event fd  error" << std::endl; 
+                //std::cout << "event fd  error" << std::endl; 
                 return -1;
             }
             else if( events[i].events & EPOLLIN )
@@ -324,28 +378,35 @@ int nf_default_worker(void *req)
 
 int nf_default_read_buf(void *data)
 {
-    
-    nf_server_pdata_t *pdata = (nf_server_pdata_t *)data;
-    
-    rio_init(&(pdata->rio), pdata->fd);
-
     int ret;
-    if ( (ret = rio_readn(&(pdata->rio), pdata->read_buf, 5)) <= 0)
+    nf_server_pdata_t *pdata = (nf_server_pdata_t *)data;
+    pdata->rio.rio_fd = pdata->fd;
+
+    void * read_buf =  nf_server_get_read_buf();
+
+    if ((ret = rio_readn_to_ms(&(pdata->rio), read_buf, 5, 1000)) <= 0)
+    {
         return -1; 
-    std::cout << pdata->read_buf << " : read value" <<std::endl;
+    }
+    std::cout << read_buf << " : read value" <<std::endl;
     return ret;
 }
 
 int nf_default_write_buf(void *data)
 {
     nf_server_pdata_t *pdata = (nf_server_pdata_t *)data;
-    pdata->write_buf = (char *)pdata->write_buf;
 
-    strncpy((char *)pdata->write_buf, (char *)pdata->read_buf, 5);
-    char * temp = (char *)pdata->write_buf;
+    char * write_buf = (char *) nf_server_get_write_buf();
+    char * read_buf = (char *) nf_server_get_read_buf();
+
+    strncpy(write_buf, read_buf, 5);
+    char * temp = write_buf;
     temp[5] = '\0';
     int ret;
-    if ( (ret = sendn(pdata->fd, pdata->write_buf, 5, 20)) <= 0 )
+    if ( (ret = sendn_to_ms(pdata->fd, write_buf, 5, 1000)) <= 0 )
+    {
+        std::cout << strerror(errno) << std::endl;
         return -1;
+    }
     return ret;
 }

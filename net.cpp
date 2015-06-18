@@ -10,346 +10,707 @@
 
 #include "net.h"
 
-
-
-void rio_init(rio_t *rp, int fd)
+void rio_init(rio_t *rp, int fd, int len)
 {
     rp->rio_fd = fd;
     rp->rio_cnt = 0;
-    rp->rio_bufptr = rp->rio_buf;
+    rp->rio_len = len;
+    rp->rio_bufptr = rp->rio_ptr;
+
+    rp->cache = NULL;
+    rp->cache_len = 0;
 }
 
-//´øbuf²Ù×÷
-//ÏÈ¶ÁÒ»´Îµ½ buf ÖÐ£¬È»ºóÏûºÄbufÖÐÊý¾Ý
-static ssize_t rio_read(rio_t *rp, char *buf, int n)
+static ssize_t
+rio_read(rio_t *rp, char *usrbuf, size_t n)
 {
-    int cnt = 0;
-
-    while( rp->rio_cnt <= 0 )
+    int cnt;
+    while(rp->rio_cnt <= 0)
     {
-        rp->rio_cnt = recv(rp->rio_fd, rp->rio_buf, 
-                           rp->rio_len, 0);
-        if( rp->rio_cnt < 0)
-        {
-            if( errno != EINTR)
-                return -1;
-        }
-        else if( rp->rio_cnt == 0)
-        {
+        rp->rio_cnt = read(rp->rio_fd, rp->rio_ptr, rp->rio_len);
+        if(rp->rio_cnt == 0)
             return 0;
-        }
+        else if(rp->rio_cnt < 0)
+        {
+            if(errno != EINTR)
+                return -1;
+        } 
         else
-            rp->rio_bufptr = rp->rio_buf;
+            rp->rio_bufptr = rp->rio_ptr;      
     }
-    
-    if( rp->rio_cnt < n)
+    if(rp->rio_cnt < n)
         cnt = rp->rio_cnt;
     else
         cnt = n;
-    memcpy(buf, rp->rio_bufptr, cnt);
+    memcpy(usrbuf, rp->rio_bufptr, cnt);
     rp->rio_bufptr += cnt;
-    rp->rio_cnt -= cnt;
+    rp->rio_cnt -= cnt;  
     return cnt;
 }
 
-ssize_t rio_readn(rio_t *rp, void *buf, int n)
+
+ssize_t 
+rio_readn(rio_t *rp, void *usrbuf, size_t n, int * st)
 {
     int nleft = n;
-    int nread;
-    char *tmp = (char *)buf;
-    
-    while( nleft > 0)
+    int nread = 0;
+    char * buf = (char *)usrbuf;
+    *st = 1;
+    while(nleft > 0)
     {
-        if( (nread = rio_read(rp, tmp, nleft)) < 0)
-        {
-            if( errno == EINTR)
-                nread = 0;
-            else
-                return -1;
-        }
-        else if( nread == 0)
+        nread = rio_read(rp, buf, nleft);
+        if(nread == 0)
             break;
+        else if(nread < 0)
+        {
+            if(errno == EAGAIN)
+            {
+                *st = -1;
+                break;
+            }
+            if(errno != EINTR)
+                return -1;
+            nread = 0;
+        }
         nleft -= nread;
-        tmp += nread;
+        buf += nread;
     }
     return n - nleft;
 }
 
-ssize_t rio_readline(rio_t * rp, void *buf, int maxlen)
+ssize_t
+rio_readline(rio_t *rp, void *usrbuf, size_t maxlen, int * st)
 {
-    int i, nread;
-    char c, *tmp = (char *)buf;
-    for( i = 1; i < maxlen; i++)
+    char c, *buf = (char *)usrbuf;
+    int i;
+    int nread;
+    *st = 1;
+
+    for(i = 1; i < maxlen; i++)
     {
-        if( (nread = rio_read(rp, &c, 1)) == 1)
+        nread = rio_read(rp, &c, 1);
+        if(nread == 0)
         {
-            *tmp = c;
-            tmp++;
-            if(c == '\n')
-                break;
-        }
-        else if( nread == 0)
-        {
-            if( i == 1)
+            if(i == 1)
                 return 0;
             else
                 break;
         }
+        else if(nread < 0)
+        {
+            if(errno == EAGAIN)
+            { 
+                *st = -1;   
+                break;
+            }
+            else
+                return -1;
+        }
         else
-            return -1;
+        {
+            *buf = c;
+            buf++;
+            if(c == '\n')
+                break;
+        }     
     }
-    *tmp = 0;
+    *buf = '\0';
     return i;
 }
 
-int connect_retry(int family, int type, int protcol, 
-                  const struct sockaddr *addr, 
-                  size_t len, size_t maxsleep)
+ssize_t 
+readn_to_ms(int fd, void *ptr, size_t nbytes, int msecs)
 {
-    int sec, fd;
-    //BSD µÚÒ»´ÎÁ¬½ÓÊ§°Ü£¬ÔÍ¬Ò»ÃèÊö·û Ö® ºóµÄ³¢ÊÔ¶¼»áÊ§°Ü
-    //Ã¿´ÎÁ¬½Ó¶¼Éú²úÐÂµÄÃèÊö·û
-    for(sec = 1; sec <= maxsleep; sec <<=1)
+    struct timeval tv;
+    struct timeval old_tv;
+    ssize_t nread;
+    int sockflag;
+    int ret;
+    int timeuse = 0;
+    socklen_t oplen = (socklen_t) sizeof (tv);
+    
+    nread = recv(fd, ptr, nbytes, MSG_DONTWAIT);
+    
+    if(nread == nbytes)
+        return nread;
+    if(nread == 0)
+        return 0;
+    if((nread < 0) && (errno != EAGAIN) && (errno != EWOULDBLOCK) &&(errno != EINTR))
+        return -1;
+    if (nread < 0) 
     {
-        if((fd = socket(family, type, protcol)) < 0)
+        nread = 0;
+    }
+
+    if (0 == msecs) 
+    {
+        errno = ETIMEDOUT;
+        return -1;
+    }
+    if (msecs < 0) {
+       msecs = INT_MAX; 
+    }
+
+    if(getsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &old_tv, &oplen) < 0)
+        return -1;
+    if((sockflag = fcntl(fd, F_GETFL, 0)) < 0)
+        return -1;
+
+    if (sockflag&O_NONBLOCK) 
+    {
+        if(fcntl(fd, F_SETFL, (sockflag)&(~O_NONBLOCK)) < 0)
             return -1;
-        if(connect(fd, addr, len) == 0)
-        {
-            return fd;
-        }
-        //Ê§°Ü¹Ø±Õ fd
-        close(fd);
-        std::cout << "retry" << std::endl;
-        if (sec <= maxsleep)
-            sleep(sec);
     }
-    return -1; 
+
+    struct timeval cur;
+    struct timeval last;
+    do 
+    {
+        tv.tv_sec = msecs/1000;
+        tv.tv_usec = (msecs % 1000) * 1000;
+        if(setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tv, oplen) < 0)
+            return -1;
+        gettimeofday(&cur, NULL);
+        
+        do 
+        {
+            ret = recv(fd, (char*)ptr + nread, nbytes - (size_t)nread, MSG_WAITALL); 
+        } while (ret < 0 && errno == EINTR);
+        
+        if (ret < 0 && EAGAIN==errno) 
+        {
+            //Ã»Êý¾Ý£¬³¬Ê±ÁË
+            errno = ETIMEDOUT;
+        }
+        
+        if (ret > 0 && nread + ret != (ssize_t) nbytes) 
+        {
+            gettimeofday(&last, NULL);
+            //ÅÐ¶ÏÊÇ²»ÊÇÕæµÄ³¬Ê±ÁË
+            timeuse = ((last.tv_usec - cur.tv_usec)/1000 + (last.tv_sec - cur.tv_sec) * 1000);
+            if (timeuse >= msecs) 
+            {
+                //Õæ³¬Ê±ÁË
+                errno = ETIMEDOUT;
+                ret = -1;
+                nread = -1;
+            } 
+            else 
+            {
+                //±»ÖÐ¶ÏÁË£¿¼ÌÐø¶Á
+                nread += ret;
+            }
+        }  
+        else if (ret < 0) 
+        {
+            nread = -1;
+        } 
+        else 
+        {
+            nread += ret;
+            msecs -= timeuse;
+        }
+      //Ã»Ð´Íê£¬¼ÌÐø
+    } while (ret > 0 && nbytes != (size_t)nread);
+
+    if (sockflag & O_NONBLOCK) 
+    {
+        if(fcntl(fd, F_SETFL, sockflag) < 0)
+            return -1;
+    }
+    if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &old_tv, oplen)<0 )
+        return -1;
+
+    return nread;
 }
 
-ssize_t sendn(int fd, const void *ptr, size_t n, size_t maxtime)
+ssize_t 
+rio_readn_to_ms(rio_t *rp, void *usrbuf, size_t n, int msecs)
 {
-    size_t nleft;
-    ssize_t nwrite;
-    //EAGAIN will end
-    nleft = n;
-    while(nleft > 0)
-    {
-        if((nwrite = send(fd, ptr, nleft, 0)) < 0)
-        {
-            //µÚÒ»´ÎÐ´Ê§°ÜÁË
-           if(errno == EINTR)
-                nwrite = 0;
-           else
-                break;
-        }
-        nleft -= nwrite;
-        ptr += nwrite;
-    }
-    return n - nleft;
-}
+    int nleft = n;
+    int nread = 0;
+    int sockflag;
+    char * buf = (char *)usrbuf;
 
-ssize_t readn(int fd, void *ptr, size_t n)
-{
-    size_t nleft;
-    ssize_t nread;
-    //EAGAIN will end
-    nleft = n;
+    if(sockflag = fcntl(rp->rio_fd, F_GETFL, 0) < 0)
+        return -1;
+    set_fd_noblock(rp->rio_fd);
+    
+    struct timeval tv;
+    tv.tv_sec = msecs/1000;
+    tv.tv_usec = (msecs % 1000) * 1000; 
+ 
     while(nleft > 0)
     {
-        if((nread = recv(fd, ptr, nleft, 0)) < 0)
-        {
-           if(errno ==  EINTR)
-                nread = 0; 
-           else if(errno == EAGAIN)
-                break;
-           else
-                return -1; //ÖÐ¼äÊ§°Ü·µ»Ø-1
-        }
-        else if(nread == 0) // Ð´ÍêÁË
+        nread = rio_read(rp, buf, nleft);
+        if(nread == 0)
             break;
+        else if(nread < 0)
+        {
+            if(errno == EAGAIN)
+            {
+               fd_set rset;
+               FD_ZERO(&rset);
+               FD_SET(rp->rio_fd, &rset);
+               if(select(rp->rio_fd + 1, &rset, NULL, NULL, &tv) <= 0)
+               {
+                    errno = ETIMEDOUT;
+                    n = nleft - 1;
+                    break;
+               }   
+               else
+                   continue; 
+            }
+            if(errno != EINTR)
+                return -1;
+            nread = 0;
+        }
         nleft -= nread;
-        ptr += nread;
+        buf += nread;
     }
+    if(fcntl(rp->rio_fd, F_SETFL, sockflag) < 0)
+        return -1;
+
     return n - nleft;
 }
 
-ssize_t readn_PEER(int fd, void *ptr, size_t n)
+ssize_t
+rio_readline_to_ms(rio_t *rp, void *usrbuf, size_t maxlen, int msecs)
 {
-    size_t nleft;
-    ssize_t nread;
-    //EAGAIN will end
-    nleft = n;
-    while(nleft > 0)
+    char c, *buf = (char *)usrbuf;
+    int i;
+    int nread;
+    int sockflag;
+    
+    struct timeval tv;
+    tv.tv_sec = msecs/1000;
+    tv.tv_usec = (msecs % 1000) * 1000;  
+
+    if(sockflag = fcntl(rp->rio_fd, F_GETFL, 0) < 0)
+        return -1;
+    set_fd_noblock(rp->rio_fd);
+
+    for(i = 1; i < maxlen; i++)
     {
-        if((nread = recv(fd, ptr, nleft, MSG_PEEK)) < 0)
+        nread = rio_read(rp, &c, 1);
+        if(nread == 0)
         {
-           if(nleft == EINTR)
-                nread = 0;
-           else
+            if(i == 1)
+                return 0;
+            else
+                break;
+        }
+        else if(nread < 0)
+        {
+            if(errno == EAGAIN)
+            { 
+               fd_set rset;
+               FD_ZERO(&rset);
+               FD_SET(rp->rio_fd, &rset);
+               if(select(rp->rio_fd + 1, &rset, NULL, NULL, &tv) <= 0)
+               {
+                    errno = ETIMEDOUT;
+                    i = - 1;
+                    break;
+               }   
+               else
+                   continue; 
+            }
+            else
                 return -1;
         }
-        else if(nread == 0) // Ð´ÍêÁË
+        else
+        {
+            *buf = c;
+            buf++;
+            if(c == '\n')
+                break;
+        }     
+    }
+    *buf = '\0';
+    if(fcntl(rp->rio_fd, F_SETFL, sockflag) < 0)
+        return -1;
+    return i;
+}
+
+ssize_t
+sendn(int fd, void *usrbuf, size_t n)
+{
+    int nleft = n;
+    int nwrite = 0;
+    char * buf = (char *)usrbuf;
+    while(nleft > 0)
+    {
+        nwrite = write(fd, buf, nleft);
+        if(nwrite < 0)
+        {
+            if(errno != EINTR)
+                return -1;
+            nwrite = 0;
+        }
+        else if(nwrite == 0)
             break;
-        nleft -= nread;
-        ptr += nread;
+        buf += nwrite;
+        nleft -= nwrite;
     }
     return n - nleft;
 }
 
-ssize_t net_socket(int domain, int type, int protocol)
+
+ssize_t 
+sendn_to_ms(int fd, const void *ptr, size_t nbytes, int msecs)
 {
-    int fd = socket(domain, type, protocol);
-    if( fd < 0)
+    struct timeval tv;
+    struct timeval old_tv;
+    ssize_t nwrite = 0;
+    int ret = 0;
+    int sockflag = 0;
+    int timeuse = 0;
+    socklen_t oplen = sizeof(tv);
+
+    nwrite = send(fd, ptr, nbytes, MSG_DONTWAIT);
+
+    if (nwrite==(ssize_t)nbytes)
+        return nwrite;
+    if ((nwrite < 0) && (errno != EAGAIN) && (errno != EWOULDBLOCK) && (errno != EINTR))
         return -1;
-    return fd;
+    if (nwrite == 0)
+        return 0;
+    if (nwrite < 0) 
+    {
+        nwrite = 0;
+    }
+
+    //0µÄÊ±ºò²»Ï£Íû»á±»¶ÂÈû×¡
+    if (0 == msecs) 
+    {
+        errno = ETIMEDOUT;
+        return -1;
+    }
+    //¸ºÊýµÄÊ±ºòÎÒÃÇÒª¶ÂÈû
+    if (msecs < 0) 
+    {
+       msecs = INT_MAX; 
+    }
+
+    if(getsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &old_tv, &oplen) < 0)
+        return -1;
+    if(sockflag = fcntl(fd, F_GETFL, 0) < 0) 
+        return -1;
+
+    if (sockflag & O_NONBLOCK) 
+    {
+        if(fcntl(fd, F_SETFL, (sockflag)&(~O_NONBLOCK)) < 0)
+            return -1;
+    }
+    
+    struct timeval cur;
+    struct timeval last;
+    do 
+    {
+        tv.tv_sec = msecs/1000;
+        tv.tv_usec = (msecs%1000)*1000;
+        gettimeofday(&cur, NULL);
+        if(setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tv, oplen)<0)
+            return -1; 
+        do 
+        { 
+            ret = send(fd, (char*)ptr + nwrite, nbytes-(size_t)nwrite, MSG_WAITALL); 
+        } while (ret < 0 && EINTR == errno);
+
+        if (ret > 0 && nwrite + ret < (ssize_t)nbytes) 
+        {
+            //ÅÐ¶ÏÊÇ·ñÕæÊÇ³¬Ê±
+            gettimeofday(&last, NULL);
+            timeuse = ((last.tv_usec - cur.tv_usec)/1000+(last.tv_sec - cur.tv_sec)*1000);
+            if (timeuse >= msecs) 
+            {
+                //ÕæµÄ³¬Ê±ÁË
+                errno = ETIMEDOUT;
+                ret = -1;
+                nwrite = -1;
+            } 
+            else 
+            {
+                //²»ÊÇ³¬Ê±£¬Ò»°ãÊÇ±»ÖÐ¶ÏÁË, ¼ÌÐøÐ´
+                msecs -= timeuse;
+                nwrite += ret;
+            }
+        } 
+        else if (ret < 0) 
+        {
+            nwrite = -1;
+        } 
+        else 
+        {
+            nwrite += ret;
+        }
+    } while (ret > 0 && nbytes != (size_t)nwrite);
+    
+    if (fcntl(fd, F_SETFL, sockflag) < 0)
+        return  -1;
+    if (setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &old_tv, oplen) < 0)
+        return -1;
+    
+    return nwrite;
 }
 
-int nepoll_create(int size)
+int 
+set_fd(int fd, int flags)
+{
+    int val;
+    int sockflag;
+    if ((val = fcntl(fd, F_GETFL, 0)) < 0)
+    {
+        close(fd);
+        return -1;
+    }
+    if(val & flags)
+        return val;
+
+    sockflag = val;
+    val |= flags;
+    if ((fcntl(fd, F_SETFL, val)) < 0)
+    {
+        close(fd);
+        return -1;
+    }
+    return sockflag;
+}
+
+int
+set_fd_noblock(int fd)
+{
+    return set_fd(fd, O_NONBLOCK);
+}
+
+int 
+set_clc_fd(int fd, int flags)
+{
+    int val;
+    int sockflag;
+    if ( (val = fcntl(fd, F_GETFL, 0)) < 0)
+    {
+        close(fd);
+        return -1;
+    }
+    
+    sockflag = val;
+    val &= ~flags;
+    if ((fcntl(fd, F_SETFL, val)) < 0)
+    {
+        close(fd);
+        return -1;
+    }
+    return sockflag;
+}
+
+int
+set_fd_block(int fd)
+{
+    return set_clc_fd(fd, O_NONBLOCK);
+}
+
+int
+net_accept(int sockfd, struct sockaddr *sa, socklen_t * addrlen)
+{
+    int connfd = 0;
+    do
+    {
+        connfd = accept(sockfd, sa, addrlen);
+	    if (connfd < 0) 
+        {
+	        if (errno == ECONNABORTED || errno == EINTR)
+                continue; 
+            else 
+			    return -1;
+	    }
+    } while(connfd < 0);
+	return connfd;
+}
+
+int
+net_tcplisten(int port, int queue)
+{
+	int listenfd;
+	const int on = 1;
+	struct sockaddr_in soin;
+
+	if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
+    {
+		return -1;
+	}
+
+	if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
+        return -1;
+
+	bzero(&soin, sizeof(soin));
+
+	soin.sin_family = AF_INET;
+	soin.sin_addr.s_addr = htonl(INADDR_ANY);
+	soin.sin_port = htons(port);
+
+	if (bind(listenfd, (struct sockaddr *) &soin, sizeof(soin)) < 0) 
+    {
+	    close(listenfd);
+		return -1;
+	}
+    
+    if(queue <= 0)
+        queue = 5;
+
+	if (listen(listenfd, queue) < 0) 
+    {
+		close(listenfd);
+		return -1;
+	}
+	return listenfd;
+}
+
+int
+net_connect_to_ms(int sockfd, struct sockaddr *sa, 
+                  socklen_t socklen, int msecs, int isclose)
+{
+	if (msecs <= 0) 
+		return net_connect_to_tv(sockfd, sa, socklen, NULL, isclose);
+    else 
+    {
+		struct timeval tv;
+		tv.tv_sec = msecs / 1000;
+		tv.tv_usec = (msecs % 1000) * 1000;
+		return net_connect_to_tv(sockfd, sa, socklen, &tv, isclose);
+	}
+	return 0;
+}
+
+int
+net_connect_to_tv(int fd, struct sockaddr * sa, 
+                socklen_t socklen, timeval * tv, int isclose)
+{
+	int sockflag;
+	int n, error;
+	socklen_t len;
+    fd_set rset, wset;
+
+    if(sa == NULL)
+    {    
+        close(fd);
+		return -1;
+	}
+
+	error = 0;
+    sockflag = set_fd_noblock(fd);
+
+	n = connect(fd, sa, (socklen_t) socklen);
+	if (n < 0) 
+    {
+		if (errno != EINPROGRESS) 
+        {
+            error = 1;
+            goto done;
+		}
+	}
+	if (n == 0) 
+		goto done;
+
+	FD_ZERO(&rset);
+    FD_SET(fd, &rset);
+    wset = rset;
+    if((n = select(fd + 1, &rset, &wset, NULL, tv)) ==0)
+    {
+        errno = ETIMEDOUT;
+        error = 1;
+        goto done;
+    }
+    if (FD_ISSET(fd, &rset) || FD_ISSET(fd, &wset))
+    {
+        len = sizeof(error);
+        if(getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, &len) < 0)
+        {
+            errno = error;
+            error = 1;
+            goto done;
+        }
+    }
+
+  done:
+	fcntl(fd, F_SETFL, sockflag);
+	if (error) 
+    {
+        if(isclose)
+		    close(fd);
+		return -1;
+	}
+	return 0;
+}
+
+int
+set_tcp_sockaddr(char * addr, int port, 
+                 struct sockaddr_in * soin)
+{
+    soin->sin_family = AF_INET;
+    soin->sin_port = htons(port);
+    return inet_pton(AF_INET, addr, &(soin->sin_addr));
+}
+
+const char *
+get_tcp_sockaddr(char * addr, int * port, 
+                 struct sockaddr_in * soin, int len)
+{
+    *port = ntohs(soin->sin_port);
+    return inet_ntop(AF_INET, &(soin->sin_addr), addr, len);
+}
+
+int 
+net_ep_create(int size)
 {
     return epoll_create(size);    
 }
 
-
-//epfd fd ÎÄ¼þÃèÊö·û£¬ÎªË÷Òý×÷ÓÃ£¬ËùÒÔ²»ÓÃ´«Ö¸Õë
-int nepoll_add(int epfd, int fd)
+int 
+net_ep_add(int epfd, int fd, int events)
 {
     struct epoll_event ev;
-    int ret;
     ev.data.fd = fd;
-    ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
+    ev.events = events;
     return epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev);
 }
 
-int nepoll_add_one(int epfd, int fd)
+int 
+net_ep_add_in(int epfd, int fd)
 {
-    struct epoll_event ev;
+    int events = EPOLLIN | EPOLLHUP | EPOLLERR;
+    return net_ep_add(epfd, fd, events);
+}
+
+int 
+net_ep_add_in1(int epfd, int fd)
+{
+    int events = EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLONESHOT;
+    return net_ep_add(epfd, fd, events);
+}
+
+int 
+net_ep_del(int epfd, int fd)
+{
     int ret;
-    ev.data.fd = fd;
-    ev.events = EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLONESHOT;
-    return epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev);
+    return epoll_ctl(epfd, EPOLL_CTL_DEL, fd, NULL);
 }
 
-int nepoll_del(int epfd, int fd, int closed)
-{
-    int ret;
-    ret = epoll_ctl(epfd, EPOLL_CTL_DEL, fd, NULL);
-    if(ret < 0 && closed == 0)
-    {
-        close(fd);
-        return ret;
-    }
-    return ret; 
-}
-
-int set_fd(int fd, int flags, int closed)
-{
-    int val;
-    if ( (val = fcntl(fd, F_GETFL, 0)) < 0)
-    {
-        std::cout << "fd get error" << std::endl;
-        if(closed == 0)
-        {
-            close(fd);
-        }
-        return -1;
-    }
-    val |= flags;
-    if ( (fcntl(fd, F_SETFL, val)) < 0)
-    {
-        std::cout << "fd get error" << std::endl;
-        if(closed == 0)
-            close(fd);
-        return -1;
-    }
-    return 0;
-}
-
-
-int set_clc_fd(int fd, int flag, int closed)
-{
-    int val;
-    if ( (val = fcntl(fd, F_GETFL, 0)) < 0)
-    {
-        std::cout << "fd get error" << std::endl;
-        if(closed == 0)
-            close(fd);
-        return -1;
-    }
-    
-    if ( val & O_NONBLOCK)
-    {
-        val &= ~O_NONBLOCK;
-        //std::cout << "need change" << std::endl;
-        if ( (fcntl(fd, F_SETFL, val)) < 0)
-        {
-            std::cout << "fd get error" << std::endl;
-            if(closed == 0)
-                close(fd);
-            return -1;
-        
-        }
-    }
-    
-    return 0;
-}
-
-int set_fd_noblock(int fd)
-{
-   return set_fd(fd, O_NONBLOCK, 1);
-}
-
-int set_fd_block(int fd)
-{
-   return set_clc_fd(fd, O_NONBLOCK, 1);
-}
-
-int naccept(int fd, struct sockaddr * addr, socklen_t *len)
-{
-    int cfd;
-    if( ( cfd = accept(fd, addr, len)) < 0)
-    {
-        if(errno == EAGAIN)
-        { std::cout << "eagain discard accept error" << std::endl; return 0;}
-        else
-        { std::cout << strerror(errno) << std::endl;  return -1;}     
-    }
-    return cfd; 
-}
-
-
-//read line from socket
-//µÍÐ§ ÎÞ buf
-int read_line(int fd, void * tmp, int size)
-{
-    char c = '\0';
-    char * buf = (char *)tmp;
-    int rlen;
-    int i = 0;
-    while( (i < size -1) && (c != '\n'))
-    {
-        rlen = readn(fd, &c, 1);
-        if( rlen > 0)
-        {
-            if(c == '\r')
-            {
-                rlen = readn_PEER(fd, &c, 1);
-                if (c == '\n' && rlen > 0)
-                    readn(fd, &c, 1);
-                else
-                    c = '\n';
-            }
-            buf[i] = c;
-            i++;
-        }
-        else
-            c = '\n';
-    }
-    return i;
-}
-
-void default_hand(int sig)
+void 
+default_hand(int sig)
 {
     std::cout << "default sig fun" << std::endl;
     return;
+}
+
+int
+set_linger(int fd, int val)
+{
+    struct linger li;
+    li.l_onoff = 1;
+    li.l_linger = val;
+    return setsockopt(fd, SOL_SOCKET, SO_LINGER, 
+                      (const char*)&li, sizeof(li));
 }
 

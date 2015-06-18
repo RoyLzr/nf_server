@@ -55,7 +55,7 @@ namespace nf
         {    std::cout << "listen error" << std::endl; return -1;}
          
         sev_data->need_join = 1; 
-         
+        //std:: cout << "listen fd : " << sev_data->sev_socket << std::endl;
         return g_pool[sev_data->server_type].run(sev_data); 
     }
     
@@ -92,8 +92,8 @@ namespace nf
                     free(sev_data->pdata[i].read_buf);
                 if( sev_data->pdata[i].write_buf != NULL)
                     free(sev_data->pdata[i].write_buf);
-                if( sev_data->pdata[i].rio.rio_buf != NULL)
-                    free(sev_data->pdata[i].rio.rio_buf);
+                if( sev_data->pdata[i].rio.rio_ptr != NULL)
+                    free(sev_data->pdata[i].rio.rio_ptr);
             }
         }
         Singleton<ConfigParser>::destroy();
@@ -152,5 +152,4 @@ namespace nf
         sev_data->p_write = write;
         return 1;
     }
-    
 }

@@ -25,11 +25,11 @@ static int lfpool_once_op(int epfd, int fd, int timeout)
 {
     int stat;
     //清空表 omit no such file error
-    if (nepoll_del(epfd, fd, 1) < 0)
+    if (net_ep_del(epfd, fd) < 0)
         if(errno != 2)
             return -1;
 
-    if (nepoll_add_one(epfd, fd) < 0)
+    if (net_ep_add_in1(epfd, fd) < 0)
         return -1;
     
     struct epoll_event events[1];
@@ -50,19 +50,22 @@ void * lf_main(void * param)
     nf_server_pdata_t *pdata = (nf_server_pdata_t *)param;
     nf_server_t *sev = (nf_server_t *)pdata->server;
     lfpool_t *pool = (lfpool_t *)sev->pool;
+    
+    set_pthread_data(pdata);
+    
     lfpool_t temp_pool;
     struct sockaddr_in caddr;
     socklen_t clen = sizeof(caddr);             
     
     std::cout << "thread start: " << pdata->id << std::endl;
     pthread_mutex_init( &(temp_pool.lock), NULL);
-    pdata->epfd = nepoll_create(1);
+    pdata->epfd = net_ep_create(1);
     if( pdata->epfd < 0)
     {
         std::cout << strerror(errno) << std::endl;
         goto EXIT;
     }
- 
+
     while(sev->run)
     {  //race leader
        pthread_mutex_lock(&(pool->lock));
@@ -73,6 +76,7 @@ void * lf_main(void * param)
            goto EXIT;                
        }
        
+       //std:: cout << "listen fd : " << sev->sev_socket << std :: endl; 
        if( lfpool_once_op(pdata->epfd, sev->sev_socket, 5000) <= 0 ) 
        {
            std::cout << strerror(errno) << std::endl;
@@ -81,16 +85,16 @@ void * lf_main(void * param)
            continue;
        }
 
-       if( !sev->run )
+       if(!sev->run)
        {
             pthread_mutex_unlock(&(pool->lock));
             goto EXIT;
        }
         
-       pdata->fd = naccept(sev->sev_socket, (sockaddr *)&caddr, (socklen_t *)&clen);
+       pdata->fd = net_accept(sev->sev_socket, (sockaddr *)&caddr, (socklen_t *)&clen);
        //release become worker.
        pthread_mutex_unlock( &(pool->lock)); 
-      
+       
        pdata->client_addr = caddr; 
        //accept noblocking
 
@@ -105,7 +109,6 @@ void * lf_main(void * param)
        }
        //set worker socket
        set_sev_socketopt(sev, pdata->fd);
-       //目前采用 阻塞 褪萁传输    
 
        //work
        if(sev->cb_work(pdata) < 0)
@@ -114,7 +117,7 @@ void * lf_main(void * param)
                 std::cout << "work end error: " << strerror(errno) << std::endl;
        }
  
-       nepoll_del(pdata->epfd, pdata->fd); 
+       net_ep_del(pdata->epfd, pdata->fd); 
        close(pdata->fd);
        pdata->fd = -1;
        //work end, become fllower 

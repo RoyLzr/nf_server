@@ -102,20 +102,40 @@ enum{
     NFSVR_LONG_CONNEC
 };
 
-extern nf_server_t * nf_server_create(const char  *);
+extern nf_server_t * 
+nf_server_create(const char  *);
 
-extern int nf_server_bind(nf_server_t *);
+extern int 
+nf_server_bind(nf_server_t *);
 
-extern int nf_server_init(nf_server_t *);
+extern int 
+nf_server_init(nf_server_t *);
 
-extern int nf_server_listen(nf_server_t *);
+extern int 
+nf_server_listen(nf_server_t *);
 
-extern int set_sev_socketopt(nf_server_t *, int);
+extern int 
+set_sev_socketopt(nf_server_t *, int);
 
-extern int nf_default_worker(void *);
+extern int 
+nf_default_worker(void *);
 
-extern int nf_default_write_buf(void *);
+extern int 
+nf_default_write_buf(void *);
 
-extern int nf_default_read_buf(void *);
+extern int 
+nf_default_read_buf(void *);
+
+extern int
+set_pthread_data(nf_server_pdata_t *data);
+
+extern nf_server_pdata_t *
+get_pdata();
+
+void * 
+nf_server_get_read_buf();
+
+void * 
+nf_server_get_write_buf();
 
 #endif

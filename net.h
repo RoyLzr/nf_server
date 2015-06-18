@@ -33,92 +33,114 @@
 #include <pthread.h>
 #include <sys/epoll.h>
 #include <signal.h>
+#include <limits.h>
 
-
-typedef struct _rio_t 
+typedef struct _rio_t
 {
     int rio_fd;
     int rio_cnt;
     size_t rio_len;
-    char *rio_bufptr;
-    char *rio_buf;
+    char * rio_bufptr;
+    char * rio_ptr;
+
+    char * cache;
+    int cache_len;
 } rio_t;
 
+void  
+rio_init(rio_t *rp, int fd, int len);
 
-extern void rio_init(rio_t *rp, int fd);
+ssize_t 
+rio_readn(rio_t *rp, void *usrbuf, size_t n, int * st = NULL);
+
+ssize_t
+rio_readline(rio_t *rp, void *usrbuf, size_t maxlen, int * st = NULL);
+
+ssize_t
+sendn(int fd, void *usrbuf, size_t n);
+
+int 
+set_fd(int fd, int flags);
+
+int 
+set_fd_noblock(int fd);
+
+int 
+set_clc_fd(int fd, int flags);
+
+int
+set_fd_block(int fd);
+
+int
+set_tcp_sockaddr(char * addr, int port, 
+                 struct sockaddr_in * soin);
+
+const char *
+get_tcp_sockaddr(char * addr, int * port, 
+                 struct sockaddr_in * soin, int len);
+
+int
+net_connect_to_tv(int fd, struct sockaddr * sa, 
+                socklen_t socklen, timeval * tv, int isclose = 1);
 
 
-
-ssize_t rio_readn(rio_t *rp, void *buf, int n);
-
-
-
-ssize_t rio_readline(rio_t * rp, void *buf, int maxlen);
+int
+net_connect_to_ms(int sockfd, struct sockaddr *sa, 
+                  socklen_t socklen, int msecs, int isclose = 1);
 
 
-
-extern int connect_retry(int family, int type, int protcol, 
-                         const struct sockaddr *addr, 
-                         size_t len, size_t maxsleep = 64);
-/**
- *  connect()µÄ°ü×°º¯Êý
- *  @note ²ÎÊýºÍ·µ»ØÖµÓëconnect()ÏàÍ¬
- *        maxsleep ÖØÊÔ×î´óµÈ´ýÊ±¼ä
- */
-
-extern ssize_t sendn(int fd, const void *ptr, size_t n, size_t maxtime);
+int
+net_accept(int sockfd, struct sockaddr *sa, socklen_t * addrlen);
 
 
-/**
- *  send()µÄ°ü×°º¯Êý
- *  @note ·¢ËÍÍê³¤¶Èn
- *        
- */
+int
+net_tcplisten(int port, int queue);
 
-extern ssize_t readn(int fd, void *ptr, size_t n);
 
-/**
- *  recv()µÄ°ü×°º¯Êý
- *  @note ·¢ËÍÍê³¤¶Èn
- *        
- */
+ssize_t 
+readn_to_ms(int fd, void *ptr, size_t nbytes, int msecs);
 
-extern ssize_t net_socket(int domain, int type, int protocol);
-/**
- *  socket()µÄ°ü×°º¯Êý
- *  @note · socket
- *        
- */
 
-extern int naccept(int, struct sockaddr *, socklen_t *);
-/**
- *  accept()µÄ°ü×°º¯Êý
- *  @note get accept
- *        
- */
+ssize_t 
+rio_readn_to_ms(rio_t *rp, void *usrbuf, size_t n, int msecs);
 
-extern int nepoll_create(int);
+
+ssize_t
+rio_readline_to_ms(rio_t *rp, void *usrbuf, size_t maxlen, int msecs);
+
+
+ssize_t 
+sendn_to_ms(int sock, const void *ptr, size_t nbytes, int msecs);
+
+extern int net_ep_create(int);
 /**
  *  epoll_create()µÄ°ü×°º¯Êý
  *  @note epoll_create
  *        
  */
 
-extern int nepoll_add(int, int);
+extern int net_ep_add(int, int, int);
+/**
+ *  epoll_ctl()µÄ°ü×°º¯Êý
+ *  @note add 
+ *  
+ */
+
+extern int net_ep_add_in(int, int);
 /**
  *  epoll_ctl()µÄ°ü×°º¯Êý
  *  @note add 
  *   EPOLLIN | EPOLLHUP | EPOLLERR;
  */
 
-extern int nepoll_add_one(int, int);
+extern int net_ep_add_in1(int, int);
 /**
  *  epoll_ctl()µÄ°ü×°º¯Êý
  *  @note add 
- *   EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLONESHOT;
+ *   EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLONESHOT ;
  */
 
-extern int nepoll_del(int, int, int closed = 1);
+extern int net_ep_del(int, int);
 /**
  *  epoll_del()µÄ°ü×°º¯Êý
  *  @note del 
@@ -126,50 +148,11 @@ extern int nepoll_del(int, int, int closed = 1);
  *   closed: error close fd or not
  */
 
-extern int set_fd(int, int, int closed = 1);
-/**
- *  fcntl()°ü×°º¯Êý
- *  @note add 
- *   param1: fd   param2: flag
- *   closed: error close fd or not
- */
+void 
+default_hand(int sig);
 
-extern int set_clc_fd(int, int, int closed = 1);
-/**
- *  fcntl()°ü×°º¯Êý
- *  @note clear
- *   param1: fd   param2: flag
- *   closed: error close fd or not
- */
+int
+set_linger(int fd, int val);
 
-extern int set_fd_noblock(int);
-/**
- *  set_fd()°ü×°º¯Êý
- *  @note set noblock
- *   param1: fd 
- */
-
-extern int set_fd_block(int);
-/**
- *  set_fd()°ü×°º¯Êý
- *  @note set block
- *   param1: fd 
- */
-
-extern int read_line(int, void *, int);
-/**
- *  readn()°ü×°º¯Êý
- *  @note read data from stream as line
- *        param1: fd, param2: buff, param3:size 
- */
-
-extern ssize_t readn_PEER(int fd, void *ptr, size_t n);
-/**
- *  readn()°ü×°º¯Êý
- *  @note read data as MSG_PEEK
- *        param1: fd, param2: buff, param3:size 
- */
-
-extern void default_hand(int sig);
 
 #endif
