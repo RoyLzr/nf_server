@@ -90,10 +90,6 @@ namespace nf
         
         virtual int set_thread_endfun(nf_handle_t end); 
         
-        virtual int set_work_readfun( nf_handle_t ); 
-        
-        virtual int set_work_writefun( nf_handle_t ); 
-   
         int set_server_name(const char *);
         
         nf_server_t * get_server_data();

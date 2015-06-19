@@ -50,7 +50,7 @@ void * lf_main(void * param)
     nf_server_pdata_t *pdata = (nf_server_pdata_t *)param;
     nf_server_t *sev = (nf_server_t *)pdata->server;
     lfpool_t *pool = (lfpool_t *)sev->pool;
-    
+    int ret; 
     set_pthread_data(pdata);
     
     lfpool_t temp_pool;
@@ -77,10 +77,13 @@ void * lf_main(void * param)
        }
        
        //std:: cout << "listen fd : " << sev->sev_socket << std :: endl; 
-       if( lfpool_once_op(pdata->epfd, sev->sev_socket, 5000) <= 0 ) 
+       if((ret = lfpool_once_op(pdata->epfd, sev->sev_socket, 5000)) <= 0) 
        {
-           std::cout << strerror(errno) << std::endl;
-           std::cout << "once op error : " << strerror(errno) << std::endl;
+           if(ret < 0)
+           {
+               std::cout << strerror(errno) << std::endl;
+               std::cout << "once op error : " << strerror(errno) << std::endl;
+           }
            pthread_mutex_unlock(&(pool->lock));
            continue;
        }
@@ -104,18 +107,14 @@ void * lf_main(void * param)
        {
             pdata->fd = -1;
             std::cout << strerror(errno) << std::endl;
-            std::cout << "accept fd error, maybe TIMEWAIT" << std::endl;
+            std::cout << "accept fd error, maybe EINTER" << std::endl;
             continue;
        }
        //set worker socket
        set_sev_socketopt(sev, pdata->fd);
 
        //work
-       if(sev->cb_work(pdata) < 0)
-       {
-            if(errno != 2)
-                std::cout << "work end error: " << strerror(errno) << std::endl;
-       }
+       sev->cb_work(pdata);
  
        net_ep_del(pdata->epfd, pdata->fd); 
        close(pdata->fd);

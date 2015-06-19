@@ -91,10 +91,7 @@ rio_readline(rio_t *rp, void *usrbuf, size_t maxlen, int * st)
         nread = rio_read(rp, &c, 1);
         if(nread == 0)
         {
-            if(i == 1)
-                return 0;
-            else
-                break;
+            return 0;
         }
         else if(nread < 0)
         {
@@ -295,10 +292,7 @@ rio_readline_to_ms(rio_t *rp, void *usrbuf, size_t maxlen, int msecs)
         nread = rio_read(rp, &c, 1);
         if(nread == 0)
         {
-            if(i == 1)
-                return 0;
-            else
-                break;
+            return 0;
         }
         else if(nread < 0)
         {
@@ -310,7 +304,7 @@ rio_readline_to_ms(rio_t *rp, void *usrbuf, size_t maxlen, int msecs)
                if(select(rp->rio_fd + 1, &rset, NULL, NULL, &tv) <= 0)
                {
                     errno = ETIMEDOUT;
-                    i = - 1;
+                    i = - i;
                     break;
                }   
                else

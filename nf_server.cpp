@@ -137,19 +137,4 @@ namespace nf
         return 1;
     }
         
-    int NfServer :: set_work_readfun( nf_handle_t read) 
-    {
-        if( sev_data == NULL)
-            return -1;
-        sev_data->p_read = read;
-        return 1;
-    }
-        
-    int NfServer :: set_work_writefun( nf_handle_t write)
-    {
-        if( sev_data == NULL)
-            return -1;
-        sev_data->p_write = write;
-        return 1;
-    }
 }

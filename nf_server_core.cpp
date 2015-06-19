@@ -51,11 +51,76 @@ nf_server_get_write_buf()
 	nf_server_pdata_t *ptr = get_pdata();
 	if (ptr == NULL) 
     {
-        std :: cout << "empty read buf" << std :: endl;
+        std :: cout << "empty wirte buf" << std :: endl;
         return NULL;
     }
 	else
 		return ptr->write_buf;
+}
+
+int
+nf_server_get_readto()
+{
+	nf_server_pdata_t *ptr = get_pdata();
+	if (ptr == NULL) 
+    {
+        std :: cout << "empty readto" << std :: endl;
+        return -1;
+    }
+	else
+        return (ptr->server)->read_to;
+}
+
+int
+nf_server_get_writeto()
+{
+	nf_server_pdata_t *ptr = get_pdata();
+	if (ptr == NULL) 
+    {
+        std :: cout << "empty readto" << std :: endl;
+        return -1;
+    }
+	else
+        return (ptr->server)->write_to;
+}
+
+int
+nf_server_get_readed_size()
+{
+	nf_server_pdata_t *ptr = get_pdata();
+	if (ptr == NULL) 
+    {
+        std :: cout << "empty readed size" << std :: endl;
+        return -1;
+    }
+	else
+        return ptr->readed_size;
+}
+
+int
+nf_server_set_writed_size(int n)
+{
+	nf_server_pdata_t *ptr = get_pdata();
+	if (ptr == NULL) 
+    {
+        std :: cout << "empty writed size" << std :: endl;
+        return -1;
+    }
+    ptr->writed_size = n;
+    return 1;
+}
+
+int
+nf_server_get_writed_size()
+{
+	nf_server_pdata_t *ptr = get_pdata();
+	if (ptr == NULL) 
+    {
+        std :: cout << "empty writed size" << std :: endl;
+        return -1;
+    }
+	else
+        return ptr->writed_size;
 }
 
 nf_server_t * 
@@ -89,8 +154,7 @@ nf_server_create(const char * sev_name)
     sev->pdata = NULL;
     sev->p_start = NULL;
     sev->p_end = NULL;
-    sev->p_read = NULL;     
-    sev->p_write = NULL;     
+    sev->p_handle = NULL;     
     
     sev->status = INIT;
 
@@ -151,13 +215,15 @@ nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
         return -1;
     memset(pdata->usr_buf, 0, sizeof(char) * pdata->usr_size);
 
-    pdata->rio.rio_ptr = (char *)malloc(sizeof(char) * pdata->read_size);
-    rio_init(&pdata->rio, pdata->fd, pdata->read_size);
-
-    if(pdata->rio.rio_ptr == NULL)
-        return -1;
-    memset(pdata->rio.rio_ptr, 0, sizeof(char) * pdata->usr_size);
+    if(sev->server_type == NFSVR_LFPOOL)
+    {
+        pdata->rio.rio_ptr = (char *)malloc(sizeof(char) * pdata->usr_size);
+        rio_init(&pdata->rio, pdata->fd, pdata->read_size);
     
+        if(pdata->rio.rio_ptr == NULL)
+            return -1;
+        memset(pdata->rio.rio_ptr, 0, sizeof(char) * pdata->usr_size);
+    }
     return 0;
 }
 
@@ -218,11 +284,9 @@ nf_server_init(nf_server_t * sev)
         return -1;
     
     if(sev->cb_work == NULL)
-        sev->cb_work = nf_default_worker;
-    if(sev->p_read == NULL)
-        sev->p_read = nf_default_read_buf;
-    if(sev->p_write == NULL)
-        sev->p_write = nf_default_write_buf;
+        sev->cb_work = nf_LF_readline_worker;
+    if(sev->p_handle == NULL)
+        sev->p_handle = nf_default_handle;
 
     for(int i = 0; i < (sev->pthread_num); i++)
     { 
@@ -311,102 +375,105 @@ int nf_server_listen(nf_server_t * sev)
     return g_pool[sev->server_type].listen(sev);
 }
 
-int nf_default_worker(void *req)
+void 
+nf_LF_readline_worker(void * data)
 {
-    nf_server_pdata_t * pdata = (nf_server_pdata_t *)req;
-    int ret = net_ep_add_in(pdata->epfd, pdata->fd);
-    if( ret < 0)
-        return -1;
+    nf_server_pdata_t * pdata = (nf_server_pdata_t *) data;
 
-    int readto = (((nf_server_pdata_t *)req)->server)->read_to;
-    nf_handle_t read_fun = (((nf_server_pdata_t *)req)->server)->p_read;
-    nf_handle_t write_fun = (((nf_server_pdata_t *)req)->server)->p_write;
+    char * req = (char *) pdata->read_buf;
+    char * res = (char *) pdata->write_buf;
+    int epfd = pdata->epfd;
+    int fd = pdata->fd;
+    int readsize = pdata->read_size;   
+    int writesize = pdata->write_size;   
+    nf_server_t *sev = pdata->server; 
      
-    const int size = pdata->ep_size;
-    struct epoll_event events[size], ev;
-
-    readto = -1;
-    
-    //event loop 
-    while(1)
+    pdata->rio.rio_fd = pdata->fd;
+    pdata->rio.rio_cnt = 0;
+    pdata->rio.rio_bufptr = pdata->rio.rio_ptr; 
+     
+    int ret;
+    if((ret = net_ep_add_in(epfd, fd)) < 0)
     {
-        ret = epoll_wait(pdata->epfd, events, pdata->ep_size, readto);
+        std :: cout << "add epoll error" << std :: endl;
+        return;
+    }      
+
+    int readto = nf_server_get_readto();
+    int writeto = nf_server_get_writeto();
+     
+    struct epoll_event events[1], ev;
+    
+    //event loop
+    while(sev->run)
+    {
+        ret = epoll_wait(pdata->epfd, events, 1, readto * 20);
         if(ret == 0)
-            {std::cout << "read timeout error" << std::endl; return ret;}
-        else if(ret < 0)
-            {std::cout << "line:226 core.cpp :" << strerror(errno) <<std::endl;   return ret;} 
-        //events analyse
-        //std::cout << "get event" << std::endl;
-        for(int i = 0; i < ret; i++)
         {
-            if( events[i].events & EPOLLRDHUP)
-            { 
-                std::cout << "event close fd error" << std::endl; 
-                return -1;
-            }
-            else if( events[i].events & EPOLLERR )
+            std::cout << "read timeout error" << std::endl; 
+            return;
+        }
+        else if(ret < 0)
+        {
+            std::cout << "epoll wait error :" << strerror(errno) <<std::endl;   
+            return;
+        } 
+        //events analyse
+        
+        if(events[0].events & EPOLLRDHUP)
+        { 
+            std::cout << "event close fd error" << std::endl; 
+            return;
+        }
+        else if(events[0].events & EPOLLERR )
+        {
+            std::cout << "event fd  error" << std::endl; 
+            return;
+        }
+        else if( events[0].events & EPOLLIN )
+        {
+            int n;
+            while((n = rio_readline_to_ms(&pdata->rio, req, readsize, readto)) > 0)   
             {
-                //std::cout << "event fd  error" << std::endl; 
-                return -1;
-            }
-            else if( events[i].events & EPOLLIN )
-            {   
-                if( read_fun(pdata) < 0)
-                    return -1;
-                else
+                pdata->readed_size = n;
+                sev->p_handle();
+                if((n = sendn_to_ms(pdata->rio.rio_fd, res, pdata->writed_size, writeto))< 0)
                 {
-                    ev.data.fd = pdata->fd;
-                    ev.events = EPOLLOUT | EPOLLHUP | EPOLLERR;
-                    epoll_ctl(pdata->epfd, EPOLL_CTL_MOD, pdata->fd, &ev);
+                    std :: cout << "write error" << strerror(errno) << std :: endl;
+                        return;
                 }
             }
-            else if( events[i].events & EPOLLOUT )
+        //Àë¿ª Ñ­»·¶Á Çé¿ö£º
+        //1. send error, °üÀ¨ TIMEOUT ±Ö±½Ó Ó return 
+        //2. read error, Èç¹ûÊÇ fin »òÕß ÆäÓà¶Áµ½ÆäËû´íÎó return
+        //3. read error, Èç¹ûÊÇ TIMEOUT
+        //   (1) ÉÏ´ÎÑread¶Áµ½Ò»ÐÐ£¬´¦Àíºó£¬µ«ÊÇÏÂ´ÎÊý¾ÝÒ»Ö±Ã»ÓÐÀ´. 
+        //        event loop ½øÐÐ¸ü³¤Ê±¼ä³¬Ê±µÈ´ýÊý¾Ý
+        //   (2) ÉÏ´Î read¶Áµ½°ëÐÐ£¬µÈ´ý¶Áµ½»Ø³µ·û£¬µÈ´ý¹ý³ÌÖÐ ·¢Éú³¬Ê±£¬¶Á²»µ½ÍêÕûÒ»ÐÐ¡£return.
+            if(n == 0|| errno != ETIMEDOUT )
             {
-                if( write_fun(pdata) < 0)
-                    return -1;
-                else
-                {
-                    ev.data.fd = pdata->fd;
-                    ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
-                    epoll_ctl(pdata->epfd, EPOLL_CTL_MOD, pdata->fd, &ev);
-                }
+                if( n == 0)
+                    std :: cout << "recv fin" << std :: endl;
+                else if( errno != ETIMEDOUT)
+                    std :: cout << "read error : " << strerror(errno) << std :: endl;
+                return;
             }
+            if(errno == ETIMEDOUT && n != -1)
+                return;
         }
     }
-    return 1;
+    return;
 }
 
-int nf_default_read_buf(void *data)
+void 
+nf_default_handle()
 {
-    int ret;
-    nf_server_pdata_t *pdata = (nf_server_pdata_t *)data;
-    pdata->rio.rio_fd = pdata->fd;
+    char * read_buf = (char *) nf_server_get_read_buf(); 
+    char * write_buf = (char *) nf_server_get_write_buf(); 
+    int readed_size = nf_server_get_readed_size();
+    strncpy(write_buf, read_buf, readed_size);
+    std :: cout << "server read data : " << read_buf << std :: endl;
 
-    void * read_buf =  nf_server_get_read_buf();
-
-    if ((ret = rio_readn_to_ms(&(pdata->rio), read_buf, 5, 1000)) <= 0)
-    {
-        return -1; 
-    }
-    std::cout << read_buf << " : read value" <<std::endl;
-    return ret;
-}
-
-int nf_default_write_buf(void *data)
-{
-    nf_server_pdata_t *pdata = (nf_server_pdata_t *)data;
-
-    char * write_buf = (char *) nf_server_get_write_buf();
-    char * read_buf = (char *) nf_server_get_read_buf();
-
-    strncpy(write_buf, read_buf, 5);
-    char * temp = write_buf;
-    temp[5] = '\0';
-    int ret;
-    if ( (ret = sendn_to_ms(pdata->fd, write_buf, 5, 1000)) <= 0 )
-    {
-        std::cout << strerror(errno) << std::endl;
-        return -1;
-    }
-    return ret;
+    if (nf_server_set_writed_size(readed_size) < 0)
+        std :: cout << "set writed size error " << std :: endl;     
 }

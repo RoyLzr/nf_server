@@ -17,8 +17,9 @@ typedef enum{
     STOP    = 3
 }SERVER_STATUS_T;
 
-typedef int (* nf_callback_proc)(void *req);
-typedef int (* nf_handle_t)(void * req);
+typedef void (* nf_callback_proc)(void *req);
+typedef void (* nf_handle_t)();
+
 typedef struct _nf_server_pdata_t nf_server_pdata_t;
 typedef struct _nf_server_t nf_server_t;
 
@@ -31,8 +32,12 @@ struct _nf_server_pdata_t
 
     void *read_buf;
     size_t read_size;
+    size_t readed_size;
+
     void *write_buf;
     size_t write_size;
+    size_t writed_size;
+
     void *usr_buf;
     size_t usr_size;
 
@@ -82,9 +87,8 @@ struct _nf_server_t
 
     nf_handle_t p_start;     
     nf_handle_t p_end;    
+    nf_handle_t p_handle;    
      
-    nf_handle_t p_read;     
-    nf_handle_t p_write;     
     
     void * pool;
     SERVER_STATUS_T status;
@@ -117,14 +121,8 @@ nf_server_listen(nf_server_t *);
 extern int 
 set_sev_socketopt(nf_server_t *, int);
 
-extern int 
-nf_default_worker(void *);
-
-extern int 
-nf_default_write_buf(void *);
-
-extern int 
-nf_default_read_buf(void *);
+extern void 
+nf_LF_readline_worker(void *);
 
 extern int
 set_pthread_data(nf_server_pdata_t *data);
@@ -137,5 +135,23 @@ nf_server_get_read_buf();
 
 void * 
 nf_server_get_write_buf();
+
+int
+nf_server_get_readto();
+
+int
+nf_server_get_writeto();
+
+int
+nf_server_get_readed_size();
+
+int
+nf_server_get_writed_size();
+
+int
+nf_server_set_writed_size();
+
+void 
+nf_default_handle();
 
 #endif
