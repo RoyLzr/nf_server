@@ -45,7 +45,7 @@ sapool_init(nf_server_t *sev)
 		ssiz = DEFAULT_SOCK_NUM;
         sev->qsize = qsiz;
         sev->socksize = ssiz;
-	}
+    }
 
 	if (sev->pool == NULL) 
     {
@@ -54,9 +54,9 @@ sapool_init(nf_server_t *sev)
         {
             std :: cout << "malloc sapool error" << std::endl;
 			return -1;
-		}
+	    }
 		memset(sev->pool, 0, sizeof(sapool_t));
-	}
+    }
     
 	pool = (sapool_t *) sev->pool;
 	pthread_mutex_init(&pool->ready_mutex, NULL);
@@ -67,7 +67,7 @@ sapool_init(nf_server_t *sev)
     {
         std :: cout << "error of create queue" << std :: endl;
 		return -1;
-	}
+    }
 
 	//´´½¨socket×ÊÔ´
 	pool->size = ssiz;
@@ -76,7 +76,7 @@ sapool_init(nf_server_t *sev)
     {
         std :: cout << "error of create sockets" << std :: endl;
 		return -1;
-	}
+    }
 	memset(pool->sockets, 0, sizeof(sapool_sock_item_t) * ssiz);
 
 	//´´½¨epoll×ÊÔ´
@@ -85,7 +85,7 @@ sapool_init(nf_server_t *sev)
     {
         std :: cout << "error of create epoll events" << std :: endl;
 		return -1;
-	}
+    }
 	memset(pool->ep_events, 0, ssiz * sizeof(struct epoll_event));
 
 	//´´½¨epoll¾ä±ú
@@ -94,13 +94,13 @@ sapool_init(nf_server_t *sev)
     {
         std :: cout << "error of create epoll handle" << std :: endl;
 		return -1;
-	}
+    }
 
 	pool->timeout = -1;
 	if (pool->timeout <= 0) 
     {
 		pool->timeout = DEFAULT_TIMEOUT;
-	}
+    }
 	pool->check_interval = DEFAULT_CHECK_INTERVAL;
 	pool->run = &sev->run;
 	pool->using_size = 0;
@@ -144,7 +144,7 @@ sapool_run(nf_server_t *sev)
         {
             std :: cout << "error thread set stacksize" << std :: endl;
 		    return -1;
-       	}
+        }
     }
 
 	ret = pthread_attr_setinheritsched(&thread_attr, PTHREAD_EXPLICIT_SCHED);
@@ -159,7 +159,7 @@ sapool_run(nf_server_t *sev)
     {
         std :: cout << "error thread set schedpolicy" << std :: endl;
         return -1;
-	}
+    }
 
 	param.sched_priority = LISTENER_PRIORITY;
 	ret = pthread_attr_setschedparam(&thread_attr, &param);
@@ -167,7 +167,7 @@ sapool_run(nf_server_t *sev)
     {
         std :: cout << "error thread set listen priority" << std :: endl;
         return -1;
-	}
+    }
 
 	ret = pthread_create(&pool->main, &thread_attr, 
                          sapool_main, &sev->pdata[sev->pthread_num]);
@@ -184,7 +184,7 @@ sapool_run(nf_server_t *sev)
     {
         std :: cout << "error thread set work priority" << std :: endl;
         return -1;
-	}
+    }
 
 	//´´½¨Âß¼­´¦Àí×ÓÏß³Ì
 	for (i=0; i<sev->pthread_num; ++i) 
@@ -196,9 +196,9 @@ sapool_run(nf_server_t *sev)
         {
             std :: cout << "error thread set create work thread" << std :: endl;
             return -1;
-		}
+        }
 		++ sev->run_thread_num;
-	}
+    }
 
 	sev->status = RUNNING;
 	pthread_attr_destroy(&thread_attr);
@@ -239,9 +239,9 @@ sapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
 			pool->sockets[0].status = IDLE;
 			close(pool->sockets[0].sock);
 			pool->sockets[0].sock = -1;
-		}
+        }
 		return;
-	}
+    }
     //Çå¿Õ ÊÂ¼þ ¶ÓÁÐ, ¶à¸ö worker ÐèÒªlock
 	pthread_mutex_lock(&pool->ready_mutex);
 	while (!is_empty_q(&pool->queue)) 
@@ -251,7 +251,7 @@ sapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
 		close(pool->sockets[hd].sock);
 		pool->sockets[hd].sock = -1;
 		pool->sockets[hd].status = IDLE;
-	}
+    }
 	pthread_mutex_unlock(&pool->ready_mutex);
     
     //Çå¿Õ pending socket poolÖÐ µÄ ÄÚÈÝ, pending socket Ò
@@ -263,8 +263,8 @@ sapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
 			close(pool->sockets[i].sock);
 			pool->sockets[i].status = IDLE;
 			pool->sockets[i].sock = -1;
-		}
-	}
+        }
+    }
 }
 
 int sapool_destroy(nf_server_t *sev)
@@ -330,14 +330,14 @@ sapool_main(void *param)
 	while (sev->run) 
     {
 		sapool_produce(sev, (struct sockaddr *) &addr, &addr_len);
-	}
+    }
 
 	sapool_close_pool_sockets(sev, true);
 
 	while(check_socket_queue(sev) != 0) 
     {
 		sapool_produce(sev, (struct sockaddr *)&addr, &addr_len);
-	}
+    }
 
 	pthread_exit(NULL);
 	return NULL;
@@ -350,7 +350,7 @@ int sapool_check_timeout(nf_server_t *sev)
 	if (curtime < pool->next_check_time) 
     {
 		return 0;
-	}
+    }
     
 	pool->next_check_time = curtime + pool->timeout;
 	time_t tmp = 0;
@@ -365,24 +365,24 @@ int sapool_check_timeout(nf_server_t *sev)
 					sapool_del(sev, i, 0, true);
 					pool->using_size --;
 					break;
-				}
+                }
 				tmp = pool->sockets[i].last_active + pool->timeout;
 				if (curtime >= tmp) 
                 {
 					sapool_del(sev, i, 0, true);
 					pool->using_size --;
                     std :: cout << "socket pool timeout : " << i << std :: endl;
-				} 
+                } 
                 else if (pool->next_check_time > tmp) 
                 {
 					pool->next_check_time = tmp;
-				}
+                }
 				break;
 			case BUSY:
 				pool->sockets[i].last_active = curtime;
 				break;
-		}
-	}
+        }
+    }
 	return 0;
 }
 
@@ -400,7 +400,7 @@ int sapool_produce(nf_server_t * sev, struct sockaddr * addr,
 	if (num <= 0) 
     {
 		return ret;
-	}
+    }
 	for (int i=0; i<num; ++i) 
     {
 		//listen port
@@ -410,7 +410,7 @@ int sapool_produce(nf_server_t * sev, struct sockaddr * addr,
 			if (cli_sock < 0) 
             {
 				continue;
-			}
+            }
 
 			set_sev_socketopt(sev, cli_sock);
 
@@ -418,8 +418,8 @@ int sapool_produce(nf_server_t * sev, struct sockaddr * addr,
             {
 			    close(cli_sock);
 				ret = -1;
-			}
-		} 
+            }
+        } 
         else if (pool->ep_events[i].data.fd > 0) 
         {
 			int idx = pool->ep_events[i].data.fd;
@@ -429,14 +429,14 @@ int sapool_produce(nf_server_t * sev, struct sockaddr * addr,
 				sapool_del(sev, idx, 0, true);
 				pool->using_size --;
                 std :: cout << "fin catch by produce loop" << std :: endl;
-			} 
+            } 
             else if (pool->ep_events[i].events & EPOLLERR) 
             {
                 //¾ä±ú³ö´í
 				sapool_del(sev, idx, 0, true);
 				pool->using_size --;
                 std :: cout << "fd EPOLLERR catch by produce loop" << std :: endl;
-			} 
+            } 
             else if (pool->ep_events[i].events & EPOLLIN) 
             {
                 //¾ä±ú¿É¶Á
@@ -448,15 +448,15 @@ int sapool_produce(nf_server_t * sev, struct sockaddr * addr,
 					pool->using_size --;
 			        std :: cout << "Because the queue(size=queuesize) is full, then close the connection" 
                     << std::endl;
-				}
-			} 
+                }
+            } 
             else 
             {
 				sapool_del(sev, idx, 0, true);
 				pool->using_size --;
-			}
-		}
-	}
+            }
+        }
+    }
 	return ret;
 }
 
@@ -470,15 +470,15 @@ int sapool_add(nf_server_t * sev, int sock, struct sockaddr_in *addr)
         {
 			idx = i;
 			break;
-		}
-	}
+        }
+    }
 
 	if (idx < 0) 
     {
 	    std :: cout << "Because the array(size=socksize) is full, so close the new connection"
          << std :: endl;
 		return -1;
-	}
+    }
 
 	pool->sockets[idx].status = READY;
 	pool->sockets[idx].last_active = time(NULL);
@@ -489,7 +489,7 @@ int sapool_add(nf_server_t * sev, int sock, struct sockaddr_in *addr)
 	if (sapool_epoll_add(sev, idx) != 0) 
     {
 		return -1;
-	}
+    }
 	return idx;
 }
 
@@ -505,7 +505,7 @@ int sapool_epoll_add(nf_server_t *sev, int idx)
     {
         std :: cout << "add socket error: " << strerror(errno) << std :: endl;
         return -1;
-	}
+    }
 	return 0;
 }
 
@@ -521,7 +521,7 @@ int sapool_epoll_del(nf_server_t *sev, int idx)
     {
         std :: cout << "del socket error: " << strerror(errno) << std :: endl;
         return -1;
-	}
+    }
 	return 0;
 }
 
@@ -537,13 +537,13 @@ int sapool_del(nf_server_t *sev, int idx, int alive, bool remove)
 
 		pool->sockets[idx].sock = -1;
 		pool->sockets[idx].status = IDLE;
-	} 
+    } 
     else 
     {
 		pool->sockets[idx].last_active = time(NULL);
 		pool->sockets[idx].status = READY;
 		sapool_epoll_add(sev, idx);
-	}
+    }
 	return 0;
 }
 
@@ -554,7 +554,7 @@ int sapool_put(sapool_t *pool, int idx)
     {
 		pthread_mutex_unlock(&pool->ready_mutex);
 		return -1;
-	}
+    }
 	push_q(&pool->queue, idx);
 
 	pool->sockets[idx].status = BUSY;
@@ -578,8 +578,8 @@ void * sapool_workers(void * param)
             //ÔËÐÐ Íê queue Êý¾Ý
             while(check_socket_queue(sev) != 0)
                 sapool_consume((sapool_t *) sev->pool, pdata);
-		}
-	}
+        }
+    }
 
 	pthread_exit(NULL);
 	return NULL;
@@ -604,13 +604,13 @@ int sapool_get(nf_server_t *sev, int *idx)
 	while (is_empty_q(&pool->queue) && sev->run) 
     {
 		sapool_pthread_cond_timewait(pool);
-	}
+    }
 
 	if (is_empty_q(&pool->queue)) 
     {
 		pthread_mutex_unlock(&pool->ready_mutex);
 		return -1;
-	}
+    }
 
 	pop_q(&pool->queue, idx);
 	pthread_mutex_unlock(&pool->ready_mutex);
@@ -625,7 +625,7 @@ int sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
 	if (sapool_get(sev, &idx) != 0) 
     {
 		return 0;
-	}
+    }
 
 	pdata->fd = pool->sockets[idx].sock;
 	pdata->client_addr = pool->sockets[idx].addr;
@@ -635,13 +635,13 @@ int sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
     {
 		sapool_del(sev, idx, 1);
 		return 0;
-	} 
+    } 
     else if (!sev->run) 
     {
         //server stop; handle left dta in socket
 		shutdown(pdata->fd, SHUT_WR);
 		for(;sev->cb_work(pdata) == 0;);
-	}
+    }
 
 	sapool_del(sev, idx, 0);
 	pdata->fd = -1;
@@ -655,14 +655,14 @@ int sapool_pause(nf_server_t *sev)
 		std :: cout << "Because server's status isn't running, sapool_pause Failed!" 
         << std::endl;
 		return -1;
-	}
+    }
 
-	sapool_t * pool = (sapool_t *) sev->pool;
-	int index = 0;
+    sapool_t * pool = (sapool_t *) sev->pool;
+    int index = 0;
 	if(sapool_epoll_del(sev, index) != 0) 
     {
 		return -1;
-	}
+    }
 	pool->sockets[index].status = IDLE;
 	pool->sockets[index].sock = -1;
 	sev->status = PAUSE;
@@ -671,19 +671,19 @@ int sapool_pause(nf_server_t *sev)
 
 int sapool_resume(nf_server_t *sev)
 {
-	if(sev->status != PAUSE) 
+    if(sev->status != PAUSE) 
     {
 		std::cout << "Because server's status isn't PAUSE, sapool_resume Failed!" 
         <<std::endl;
 		return -1;
-	}
+    }
 
-	if(add_listen_socket(sev, sev->sev_socket) != 0) 
+    if(add_listen_socket(sev, sev->sev_socket) != 0) 
     {
-		return -1;
-	}
+	    return -1;
+    }
 
-	sev->status = RUNNING;
-	return 0;
+    sev->status = RUNNING;
+    return 0;
 }
 
