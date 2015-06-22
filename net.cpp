@@ -514,102 +514,102 @@ net_accept(int sockfd, struct sockaddr *sa, socklen_t * addrlen)
     do
     {
         connfd = accept(sockfd, sa, addrlen);
-	    if (connfd < 0) 
+        if (connfd < 0) 
         {
-	        if (errno == EINTR)
+            if (errno == EINTR)
                 continue; 
             else 
-			    return -1;
-	    }
+                return -1;
+        }
     } while(connfd < 0);
-	return connfd;
+    return connfd;
 }
 
 int
 net_tcplisten(int port, int queue)
 {
-	int listenfd;
-	const int on = 1;
-	struct sockaddr_in soin;
+    int listenfd;
+    const int on = 1;
+    struct sockaddr_in soin;
 
-	if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
+    if ((listenfd = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
     {
-		return -1;
-	}
+        return -1;
+    }
 
-	if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
+    if (setsockopt(listenfd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) < 0)
         return -1;
 
-	bzero(&soin, sizeof(soin));
+    bzero(&soin, sizeof(soin));
 
-	soin.sin_family = AF_INET;
-	soin.sin_addr.s_addr = htonl(INADDR_ANY);
-	soin.sin_port = htons(port);
+    soin.sin_family = AF_INET;
+    soin.sin_addr.s_addr = htonl(INADDR_ANY);
+    soin.sin_port = htons(port);
 
-	if (bind(listenfd, (struct sockaddr *) &soin, sizeof(soin)) < 0) 
+    if (bind(listenfd, (struct sockaddr *) &soin, sizeof(soin)) < 0) 
     {
-	    close(listenfd);
-		return -1;
-	}
+        close(listenfd);
+        return -1;
+    }
     
     if(queue <= 0)
         queue = 5;
 
-	if (listen(listenfd, queue) < 0) 
+    if (listen(listenfd, queue) < 0) 
     {
-		close(listenfd);
-		return -1;
-	}
-	return listenfd;
+        close(listenfd);
+        return -1;
+    }
+    return listenfd;
 }
 
 int
 net_connect_to_ms(int sockfd, struct sockaddr *sa, 
                   socklen_t socklen, int msecs, int isclose)
 {
-	if (msecs <= 0) 
-		return net_connect_to_tv(sockfd, sa, socklen, NULL, isclose);
+    if (msecs <= 0) 
+        return net_connect_to_tv(sockfd, sa, socklen, NULL, isclose);
     else 
     {
-		struct timeval tv;
-		tv.tv_sec = msecs / 1000;
-		tv.tv_usec = (msecs % 1000) * 1000;
-		return net_connect_to_tv(sockfd, sa, socklen, &tv, isclose);
-	}
-	return 0;
+        struct timeval tv;
+        tv.tv_sec = msecs / 1000;
+        tv.tv_usec = (msecs % 1000) * 1000;
+        return net_connect_to_tv(sockfd, sa, socklen, &tv, isclose);
+    }
+    return 0;
 }
 
 int
 net_connect_to_tv(int fd, struct sockaddr * sa, 
                 socklen_t socklen, timeval * tv, int isclose)
 {
-	int sockflag;
-	int n, error;
-	socklen_t len;
+    int sockflag;
+    int n, error;
+    socklen_t len;
     fd_set rset, wset;
 
     if(sa == NULL)
     {    
         close(fd);
-		return -1;
-	}
+        return -1;
+    }
 
-	error = 0;
+    error = 0;
     sockflag = set_fd_noblock(fd);
 
-	n = connect(fd, sa, (socklen_t) socklen);
-	if (n < 0) 
+    n = connect(fd, sa, (socklen_t) socklen);
+    if (n < 0) 
     {
-		if (errno != EINPROGRESS) 
+        if (errno != EINPROGRESS) 
         {
             error = 1;
             goto done;
-		}
-	}
-	if (n == 0) 
-		goto done;
+        }
+    }
+    if (n == 0) 
+        goto done;
 
-	FD_ZERO(&rset);
+    FD_ZERO(&rset);
     FD_SET(fd, &rset);
     wset = rset;
     if((n = select(fd + 1, &rset, &wset, NULL, tv)) ==0)
@@ -630,14 +630,14 @@ net_connect_to_tv(int fd, struct sockaddr * sa,
     }
 
   done:
-	fcntl(fd, F_SETFL, sockflag);
-	if (error) 
+    fcntl(fd, F_SETFL, sockflag);
+    if (error) 
     {
         if(isclose)
-		    close(fd);
-		return -1;
-	}
-	return 0;
+            close(fd);
+        return -1;
+    }
+    return 0;
 }
 
 int

@@ -71,8 +71,8 @@ struct _nf_server_t
     size_t listen_prio; //sapool
     size_t work_prio;   //sapool
 
-    size_t sock_num;  //sapool
-    size_t queue_len; //sapool
+    size_t socksize;  //sapool
+    size_t qsize; //sapool
     size_t check_interval;  //sapool
     size_t timeout; //sapool
  
@@ -91,8 +91,6 @@ struct _nf_server_t
      
     
     void * pool;
-    size_t qsize;
-    size_t socksize;
 
     SERVER_STATUS_T status;
 
@@ -126,6 +124,9 @@ set_sev_socketopt(nf_server_t *, int);
 
 extern int 
 nf_LF_readline_worker(void *);
+
+extern int 
+nf_LF_readnf_worker(void * );
 
 extern int
 set_pthread_data(nf_server_pdata_t *data);

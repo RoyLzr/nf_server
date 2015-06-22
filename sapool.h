@@ -4,42 +4,42 @@
 #include "pool_register.h"
 #include "commonn/queue.h"
 
-#define LISTENER_PRIORITY	10
-#define WORKER_PRIORITY		5 
+#define LISTENER_PRIORITY    10
+#define WORKER_PRIORITY        5 
 
 typedef struct _sapool_sock_item_t sapool_sock_item_t;
 typedef struct _sapool_t sapool_t;
 
 struct _sapool_sock_item_t
 {
-	int status;
-	//int epoll_staus;
-	int sock;
-	time_t last_active;
-	struct sockaddr_in addr;
+    int status;
+    //int epoll_staus;
+    int sock;
+    time_t last_active;
+    struct sockaddr_in addr;
 };
 
 struct _sapool_t
 {
-	sapool_sock_item_t * sockets;
-	struct epoll_event * ep_events;
-	int size;
+    sapool_sock_item_t * sockets;
+    struct epoll_event * ep_events;
+    int size;
     long long using_size;
 
-	int epfd;
+    int epfd;
 
-	int timeout;	    //epoll的超时时间
-	int check_interval;	//微妙级别支持超时
-	time_t next_check_time;
+    int timeout;        //epoll的超时时间
+    int check_interval;    //微妙级别支持超时
+    time_t next_check_time;
 
-	int * run;
-	int sev_sock_id;
+    int * run;
+    int sev_sock_id;
 
-	queue_t queue;
-	pthread_mutex_t ready_mutex;
-	pthread_cond_t  ready_cond;
+    queue_t queue;
+    pthread_mutex_t ready_mutex;
+    pthread_cond_t  ready_cond;
 
-	pthread_t main;
+    pthread_t main;
 };
 
 /**

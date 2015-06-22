@@ -25,7 +25,7 @@ int main(int argc, char *argv[])
     test->set_server_name(s);
     test->load_conf("server.conf");
    
-    test->set_work_callback(nf_LF_readnf_worker);
+    //test->set_work_readfun( nf_default_read );
     //test->set_work_writefun( nf_default_write );
      
     if (test->run() < 0)

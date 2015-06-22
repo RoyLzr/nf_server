@@ -1,0 +1,20 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+BUFLEN	case/getline/server_simple.cpp	15;"	d	file:
+BUFLEN	server_simple.cpp	15;"	d	file:
+createData	case/getline/client_simple.cpp	/^int createData(char * tmp, int off)$/;"	f
+createData	client_simple.cpp	/^int createData(char * tmp, int off)$/;"	f
+main	case/getline/client_simple.cpp	/^int main(int argc, char *argv[])$/;"	f
+main	case/getline/server_simple.cpp	/^int main(int argc, char *argv[])$/;"	f
+main	client_simple.cpp	/^int main(int argc, char *argv[])$/;"	f
+main	server_simple.cpp	/^int main(int argc, char *argv[])$/;"	f
+max	case/getline/client_simple.cpp	15;"	d	file:
+max	case/getline/server_simple.cpp	14;"	d	file:
+max	client_simple.cpp	15;"	d	file:
+max	server_simple.cpp	14;"	d	file:
+work	case/getline/client_simple.cpp	/^void * work(void * arg)$/;"	f
+work	client_simple.cpp	/^void * work(void * arg)$/;"	f

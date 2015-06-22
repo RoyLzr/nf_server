@@ -35,47 +35,47 @@ int empty_q(queue_t *q)
 
 int create_q(queue_t *q, int qcap)
 {
-	++ qcap;
-	if (qcap < 2) 
+    ++ qcap;
+    if (qcap < 2) 
         return -1;
-	q->cap = qcap;
-	empty_q(q);
-	q->array = (int *)malloc(sizeof(int) * qcap);
-	if (q->array == NULL) 
+    q->cap = qcap;
+    empty_q(q);
+    q->array = (int *)malloc(sizeof(int) * qcap);
+    if (q->array == NULL) 
     {
-		return -1;
-	}
-	return 0;
+        return -1;
+    }
+    return 0;
 }
 
 int push_q(queue_t *q, int val)
 {
-	if (is_full_q(q)) 
+    if (is_full_q(q)) 
         return -1;
-	q->array[q->rear] = val;
-	++ q->size;
-	if (++ q->rear >= q->cap) 
+    q->array[q->rear] = val;
+    ++ q->size;
+    if (++ q->rear >= q->cap) 
         q->rear = 0;
-	return 0;
+    return 0;
 }
 
 int pop_q(queue_t *q, int *val)
 {
-	if (is_empty_q(q)) 
+    if (is_empty_q(q)) 
         return -1;
-	++ q->front;
-	if (q->front >= q->cap) 
+    ++ q->front;
+    if (q->front >= q->cap) 
         q->front = 0;
-	*val = q->array[q->front];
-	-- q->size;
-	return 0;
+    *val = q->array[q->front];
+    -- q->size;
+    return 0;
 }
 
 int destroy_q(queue_t *q)
 {
-	q->cap = 0;
-	free(q->array);
-	return 0;
+    q->cap = 0;
+    free(q->array);
+    return 0;
 }
 
 #endif

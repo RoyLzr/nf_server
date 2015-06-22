@@ -15,117 +15,117 @@ create_key_once(void)
 int 
 set_pthread_data(nf_server_pdata_t *data)
 {
-	void *ptr = NULL;
-	pthread_once(&ponce, create_key_once);
-	if ((ptr = pthread_getspecific(pkey)) == NULL) 
+    void *ptr = NULL;
+    pthread_once(&ponce, create_key_once);
+    if ((ptr = pthread_getspecific(pkey)) == NULL) 
     {
-		ptr = data;
-		pthread_setspecific(pkey, ptr);
-	}
-	return 0;
+        ptr = data;
+        pthread_setspecific(pkey, ptr);
+    }
+    return 0;
 }
 
 nf_server_pdata_t * 
 get_pdata()
 {
-	void * ptr = pthread_getspecific(pkey);
-	return (nf_server_pdata_t *) ptr;
+    void * ptr = pthread_getspecific(pkey);
+    return (nf_server_pdata_t *) ptr;
 }
 
 void * 
 nf_server_get_read_buf()
 {
-	nf_server_pdata_t *ptr = get_pdata();
-	if (ptr == NULL) 
+    nf_server_pdata_t *ptr = get_pdata();
+    if (ptr == NULL) 
     {
         std :: cout << "empty read buf" << std :: endl;
         return NULL;
     }
-	else
-		return ptr->read_buf;
+    else
+        return ptr->read_buf;
 }
 
 void * 
 nf_server_get_write_buf()
 {
-	nf_server_pdata_t *ptr = get_pdata();
-	if (ptr == NULL) 
+    nf_server_pdata_t *ptr = get_pdata();
+    if (ptr == NULL) 
     {
         std :: cout << "empty wirte buf" << std :: endl;
         return NULL;
     }
-	else
-		return ptr->write_buf;
+    else
+        return ptr->write_buf;
 }
 
 int
 nf_server_get_readto()
 {
-	nf_server_pdata_t *ptr = get_pdata();
-	if (ptr == NULL) 
+    nf_server_pdata_t *ptr = get_pdata();
+    if (ptr == NULL) 
     {
         std :: cout << "empty readto" << std :: endl;
         return -1;
     }
-	else
+    else
         return (ptr->server)->read_to;
 }
 
 int
 nf_server_get_writeto()
 {
-	nf_server_pdata_t *ptr = get_pdata();
-	if (ptr == NULL) 
+    nf_server_pdata_t *ptr = get_pdata();
+    if (ptr == NULL) 
     {
         std :: cout << "empty readto" << std :: endl;
         return -1;
     }
-	else
+    else
         return (ptr->server)->write_to;
 }
 
 int
 nf_server_get_qsize(nf_server_t * sev)
 {
-	if (sev == NULL) 
+    if (sev == NULL) 
     {
         std :: cout << "empty qsize" << std :: endl;
         return -1;
     }
-	else
+    else
         return sev->qsize;
 }
 
 int
 nf_server_get_socksize(nf_server_t * sev)
 {
-	if (sev == NULL) 
+    if (sev == NULL) 
     {
         std :: cout << "empty socketsize" << std :: endl;
         return -1;
     }
-	else
+    else
         return sev->socksize;
 }
 
 int
 nf_server_get_readed_size()
 {
-	nf_server_pdata_t *ptr = get_pdata();
-	if (ptr == NULL) 
+    nf_server_pdata_t *ptr = get_pdata();
+    if (ptr == NULL) 
     {
         std :: cout << "empty readed size" << std :: endl;
         return -1;
     }
-	else
+    else
         return ptr->readed_size;
 }
 
 int
 nf_server_set_writed_size(int n)
 {
-	nf_server_pdata_t *ptr = get_pdata();
-	if (ptr == NULL) 
+    nf_server_pdata_t *ptr = get_pdata();
+    if (ptr == NULL) 
     {
         std :: cout << "empty writed size" << std :: endl;
         return -1;
@@ -137,13 +137,13 @@ nf_server_set_writed_size(int n)
 int
 nf_server_get_writed_size()
 {
-	nf_server_pdata_t *ptr = get_pdata();
-	if (ptr == NULL) 
+    nf_server_pdata_t *ptr = get_pdata();
+    if (ptr == NULL) 
     {
         std :: cout << "empty writed size" << std :: endl;
         return -1;
     }
-	else
+    else
         return ptr->writed_size;
 }
 
@@ -169,8 +169,8 @@ nf_server_create(const char * sev_name)
     sev->listen_prio = 10;
     sev->work_prio = 5;  
 
-    sev->sock_num = 500;  
-    sev->queue_len = 200;
+    sev->socksize = 500;  
+    sev->qsize = 10000;
     sev->check_interval = 5;
     sev->timeout = 60;
 
@@ -280,7 +280,7 @@ nf_server_init(nf_server_t * sev)
     //server_type
     sev->server_type = (size_t)atoi((Singleton<ConfigParser>::
                                      instance()->get("server", "type")).c_str());
-    //init by pool.init()
+    //init by pool.init() pool 内容
     sev->pool = NULL;
 
     //线程数
@@ -484,6 +484,80 @@ nf_LF_readline_worker(void * data)
             }
             if(errno == ETIMEDOUT && n != -1)
                 return -1;
+        }
+    }
+    return 0;
+}
+
+//LF 的 readn 不使用缓存区
+int 
+nf_LF_readnf_worker(void * data)
+{
+    nf_server_pdata_t * pdata = (nf_server_pdata_t *) data;
+
+    char * req = (char *) pdata->read_buf;
+    char * res = (char *) pdata->write_buf;
+    int epfd = pdata->epfd;
+    int fd = pdata->fd;
+    int readsize = pdata->read_size;   
+    int writesize = pdata->write_size;   
+    nf_server_t *sev = pdata->server; 
+     
+    int ret;
+    if((ret = net_ep_add_in(epfd, fd)) < 0)
+    {
+        std :: cout << "add epoll error : " << 
+        strerror(errno)<< std :: endl;
+        return -1;
+    }      
+
+    int readto = nf_server_get_readto();
+    int writeto = nf_server_get_writeto();
+     
+    struct epoll_event events[1], ev;
+    
+    //event loop
+    while(sev->run)
+    {
+        ret = epoll_wait(pdata->epfd, events, 1, readto * 20);
+        if(ret == 0)
+        {
+            std::cout << "read timeout error" << std::endl; 
+            return -1;
+        }
+        else if(ret < 0)
+        {
+            std::cout << "epoll wait error :" << strerror(errno) <<std::endl;   
+            return -1;
+        } 
+        //events analyse
+        
+        if(events[0].events & EPOLLRDHUP)
+        { 
+            std::cout << "event close fd error" << std::endl; 
+            return -1;
+        }
+        else if(events[0].events & EPOLLERR )
+        {
+            std::cout << "event fd  error" << std::endl; 
+            return -1;
+        }
+        else if( events[0].events & EPOLLIN )
+        {
+            int n;
+            if ((n = readn_to_ms(pdata->fd, req, 6, readto)) < 0)
+            {
+                std :: cout << "read error : " << strerror(errno) << std::endl;
+                return -1;
+            }
+            pdata->readed_size = n;
+            sev->p_handle();
+    
+            if((n = sendn_to_ms(pdata->fd, res, pdata->writed_size, writeto)) < 0)
+            {
+                std :: cout << "write error : " << strerror(errno) << std :: endl;
+                return -1;
+            }
         }
     }
     return 0;

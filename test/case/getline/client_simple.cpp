@@ -33,26 +33,24 @@ void * work(void * arg)
     struct sockaddr_in server_address;
     char ip[] = "127.0.0.1";
     set_tcp_sockaddr(ip, 1025, &server_address);
-    char tmp[] = "12345";
-    
+
     for(int i = 0; i < 1000; i++)
     {
         int fd = socket(AF_INET, SOCK_STREAM, 0);
         set_linger(fd, 0);
-        //int size = createData(buf, i); 
-        int n = net_connect_to_ms(fd, (struct sockaddr *)&server_address, 
-                                  sizeof(server_address), 3000, 1);
+        int size = createData(buf, i); 
+        int n = net_connect_to_ms(fd, (struct sockaddr *)&server_address, sizeof(server_address), 3000, 1);
         if(n < 0)
         {
             std::cout << "connect error" << std::endl;
             continue;
         }
-        //buf[size] = '\0';
-        //std :: cout << buf << std :: endl;
-        if (send(fd, tmp, sizeof(tmp), 0) <= 0)
+        buf[size] = '\0';
+        std :: cout << buf << std :: endl;
+        if (send(fd, buf, size, 0) <= 0)
             std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
             
-        if( (n = recv(fd, readbuf, sizeof(tmp), MSG_WAITALL)) <= 0)
+        if( (n = recv(fd, readbuf, size, MSG_WAITALL)) <= 0)
             std::cout <<  "recv error"  << ": " << strerror(errno) << std::endl;
         
         //readbuf[n] = '\0';
