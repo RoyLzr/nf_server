@@ -282,6 +282,10 @@ nf_server_init(nf_server_t * sev)
                                      instance()->get("server", "type")).c_str());
     //init by pool.init() pool 内容
     sev->pool = NULL;
+    sev->check_interval = (size_t)atoi((Singleton<ConfigParser>::
+                                     instance()->get("pool", "check_interval")).c_str());
+    sev->timeout = (size_t)atoi((Singleton<ConfigParser>::
+                                     instance()->get("pool", "timeout")).c_str());
 
     //线程数
     sev->pthread_num = (size_t)atoi((Singleton<ConfigParser>::

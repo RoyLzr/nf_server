@@ -99,9 +99,11 @@ sapool_init(nf_server_t *sev)
     pool->timeout = -1;
     if (pool->timeout <= 0) 
     {
-        pool->timeout = DEFAULT_TIMEOUT;
+        //pool->timeout = DEFAULT_TIMEOUT;
+        pool->timeout = sev->timeout;
     }
-    pool->check_interval = DEFAULT_CHECK_INTERVAL;
+    //pool->check_interval = DEFAULT_CHECK_INTERVAL;
+    pool->check_interval = sev->check_interval;
     pool->run = &sev->run;
     pool->using_size = 0;
 
@@ -173,6 +175,8 @@ sapool_run(nf_server_t *sev)
 
     ret = pthread_create(&pool->main, &thread_attr, 
                          sapool_main, &sev->pdata[0]);
+    sev->pdata[0].pid = pool->main;
+
     if (ret) 
     {
         std :: cout << "error thread set create main thread" << std :: endl;

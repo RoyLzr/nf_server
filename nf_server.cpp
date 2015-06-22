@@ -92,7 +92,8 @@ namespace nf
                     free(sev_data->pdata[i].read_buf);
                 if( sev_data->pdata[i].write_buf != NULL)
                     free(sev_data->pdata[i].write_buf);
-                if( sev_data->pdata[i].rio.rio_ptr != NULL)
+                if(sev_data->server_type == NFSVR_LFPOOL 
+                   && sev_data->pdata[i].rio.rio_ptr != NULL)
                     free(sev_data->pdata[i].rio.rio_ptr);
             }
         }
