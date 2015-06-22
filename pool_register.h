@@ -19,7 +19,6 @@ extern int sapool_run(nf_server_t *);
 extern int sapool_join(nf_server_t *);
 extern int sapool_listen(nf_server_t *);
 extern int sapool_destroy(nf_server_t *);
-extern long long sapool_get_socknum(nf_server_t *);
 extern long long sapool_get_queuenum(nf_server_t *);
 extern int sapool_pause(nf_server_t *);
 extern int sapool_resume(nf_server_t *);
@@ -69,7 +68,7 @@ static const struct _pool_t g_pool[] = {
 		sapool_listen,
 		sapool_join,
 		sapool_destroy,
-		sapool_get_socknum,
+		NULL,
 		sapool_get_queuenum,
 		sapool_pause,
 		sapool_resume

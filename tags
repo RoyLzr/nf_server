@@ -5,13 +5,19 @@
 !_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
 !_TAG_PROGRAM_VERSION	5.8	//
 BUFLEN	test/server_simple.cpp	15;"	d	file:
-BUSY	sapool.cpp	/^    BUSY$/;"	e	enum:__anon4	file:
+BUSY	sapool.cpp	/^	BUSY$/;"	e	enum:__anon5	file:
 ConfigParser	commonn/configParser.h	/^        ConfigParser(){}$/;"	f	class:ConfigParser
 ConfigParser	commonn/configParser.h	/^class ConfigParser$/;"	c
-IDLE	sapool.cpp	/^    IDLE = 0,$/;"	e	enum:__anon4	file:
+DEFAULT_CHECK_INTERVAL	sapool.cpp	/^	DEFAULT_CHECK_INTERVAL = 10,  \/\/\/默认check_interval, 10ms$/;"	e	enum:__anon4	file:
+DEFAULT_QUEUE_LEN	sapool.cpp	/^	DEFAULT_QUEUE_LEN = 100,      \/\/\/默认的等待队列的长度 100$/;"	e	enum:__anon4	file:
+DEFAULT_SOCK_NUM	sapool.cpp	/^	DEFAULT_SOCK_NUM = 500,       \/\/\/同时维护的最大sock句柄数，500$/;"	e	enum:__anon4	file:
+DEFAULT_TIMEOUT	sapool.cpp	/^	DEFAULT_TIMEOUT = 60,         \/\/\/等待队列里面的默认超时时间t, 60s$/;"	e	enum:__anon4	file:
+IDLE	sapool.cpp	/^	IDLE = 0,$/;"	e	enum:__anon5	file:
 INIT	nf_server_core.h	/^    INIT    = 0,$/;"	e	enum:__anon1
+LISTENER_PRIORITY	sapool.h	11;"	d
 Lock	commonn/singleton.h	/^        static MutexLock Lock;$/;"	m	class:Singleton
 Lock	commonn/singleton.h	/^MutexLock Singleton<T>::Lock;$/;"	m	class:Singleton
+MAX	sapool.cpp	18;"	d	file:
 MutexLock	commonn/singleton.h	/^        MutexLock()$/;"	f	class:MutexLock
 MutexLock	commonn/singleton.h	/^class MutexLock$/;"	c
 NFSVR_LFPOOL	nf_server_core.h	/^    NFSVR_LFPOOL = 0,    \/\/建议用于多线程短连接                                                                   $/;"	e	enum:__anon2
@@ -22,13 +28,14 @@ NFSVR_SHORT_CONNEC	nf_server_core.h	/^    NFSVR_SHORT_CONNEC = 0,$/;"	e	enum:__a
 NfServer	nf_server.cpp	/^    NfServer :: NfServer()$/;"	f	class:nf::NfServer
 NfServer	nf_server.h	/^    class NfServer$/;"	c	namespace:nf
 PAUSE	nf_server_core.h	/^    PAUSE   = 2,$/;"	e	enum:__anon1
-READY	sapool.cpp	/^    READY,$/;"	e	enum:__anon4	file:
+READY	sapool.cpp	/^	READY,$/;"	e	enum:__anon5	file:
 RUNNING	nf_server_core.h	/^    RUNNING = 1,$/;"	e	enum:__anon1
 SERVER_STATUS_T	nf_server_core.h	/^}SERVER_STATUS_T;$/;"	t	typeref:enum:__anon1
 STOP	nf_server_core.h	/^    STOP    = 3$/;"	e	enum:__anon1
 Section	commonn/configParser.h	/^class Section$/;"	c
 Server	commonn/Server.h	/^class Server$/;"	c
 Singleton	commonn/singleton.h	/^class Singleton$/;"	c
+WORKER_PRIORITY	sapool.h	12;"	d
 _CONFIG_PARSER_H	commonn/configParser.h	2;"	d
 _NFSERVER_CORE_H	nf_server_core.h	7;"	d
 _NFSERVER_REGISTER_H	pool_register.h	2;"	d
@@ -36,22 +43,22 @@ _NF_SERVER_H	nf_server.h	10;"	d
 _QUEUE_H	commonn/queue.h	2;"	d
 _SERVER_H	commonn/Server.h	9;"	d
 __NET_H__	net.h	12;"	d
-_check_interval	sapool.cpp	/^	size_t _check_interval;$/;"	m	struct:_sapool_t	file:
+__SAPOOL_H_	sapool.h	2;"	d
 _initialized	commonn/singleton.h	/^        static bool _initialized;$/;"	m	class:Singleton
 _initialized	commonn/singleton.h	/^bool Singleton<T>::_initialized = false;$/;"	m	class:Singleton
 _instance	commonn/singleton.h	/^        static T * _instance;$/;"	m	class:Singleton
 _instance	commonn/singleton.h	/^T * Singleton<T>::_instance = NULL;$/;"	m	class:Singleton
 _lfpool_t	lfpool.cpp	/^typedef struct _lfpool_t $/;"	s	file:
-_next_check_time	sapool.cpp	/^	time_t _next_check_time;$/;"	m	struct:_sapool_t	file:
 _nf_server_pdata_t	nf_server_core.h	/^struct _nf_server_pdata_t$/;"	s
 _nf_server_t	nf_server_core.h	/^struct _nf_server_t$/;"	s
 _pool_t	pool_register.h	/^struct _pool_t$/;"	s
 _queue_t	commonn/queue.h	/^typedef struct _queue_t$/;"	s
 _rio_t	net.h	/^typedef struct _rio_t$/;"	s
-_sapool_sock_item_t	sapool.cpp	/^typedef struct _sapool_sock_item_t$/;"	s	file:
-_sapool_t	sapool.cpp	/^typedef struct _sapool_t$/;"	s	file:
+_sapool_sock_item_t	sapool.h	/^struct _sapool_sock_item_t$/;"	s
+_sapool_t	sapool.h	/^typedef struct _sapool_t$/;"	s
 _singleton_h	commonn/singleton.h	2;"	d
-addr	sapool.cpp	/^	struct sockaddr_in addr;$/;"	m	struct:_sapool_sock_item_t	typeref:struct:_sapool_sock_item_t::sockaddr_in	file:
+add_listen_socket	sapool.cpp	/^add_listen_socket(nf_server_t *sev, int listenfd)$/;"	f	file:
+addr	sapool.h	/^	struct sockaddr_in addr;$/;"	m	struct:_sapool_sock_item_t	typeref:struct:_sapool_sock_item_t::sockaddr_in
 array	commonn/queue.h	/^    int *array;$/;"	m	struct:_queue_t
 backlog	nf_server_core.h	/^    size_t backlog;$/;"	m	struct:_nf_server_t
 cache	net.h	/^    char * cache;$/;"	m	struct:_rio_t
@@ -59,9 +66,12 @@ cache_len	net.h	/^    int cache_len;$/;"	m	struct:_rio_t
 cap	commonn/queue.h	/^    int cap;$/;"	m	struct:_queue_t
 cb_work	nf_server_core.h	/^    nf_callback_proc cb_work;$/;"	m	struct:_nf_server_t
 check_interval	nf_server_core.h	/^    size_t check_interval;  \/\/sapool$/;"	m	struct:_nf_server_t
+check_interval	sapool.h	/^	int check_interval;	\/\/微妙级别支持超时$/;"	m	struct:_sapool_t
+check_socket_queue	sapool.cpp	/^int check_socket_queue(nf_server_t *sev)$/;"	f
 client_addr	nf_server_core.h	/^    struct sockaddr_in client_addr;$/;"	m	struct:_nf_server_pdata_t	typeref:struct:_nf_server_pdata_t::sockaddr_in
 connect_to	nf_server_core.h	/^    size_t connect_to;$/;"	m	struct:_nf_server_t
 connect_type	nf_server_core.h	/^    size_t connect_type; $/;"	m	struct:_nf_server_t
+createData	test/client_simple.cpp	/^int createData(char * tmp, int off)$/;"	f
 create_key_once	nf_server_core.cpp	/^create_key_once(void)$/;"	f	file:
 create_q	commonn/queue.h	/^int create_q(queue_t *q, int qcap)$/;"	f
 default_hand	net.cpp	/^default_hand(int sig)$/;"	f
@@ -72,12 +82,12 @@ destroy_pool	pool_register.h	/^typedef int (*destroy_pool)(nf_server_t *);$/;"	t
 destroy_q	commonn/queue.h	/^int destroy_q(queue_t *q)$/;"	f
 empty_q	commonn/queue.h	/^int empty_q(queue_t *q)$/;"	f
 empty_str	commonn/configParser.cpp	/^static const std::string empty_str = "";$/;"	v	file:
-enqueue_time	sapool.cpp	/^	unsigned long long int enqueue_time;$/;"	m	struct:_sapool_sock_item_t	file:
+enqueue_time	sapool.h	/^	uint64_t enqueue_time;$/;"	m	struct:_sapool_sock_item_t
+ep_events	sapool.h	/^	struct epoll_event * ep_events;$/;"	m	struct:_sapool_t	typeref:struct:_sapool_t::epoll_event
 ep_size	nf_server_core.h	/^    size_t ep_size;$/;"	m	struct:_nf_server_pdata_t
 epfd	nf_server_core.h	/^    int epfd;$/;"	m	struct:_nf_server_pdata_t
 epfd	nf_server_core.h	/^    int epfd;$/;"	m	struct:_nf_server_t
-epfd	sapool.cpp	/^	int epfd;       \/\/池中一个epfd, 监控池中所有连接，$/;"	m	struct:_sapool_t	file:
-events	sapool.cpp	/^	struct epoll_event *events;$/;"	m	struct:_sapool_t	typeref:struct:_sapool_t::epoll_event	file:
+epfd	sapool.h	/^	int epfd;$/;"	m	struct:_sapool_t
 fd	nf_server_core.h	/^    int fd;$/;"	m	struct:_nf_server_pdata_t
 front	commonn/queue.h	/^    int front;$/;"	m	struct:_queue_t
 g_pool	pool_register.h	/^static const struct _pool_t g_pool[] = {$/;"	v	typeref:struct:_pool_t
@@ -100,7 +110,7 @@ items	commonn/configParser.h	/^        std::map<std::string, std::string> items;
 join	nf_server.cpp	/^    int NfServer :: join()$/;"	f	class:nf::NfServer
 join	pool_register.h	/^    join_pool join;	\/\/pool的join函数$/;"	m	struct:_pool_t
 join_pool	pool_register.h	/^typedef int (*join_pool)(nf_server_t *);$/;"	t
-last_active	sapool.cpp	/^	time_t last_active;$/;"	m	struct:_sapool_sock_item_t	file:
+last_active	sapool.h	/^	time_t last_active;$/;"	m	struct:_sapool_sock_item_t
 lf_main	lfpool.cpp	/^void * lf_main(void * param)$/;"	f
 lfpool_destroy	lfpool.cpp	/^int lfpool_destroy(nf_server_t * sev)$/;"	f
 lfpool_get_queuenum	lfpool.cpp	/^long long lfpool_get_queuenum(nf_server_t *)$/;"	f
@@ -120,10 +130,10 @@ load_conf	nf_server.cpp	/^    int NfServer :: load_conf(const std::string & conf
 lock	commonn/singleton.h	/^        void lock()$/;"	f	class:MutexLock
 lock	lfpool.cpp	/^    pthread_mutex_t lock;$/;"	m	struct:_lfpool_t	file:
 mSections	commonn/configParser.h	/^    std::map<std::string, Section> mSections;$/;"	m	class:ConfigParser
-main	sapool.cpp	/^	pthread_t main; \/\/pool 中监控事件发生的线程$/;"	m	struct:_sapool_t	file:
+main	sapool.h	/^	pthread_t main;$/;"	m	struct:_sapool_t
 main	test/client_simple.cpp	/^int main(int argc, char *argv[])$/;"	f
 main	test/server_simple.cpp	/^int main(int argc, char *argv[])$/;"	f
-max	test/client_simple.cpp	14;"	d	file:
+max	test/client_simple.cpp	15;"	d	file:
 max	test/server_simple.cpp	14;"	d	file:
 mutex	commonn/singleton.h	/^        pthread_mutex_t mutex;$/;"	m	class:MutexLock
 name	nf_server_core.h	/^    char name[256];$/;"	m	struct:_nf_server_t
@@ -137,31 +147,37 @@ net_ep_add_in1	net.cpp	/^net_ep_add_in1(int epfd, int fd)$/;"	f
 net_ep_create	net.cpp	/^net_ep_create(int size)$/;"	f
 net_ep_del	net.cpp	/^net_ep_del(int epfd, int fd)$/;"	f
 net_tcplisten	net.cpp	/^net_tcplisten(int port, int queue)$/;"	f
+next_check_time	sapool.h	/^	time_t next_check_time;$/;"	m	struct:_sapool_t
 nf	nf_server.cpp	/^namespace nf$/;"	n	file:
 nf	nf_server.h	/^namespace nf$/;"	n
+nf_LF_readline_worker	nf_server_core.cpp	/^nf_LF_readline_worker(void * data)$/;"	f
 nf_callback_proc	nf_server_core.h	/^typedef int (* nf_callback_proc)(void *req);$/;"	t
-nf_default_read_buf	nf_server_core.cpp	/^int nf_default_read_buf(void *data)$/;"	f
-nf_default_worker	nf_server_core.cpp	/^int nf_default_worker(void *req)$/;"	f
-nf_default_write_buf	nf_server_core.cpp	/^int nf_default_write_buf(void *data)$/;"	f
-nf_handle_t	nf_server_core.h	/^typedef int (* nf_handle_t)(void * req);$/;"	t
+nf_default_handle	nf_server_core.cpp	/^nf_default_handle()$/;"	f
+nf_handle_t	nf_server_core.h	/^typedef void (* nf_handle_t)();$/;"	t
 nf_pdata_init	nf_server_core.cpp	/^nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)$/;"	f
 nf_server_bind	nf_server_core.cpp	/^int nf_server_bind(nf_server_t * sev)$/;"	f
 nf_server_create	nf_server_core.cpp	/^nf_server_create(const char * sev_name)$/;"	f
+nf_server_get_qsize	nf_server_core.cpp	/^nf_server_get_qsize(nf_server_t * sev)$/;"	f
 nf_server_get_read_buf	nf_server_core.cpp	/^nf_server_get_read_buf()$/;"	f
+nf_server_get_readed_size	nf_server_core.cpp	/^nf_server_get_readed_size()$/;"	f
+nf_server_get_readto	nf_server_core.cpp	/^nf_server_get_readto()$/;"	f
+nf_server_get_socksize	nf_server_core.cpp	/^nf_server_get_socksize(nf_server_t * sev)$/;"	f
 nf_server_get_write_buf	nf_server_core.cpp	/^nf_server_get_write_buf()$/;"	f
+nf_server_get_writed_size	nf_server_core.cpp	/^nf_server_get_writed_size()$/;"	f
+nf_server_get_writeto	nf_server_core.cpp	/^nf_server_get_writeto()$/;"	f
 nf_server_init	nf_server_core.cpp	/^nf_server_init(nf_server_t * sev)$/;"	f
 nf_server_listen	nf_server_core.cpp	/^int nf_server_listen(nf_server_t * sev)$/;"	f
 nf_server_pdata_t	nf_server_core.h	/^typedef struct _nf_server_pdata_t nf_server_pdata_t;$/;"	t	typeref:struct:_nf_server_pdata_t
+nf_server_set_writed_size	nf_server_core.cpp	/^nf_server_set_writed_size(int n)$/;"	f
 nf_server_t	nf_server_core.h	/^typedef struct _nf_server_t nf_server_t;$/;"	t	typeref:struct:_nf_server_t
 p_end	nf_server_core.h	/^    nf_handle_t p_end;    $/;"	m	struct:_nf_server_t
-p_read	nf_server_core.h	/^    nf_handle_t p_read;     $/;"	m	struct:_nf_server_t
+p_handle	nf_server_core.h	/^    nf_handle_t p_handle;    $/;"	m	struct:_nf_server_t
 p_start	nf_server_core.h	/^    nf_handle_t p_start;     $/;"	m	struct:_nf_server_t
-p_write	nf_server_core.h	/^    nf_handle_t p_write;     $/;"	m	struct:_nf_server_t
 parser_file	commonn/configParser.cpp	/^bool ConfigParser :: parser_file(const std::string &file)$/;"	f	class:ConfigParser
 pause	nf_server.cpp	/^    int NfServer :: pause()$/;"	f	class:nf::NfServer
 pause	pool_register.h	/^    pause_pool pause;$/;"	m	struct:_pool_t
 pause_pool	pool_register.h	/^typedef int (*pause_pool)(nf_server_t *);$/;"	t
-pdata	nf_server_core.h	/^    nf_server_pdata_t *pdata;$/;"	m	struct:_nf_server_t
+pdata	nf_server_core.h	/^    nf_server_pdata_t * pdata;$/;"	m	struct:_nf_server_t
 pid	nf_server_core.h	/^    pthread_t pid;$/;"	m	struct:_nf_server_pdata_t
 pkey	nf_server_core.cpp	/^static pthread_key_t pkey;$/;"	v	file:
 ponce	nf_server_core.cpp	/^static pthread_once_t ponce = PTHREAD_ONCE_INIT;$/;"	v	file:
@@ -169,15 +185,17 @@ pool	nf_server_core.h	/^    void * pool;$/;"	m	struct:_nf_server_t
 pop_q	commonn/queue.h	/^int pop_q(queue_t *q, int *val)$/;"	f
 pthread_num	nf_server_core.h	/^    size_t pthread_num;        \/\/线程池开启线程总数$/;"	m	struct:_nf_server_t
 push_q	commonn/queue.h	/^int push_q(queue_t *q, int val)$/;"	f
-queue	sapool.cpp	/^	queue_t queue;$/;"	m	struct:_sapool_t	file:
+qsize	nf_server_core.h	/^    size_t qsize;$/;"	m	struct:_nf_server_t
+queue	sapool.h	/^	queue_t queue;$/;"	m	struct:_sapool_t
 queue_len	nf_server_core.h	/^    size_t queue_len; \/\/sapool$/;"	m	struct:_nf_server_t
 queue_t	commonn/queue.h	/^} queue_t;$/;"	t	typeref:struct:_queue_t
 read_buf	nf_server_core.h	/^    void *read_buf;$/;"	m	struct:_nf_server_pdata_t
 read_size	nf_server_core.h	/^    size_t read_size;$/;"	m	struct:_nf_server_pdata_t
 read_to	nf_server_core.h	/^    size_t read_to;$/;"	m	struct:_nf_server_t
+readed_size	nf_server_core.h	/^    size_t readed_size;$/;"	m	struct:_nf_server_pdata_t
 readn_to_ms	net.cpp	/^readn_to_ms(int fd, void *ptr, size_t nbytes, int msecs)$/;"	f
-ready_cond	sapool.cpp	/^	pthread_cond_t ready_cond;$/;"	m	struct:_sapool_t	file:
-ready_mutex	sapool.cpp	/^	pthread_mutex_t ready_mutex;$/;"	m	struct:_sapool_t	file:
+ready_cond	sapool.h	/^	pthread_cond_t  ready_cond;$/;"	m	struct:_sapool_t
+ready_mutex	sapool.h	/^	pthread_mutex_t ready_mutex;$/;"	m	struct:_sapool_t
 rear	commonn/queue.h	/^    int rear;$/;"	m	struct:_queue_t
 resume	nf_server.cpp	/^    int NfServer :: resume()$/;"	f	class:nf::NfServer
 resume	pool_register.h	/^    resume_pool resume;$/;"	m	struct:_pool_t
@@ -198,20 +216,35 @@ rio_t	net.h	/^} rio_t;$/;"	t	typeref:struct:_rio_t
 run	nf_server.cpp	/^    int NfServer :: run()$/;"	f	class:nf::NfServer
 run	nf_server_core.h	/^    size_t run;     $/;"	m	struct:_nf_server_t
 run	pool_register.h	/^    run_pool run;	\/\/pool的运行回调函数$/;"	m	struct:_pool_t
-run	sapool.cpp	/^	int *run;$/;"	m	struct:_sapool_t	file:
+run	sapool.h	/^	int * run;$/;"	m	struct:_sapool_t
 run_pool	pool_register.h	/^typedef int (*run_pool)(nf_server_t *);$/;"	t
-run_thread_num	nf_server_core.h	/^    int run_thread_num;     \/\/工作线程数$/;"	m	struct:_nf_server_t
-sapool_destroy	sapool.cpp	/^int sapool_destroy(nf_server_t * sev)$/;"	f
-sapool_get_queuenum	sapool.cpp	/^long long sapool_get_queuenum(nf_server_t *)$/;"	f
-sapool_get_socknum	sapool.cpp	/^long long sapool_get_socknum(nf_server_t *)$/;"	f
-sapool_init	sapool.cpp	/^int sapool_init(nf_server_t * sev)$/;"	f
-sapool_join	sapool.cpp	/^int sapool_join(nf_server_t * sev)$/;"	f
-sapool_listen	sapool.cpp	/^int sapool_listen(nf_server_t * sev)$/;"	f
-sapool_pause	sapool.cpp	/^int sapool_pause(nf_server_t *)$/;"	f
-sapool_resume	sapool.cpp	/^int sapool_resume(nf_server_t *)$/;"	f
-sapool_run	sapool.cpp	/^int sapool_run(nf_server_t * sev)$/;"	f
-sapool_sock_item_t	sapool.cpp	/^} sapool_sock_item_t;$/;"	t	typeref:struct:_sapool_sock_item_t	file:
-sapool_t	sapool.cpp	/^} sapool_t;$/;"	t	typeref:struct:_sapool_t	file:
+run_thread_num	nf_server_core.h	/^    int run_thread_num;        \/\/工作线程数$/;"	m	struct:_nf_server_t
+sapool_add	sapool.cpp	/^int sapool_add(nf_server_t * sev, int sock, struct sockaddr_in *addr)$/;"	f
+sapool_check_timeout	sapool.cpp	/^int sapool_check_timeout(nf_server_t *sev)$/;"	f
+sapool_close_pool_sockets	sapool.cpp	/^sapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)$/;"	f	file:
+sapool_consume	sapool.cpp	/^int sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)$/;"	f
+sapool_del	sapool.cpp	/^int sapool_del(nf_server_t *sev, int idx, int alive, bool remove)$/;"	f
+sapool_destroy	sapool.cpp	/^int sapool_destroy(nf_server_t *sev)$/;"	f
+sapool_epoll_add	sapool.cpp	/^int sapool_epoll_add(nf_server_t *sev, int idx)$/;"	f
+sapool_epoll_del	sapool.cpp	/^int sapool_epoll_del(nf_server_t *sev, int idx)$/;"	f
+sapool_get	sapool.cpp	/^int sapool_get(nf_server_t *sev, int *idx)$/;"	f
+sapool_get_queuenum	sapool.cpp	/^sapool_get_queuenum(nf_server_t *sev)$/;"	f
+sapool_get_socknum	sapool.cpp	/^sapool_get_socknum(nf_server_t *sev)$/;"	f
+sapool_init	sapool.cpp	/^sapool_init(nf_server_t *sev)$/;"	f
+sapool_join	sapool.cpp	/^sapool_join(nf_server_t *sev)$/;"	f
+sapool_listen	sapool.cpp	/^sapool_listen(nf_server_t *sev)$/;"	f
+sapool_main	sapool.cpp	/^sapool_main(void *param)$/;"	f
+sapool_pause	sapool.cpp	/^int sapool_pause(nf_server_t *sev)$/;"	f
+sapool_produce	sapool.cpp	/^int sapool_produce(nf_server_t * sev, struct sockaddr * addr, $/;"	f
+sapool_pthread_cond_timewait	sapool.cpp	/^int sapool_pthread_cond_timewait(sapool_t *pool)$/;"	f
+sapool_put	sapool.cpp	/^int sapool_put(sapool_t *pool, int idx)$/;"	f
+sapool_resume	sapool.cpp	/^int sapool_resume(nf_server_t *sev)$/;"	f
+sapool_run	sapool.cpp	/^sapool_run(nf_server_t *sev)$/;"	f
+sapool_sock_item_t	sapool.h	/^typedef struct _sapool_sock_item_t sapool_sock_item_t;$/;"	t	typeref:struct:_sapool_sock_item_t
+sapool_sock_item_t	sapool.h	/^} sapool_sock_item_t;$/;"	v	typeref:struct:_sapool_sock_item_t
+sapool_t	sapool.h	/^typedef struct _sapool_t sapool_t;$/;"	t	typeref:struct:_sapool_t
+sapool_t	sapool.h	/^} sapool_t;$/;"	t	typeref:struct:_sapool_t
+sapool_workers	sapool.cpp	/^void * sapool_workers(void * param)$/;"	f
 scan	commonn/configParser.cpp	/^void ConfigParser :: scan() const$/;"	f	class:ConfigParser
 scan	commonn/configParser.cpp	/^void Section :: scan() const$/;"	f	class:Section
 sendn	net.cpp	/^sendn(int fd, void *usrbuf, size_t n)$/;"	f
@@ -233,28 +266,27 @@ set_tcp_sockaddr	net.cpp	/^set_tcp_sockaddr(char * addr, int port, $/;"	f
 set_thread_endfun	nf_server.cpp	/^    int NfServer :: set_thread_endfun( nf_handle_t end )$/;"	f	class:nf::NfServer
 set_thread_startfun	nf_server.cpp	/^    int NfServer :: set_thread_startfun( nf_handle_t start ) $/;"	f	class:nf::NfServer
 set_work_callback	nf_server.cpp	/^    int NfServer :: set_work_callback(nf_callback_proc run)$/;"	f	class:nf::NfServer
-set_work_readfun	nf_server.cpp	/^    int NfServer :: set_work_readfun( nf_handle_t read) $/;"	f	class:nf::NfServer
-set_work_writefun	nf_server.cpp	/^    int NfServer :: set_work_writefun( nf_handle_t write)$/;"	f	class:nf::NfServer
 sev_data	nf_server.h	/^        nf_server_t *sev_data;$/;"	m	class:nf::NfServer
-sev_sock_id	sapool.cpp	/^	int sev_sock_id;$/;"	m	struct:_sapool_t	file:
+sev_sock_id	sapool.h	/^	int sev_sock_id;$/;"	m	struct:_sapool_t
 sev_socket	nf_server_core.h	/^    int sev_socket; $/;"	m	struct:_nf_server_t
 size	commonn/queue.h	/^    int size;$/;"	m	struct:_queue_t
-size	sapool.cpp	/^	size_t size;$/;"	m	struct:_sapool_t	file:
-sock	sapool.cpp	/^	int sock;$/;"	m	struct:_sapool_sock_item_t	file:
+size	sapool.h	/^	int size;$/;"	m	struct:_sapool_t
+sock	sapool.h	/^	int sock;$/;"	m	struct:_sapool_sock_item_t
 sock_family	nf_server_core.h	/^    int sock_family;$/;"	m	struct:_nf_server_t
 sock_num	nf_server_core.h	/^    size_t sock_num;  \/\/sapool$/;"	m	struct:_nf_server_t
-sockets	sapool.cpp	/^	sapool_sock_item_t *sockets;$/;"	m	struct:_sapool_t	file:
+sockets	sapool.h	/^	sapool_sock_item_t * sockets;$/;"	m	struct:_sapool_t
+socksize	nf_server_core.h	/^    size_t socksize;$/;"	m	struct:_nf_server_t
 stack_size	nf_server_core.h	/^    size_t stack_size; \/\/线程栈大小$/;"	m	struct:_nf_server_t
 status	nf_server_core.h	/^    SERVER_STATUS_T status;$/;"	m	struct:_nf_server_t
-status	sapool.cpp	/^	int status;$/;"	m	struct:_sapool_sock_item_t	file:
+status	sapool.h	/^	int status;$/;"	m	struct:_sapool_sock_item_t
 stop	nf_server.cpp	/^    int NfServer :: stop()$/;"	f	class:nf::NfServer
 thread_read_buf	nf_server_core.h	/^    size_t thread_read_buf;$/;"	m	struct:_nf_server_t
 thread_usr_buf	nf_server_core.h	/^    size_t thread_usr_buf;$/;"	m	struct:_nf_server_t
 thread_write_buf	nf_server_core.h	/^    size_t thread_write_buf;$/;"	m	struct:_nf_server_t
 timeout	nf_server_core.h	/^    size_t timeout; \/\/sapool$/;"	m	struct:_nf_server_t
-timeout	sapool.cpp	/^	size_t timeout;	\/\/epoll的超时时间$/;"	m	struct:_sapool_t	file:
+timeout	sapool.h	/^	int timeout;	    \/\/epoll的超时时间$/;"	m	struct:_sapool_t
 unlock	commonn/singleton.h	/^        void unlock()$/;"	f	class:MutexLock
-using_size	sapool.cpp	/^    long long using_size;$/;"	m	struct:_sapool_t	file:
+using_size	sapool.h	/^    long long using_size;$/;"	m	struct:_sapool_t
 usr_buf	nf_server_core.h	/^    void *usr_buf;$/;"	m	struct:_nf_server_pdata_t
 usr_size	nf_server_core.h	/^    size_t usr_size;$/;"	m	struct:_nf_server_pdata_t
 work	test/client_simple.cpp	/^void * work(void * arg)$/;"	f
@@ -262,6 +294,7 @@ work_prio	nf_server_core.h	/^    size_t work_prio;   \/\/sapool$/;"	m	struct:_nf
 write_buf	nf_server_core.h	/^    void *write_buf;$/;"	m	struct:_nf_server_pdata_t
 write_size	nf_server_core.h	/^    size_t write_size;$/;"	m	struct:_nf_server_pdata_t
 write_to	nf_server_core.h	/^    size_t write_to;$/;"	m	struct:_nf_server_t
+writed_size	nf_server_core.h	/^    size_t writed_size;$/;"	m	struct:_nf_server_pdata_t
 ~ConfigParser	commonn/configParser.h	/^        virtual ~ConfigParser(){}$/;"	f	class:ConfigParser
 ~MutexLock	commonn/singleton.h	/^        ~MutexLock()$/;"	f	class:MutexLock
 ~NfServer	nf_server.cpp	/^    NfServer :: ~NfServer()$/;"	f	class:nf::NfServer

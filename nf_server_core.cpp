@@ -85,6 +85,30 @@ nf_server_get_writeto()
 }
 
 int
+nf_server_get_qsize(nf_server_t * sev)
+{
+	if (sev == NULL) 
+    {
+        std :: cout << "empty qsize" << std :: endl;
+        return -1;
+    }
+	else
+        return sev->qsize;
+}
+
+int
+nf_server_get_socksize(nf_server_t * sev)
+{
+	if (sev == NULL) 
+    {
+        std :: cout << "empty socketsize" << std :: endl;
+        return -1;
+    }
+	else
+        return sev->socksize;
+}
+
+int
 nf_server_get_readed_size()
 {
 	nf_server_pdata_t *ptr = get_pdata();
@@ -218,7 +242,7 @@ nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
     if(sev->server_type == NFSVR_LFPOOL)
     {
         pdata->rio.rio_ptr = (char *)malloc(sizeof(char) * pdata->usr_size);
-        rio_init(&pdata->rio, pdata->fd, pdata->read_size);
+        rio_init(&pdata->rio, pdata->fd, pdata->usr_size);
     
         if(pdata->rio.rio_ptr == NULL)
             return -1;
@@ -375,7 +399,7 @@ int nf_server_listen(nf_server_t * sev)
     return g_pool[sev->server_type].listen(sev);
 }
 
-void 
+int 
 nf_LF_readline_worker(void * data)
 {
     nf_server_pdata_t * pdata = (nf_server_pdata_t *) data;
@@ -396,7 +420,7 @@ nf_LF_readline_worker(void * data)
     if((ret = net_ep_add_in(epfd, fd)) < 0)
     {
         std :: cout << "add epoll error" << std :: endl;
-        return;
+        return -1;
     }      
 
     int readto = nf_server_get_readto();
@@ -411,24 +435,24 @@ nf_LF_readline_worker(void * data)
         if(ret == 0)
         {
             std::cout << "read timeout error" << std::endl; 
-            return;
+            return -1;
         }
         else if(ret < 0)
         {
             std::cout << "epoll wait error :" << strerror(errno) <<std::endl;   
-            return;
+            return -1;
         } 
         //events analyse
         
         if(events[0].events & EPOLLRDHUP)
         { 
             std::cout << "event close fd error" << std::endl; 
-            return;
+            return -1;
         }
         else if(events[0].events & EPOLLERR )
         {
             std::cout << "event fd  error" << std::endl; 
-            return;
+            return -1;
         }
         else if( events[0].events & EPOLLIN )
         {
@@ -440,7 +464,7 @@ nf_LF_readline_worker(void * data)
                 if((n = sendn_to_ms(pdata->rio.rio_fd, res, pdata->writed_size, writeto))< 0)
                 {
                     std :: cout << "write error" << strerror(errno) << std :: endl;
-                        return;
+                        return -1;
                 }
             }
         //离开 循环读 情况：
@@ -456,13 +480,13 @@ nf_LF_readline_worker(void * data)
                     std :: cout << "recv fin" << std :: endl;
                 else if( errno != ETIMEDOUT)
                     std :: cout << "read error : " << strerror(errno) << std :: endl;
-                return;
+                return -1;
             }
             if(errno == ETIMEDOUT && n != -1)
-                return;
+                return -1;
         }
     }
-    return;
+    return 0;
 }
 
 void 

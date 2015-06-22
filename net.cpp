@@ -42,7 +42,9 @@ rio_read(rio_t *rp, char *usrbuf, size_t n)
         cnt = rp->rio_cnt;
     else
         cnt = n;
+    
     memcpy(usrbuf, rp->rio_bufptr, cnt);
+    
     rp->rio_bufptr += cnt;
     rp->rio_cnt -= cnt;  
     return cnt;
@@ -514,7 +516,7 @@ net_accept(int sockfd, struct sockaddr *sa, socklen_t * addrlen)
         connfd = accept(sockfd, sa, addrlen);
 	    if (connfd < 0) 
         {
-	        if (errno == ECONNABORTED || errno == EINTR)
+	        if (errno == EINTR)
                 continue; 
             else 
 			    return -1;

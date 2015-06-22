@@ -17,7 +17,7 @@ typedef enum{
     STOP    = 3
 }SERVER_STATUS_T;
 
-typedef void (* nf_callback_proc)(void *req);
+typedef int (* nf_callback_proc)(void *req);
 typedef void (* nf_handle_t)();
 
 typedef struct _nf_server_pdata_t nf_server_pdata_t;
@@ -52,7 +52,7 @@ struct _nf_server_t
     size_t server_type;
     size_t connect_type; 
     size_t pthread_num;        //线程池开启线程总数
-    int run_thread_num;     //工作线程数
+    int run_thread_num;        //工作线程数
     size_t backlog;
     size_t listen_port;
     size_t need_join;
@@ -65,7 +65,7 @@ struct _nf_server_t
     size_t thread_write_buf;
     size_t thread_usr_buf;
     
-    size_t run;     
+    int run;     
     size_t stack_size; //线程栈大小
 
     size_t listen_prio; //sapool
@@ -83,7 +83,7 @@ struct _nf_server_t
     int epfd;
     
     nf_callback_proc cb_work;
-    nf_server_pdata_t *pdata;
+    nf_server_pdata_t * pdata;
 
     nf_handle_t p_start;     
     nf_handle_t p_end;    
@@ -91,6 +91,9 @@ struct _nf_server_t
      
     
     void * pool;
+    size_t qsize;
+    size_t socksize;
+
     SERVER_STATUS_T status;
 
 };
@@ -121,7 +124,7 @@ nf_server_listen(nf_server_t *);
 extern int 
 set_sev_socketopt(nf_server_t *, int);
 
-extern void 
+extern int 
 nf_LF_readline_worker(void *);
 
 extern int
@@ -150,6 +153,15 @@ nf_server_get_writed_size();
 
 int
 nf_server_set_writed_size();
+
+int
+nf_server_get_qsize(nf_server_t * sev);
+
+int
+nf_server_set_socksize(nf_server_t * sev);
+
+int
+nf_server_get_socksize(nf_server_t * sev);
 
 void 
 nf_default_handle();

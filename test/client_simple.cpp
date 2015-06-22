@@ -41,7 +41,10 @@ void * work(void * arg)
         int size = createData(buf, i); 
         int n = net_connect_to_ms(fd, (struct sockaddr *)&server_address, sizeof(server_address), 3000, 1);
         if(n < 0)
+        {
             std::cout << "connect error" << std::endl;
+            continue;
+        }
         buf[size] = '\0';
         std :: cout << buf << std :: endl;
         if (send(fd, buf, size, 0) <= 0)
@@ -61,7 +64,7 @@ int main(int argc, char *argv[])
     char buf[128] = "12345";
     char readbuf[128];
     pthread_t tid[100];
-    for(int i = 0; i < 10; i++)
+    for(int i = 0; i < 1; i++)
     {
         if( pthread_create(&tid[i], NULL, work, NULL) != 0) 
             return -1; 
