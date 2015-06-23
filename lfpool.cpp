@@ -1,7 +1,7 @@
 #include <sys/epoll.h>
-#include "pool_register.h"
 #include <pthread.h>
-
+#include "nf_server_core.h"
+#include "pool_register.h"
 
 typedef struct _lfpool_t 
 {   

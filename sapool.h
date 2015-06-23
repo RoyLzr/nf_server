@@ -1,7 +1,7 @@
 #ifndef  __SAPOOL_H_
 #define  __SAPOOL_H_
 
-#include "pool_register.h"
+#include "nf_server_core.h"
 #include "commonn/queue.h"
 
 #define LISTENER_PRIORITY    10
@@ -17,6 +17,8 @@ struct _sapool_sock_item_t
     int sock;
     time_t last_active;
     struct sockaddr_in addr;
+    
+    rio_t rp;
 };
 
 struct _sapool_t

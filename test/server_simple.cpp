@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <errno.h>
 #include "../nf_server.h"
-#include "../commonn/singleton.h"
 
 #define max 128
 #define BUFLEN 128
@@ -24,8 +23,9 @@ int main(int argc, char *argv[])
     char s[] = "test server";
     test->set_server_name(s);
     test->load_conf("server.conf");
-   
-    test->set_work_callback(nf_LF_readnf_worker);
+    
+    test->set_work_callback(nf_SA_readline_worker); 
+    //test->set_work_readfun( nf_default_read );
     //test->set_work_writefun( nf_default_write );
      
     if (test->run() < 0)

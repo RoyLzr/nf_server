@@ -1,7 +1,6 @@
 #ifndef _NFSERVER_REGISTER_H
 #define _NFSERVER_REGISTER_H
 
-#include "nf_server.h"
 #include "nf_server_core.h"
 
 //×¢²áÄÚÈÝ

@@ -72,12 +72,20 @@ sapool_init(nf_server_t *sev)
     //创建socket资源
     pool->size = ssiz;
     pool->sockets = (sapool_sock_item_t *) malloc (sizeof(sapool_sock_item_t) * ssiz);
+    for(int i = 0; i < ssiz; i++)
+    {
+        pool->sockets[i].rp.rio_ptr = ((char *) malloc(sizeof(char) * 
+                                    sev->thread_usr_buf)); 
+        if(pool->sockets[i].rp.rio_ptr == NULL)
+            return -1;
+        memset(pool->sockets[i].rp.rio_ptr, 0, sev->thread_usr_buf); 
+        rio_init(&pool->sockets[i].rp, -1, sev->thread_usr_buf); 
+    }
     if (pool->sockets == NULL) 
     {
         std :: cout << "error of create sockets" << std :: endl;
         return -1;
     }
-    memset(pool->sockets, 0, sizeof(sapool_sock_item_t) * ssiz);
 
     //创建epoll资源
     pool->ep_events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * ssiz);
@@ -549,6 +557,12 @@ sapool_del(nf_server_t *sev, int idx, int alive, bool remove)
 
         pool->sockets[idx].sock = -1;
         pool->sockets[idx].status = IDLE;
+
+        if(pool->sockets[idx].rp.cache != NULL)
+            Allocate :: deallocate(pool->sockets[idx].rp.cache, 
+                                   pool->sockets[idx].rp.cache_len);
+        pool->sockets[idx].rp.cache = NULL;
+        pool->sockets[idx].rp.cache_len = 0; 
     } 
     else 
     {
@@ -646,8 +660,9 @@ sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
 
     pdata->fd = pool->sockets[idx].sock;
     pdata->client_addr = pool->sockets[idx].addr;
-    pdata->epfd = net_ep_create(1);
+    pdata->idx = idx;
 
+    pdata->epfd = net_ep_create(1);
     if(pdata->epfd < 0)
     {
         std::cout << strerror(errno) << std::endl;

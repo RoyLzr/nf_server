@@ -9,14 +9,12 @@
 #ifndef _NF_SERVER_H
 #define _NF_SERVER_H
 
-#include "net.h"
 #include <string>
 #include "nf_server_core.h"
+#include "pool_register.h"
+#include "commonn/Server.h"
 #include <iostream>
 #include <string.h>
-#include "commonn/singleton.h"
-#include "commonn/configParser.h"
-#include "commonn/Server.h"
 
 namespace nf
 {

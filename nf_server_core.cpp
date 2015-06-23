@@ -1,6 +1,5 @@
 #include "nf_server_core.h"
-#include "net.h"
-#include <unistd.h>
+#include "sapool.h"
 #include "pool_register.h"
 
 static pthread_key_t pkey;
@@ -296,7 +295,6 @@ nf_server_init(nf_server_t * sev)
     sev->stack_size = (size_t)atoi((Singleton<ConfigParser>:: 
                                     instance()->get("server", "stackSize")).c_str());
 
-
     //thread write/read/usr buf size
     sev->thread_read_buf = (size_t)atoi((Singleton<ConfigParser>:: 
                                     instance()->get("thread", "threadReadBuf")).c_str());
@@ -305,7 +303,6 @@ nf_server_init(nf_server_t * sev)
     sev->thread_usr_buf = (size_t)atoi((Singleton<ConfigParser>:: 
                                     instance()->get("thread", "threadUsrBuf")).c_str());
   
- 
     //Ïß³ÌÄÚÈÝ ³õÊ¼»¯ 
     sev->pdata = (nf_server_pdata_t *) malloc(sizeof(nf_server_pdata_t) * (sev->pthread_num));
     if (sev->pdata == NULL)
@@ -492,6 +489,134 @@ nf_LF_readline_worker(void * data)
     }
     return 0;
 }
+
+//SA model read line support:
+//1. rio rio_ptr ¶ÁÊý¾Ý»º´æÇø = 
+//2. rio cache   ´æ´¢×´Ì¬buf, ·ÀÖ¹¶ÁÊÂ¼þ·¢Éú×èÈû£¬·Ç×èÈû²Ù×÷
+//               Ò»µ©¶Á¿Õ£¬´æ´¢×´Ì¬£¬ÊÍ·Åthread£¬thread
+//               »ñÈ¡queueÐÂÊÂ¼þ´¦Àí
+//3. rio cache   »ñÈ¡²ÉÓÃÄÚ´æ³Ø´úÌæmalloc
+
+int 
+nf_SA_readline_worker(void * data)
+{
+    nf_server_pdata_t * pdata = (nf_server_pdata_t *) data;
+    nf_server_t * sev = (nf_server_t *) pdata->server;
+    sapool_t * pool = (sapool_t *) sev->pool;    
+
+    char * req = (char *) pdata->read_buf;
+    char * res = (char *) pdata->write_buf;
+    int epfd = pdata->epfd;
+    int fd = pdata->fd;
+    int readsize = pdata->read_size;   
+    int writesize = pdata->write_size;   
+    int idx = pdata->idx;    
+    rio_t * rp = &(pool->sockets[idx].rp); 
+
+    //Çå¿Õ ¶ÁÊý¾ÝµÄ »º´æÇø
+    rp->rio_fd = pdata->fd;
+    rp->rio_cnt = 0;
+    rp->rio_bufptr = rp->rio_ptr; 
+     
+    int ret;
+    if((ret = net_ep_add_in(epfd, fd)) < 0)
+    {
+        std :: cout << "add epoll error" << std :: endl;
+        return -1;
+    }      
+
+    int readto = nf_server_get_readto();
+    int writeto = nf_server_get_writeto();
+     
+    struct epoll_event events[1], ev;
+    
+    //event loop
+    while(sev->run)
+    {
+        ret = epoll_wait(pdata->epfd, events, 1, readto * 20);
+        if(ret == 0)
+        {
+            std::cout << "read timeout error" << std::endl; 
+            return -1;
+        }
+        else if(ret < 0)
+        {
+            std::cout << "epoll wait error :" << strerror(errno) <<std::endl;   
+            return -1;
+        } 
+        //events analyse
+        
+        if(events[0].events & EPOLLRDHUP)
+        { 
+            std::cout << "event close fd error" << std::endl; 
+            return -1;
+        }
+        else if(events[0].events & EPOLLERR )
+        {
+            std::cout << "event fd  error" << std::endl; 
+            return -1;
+        }
+        else if( events[0].events & EPOLLIN )
+        {
+            int n;
+            int st;
+            int clen = 0;
+            //»Ö¸´ÉÏ´Î socket ×´Ì¬
+            if(rp->cache != NULL && rp->cache_len > 0)
+            {
+                memcpy(req, rp->cache, rp->cache_len);
+                clen = rp->cache_len;
+
+                std :: cout << "back status of cache" << std::endl;
+ 
+                Allocate :: deallocate(rp->cache, rp->cache_len);
+                rp->cache_len = 0; 
+                rp->cache = NULL;
+            }
+            //ÎÞµÈ´ýÊ±¼äµÄ ·Ç×èÈû¶Á£¬¶Á¿ÕÐ­ÒéÕ»»º´æ£¬µ«Êý¾Ý´Õ²»ÂúÒ»ÐÐÊ±£¬
+            //±£´æ×´Ì¬£¬ÊÍ·ÅÏß³Ì´¦Àí±ðµÄÊÂ¼þ¡£¶ñÐÔ·Êý¾Ý£¬Í¨¹ý³¬Ê±
+            //¼ì²âÇå¿Õ`
+
+            while((n = rio_readline(rp, req + clen, readsize - clen, &st)) > 0)   
+            {
+                if(n == 0)
+                {
+                    std :: cout << "recv fin" << std :: endl;
+                    return -1; 
+                }
+                else if(n < 0)
+                {
+                    std :: cout << "recv error : " << strerror(errno) << std :: endl;
+                    return -1; 
+                }
+                else if(st < 0)
+                {
+                    int len = clen + n -1;
+                    if(len > 0)
+                    {   
+                        std :: cout << "dump cache : " << len << std::endl;
+                        rp->cache = (char *) Allocate :: allocate(len);
+                    
+                        rp->cache_len = len;
+                        memcpy(rp->cache, req, len);
+                        //return 0, ¹Ø±Õpdata->epfd, socket ×÷Îªready¼ÓÈëepoll
+                    }
+                    return 0;
+                }
+                pdata->readed_size = n + clen;
+                clen = 0;
+                sev->p_handle();
+                if((n = sendn_to_ms(rp->rio_fd, res, pdata->writed_size, writeto))< 0)
+                {
+                    std :: cout << "write error" << strerror(errno) << std :: endl;
+                        return -1;
+                }
+            }
+        }
+    }
+    return 0;
+}
+
 
 //LF µÄ readn ²»Ê¹ÓÃ»º´æÇø
 int 

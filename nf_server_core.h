@@ -3,13 +3,23 @@
  * author liuzhaorui
  * email  liuzhaorui1@163.com
  */
+
 #ifndef _NFSERVER_CORE_H
 #define _NFSERVER_CORE_H
 
-#include "net.h"
-#include "string.h"
+struct _sapool_sock_item_t;
+struct _sapool_t;
+typedef _sapool_sock_item_t sapool_sock_item_t;
+typedef _sapool_t sapool_t;
 
-typedef enum{
+
+#include "net.h"
+#include "commonn/singleton.h"
+#include "commonn/configParser.h"
+#include "commonn/memCache.h"
+
+typedef enum
+{
 
     INIT    = 0,
     RUNNING = 1,
@@ -44,6 +54,7 @@ struct _nf_server_pdata_t
     nf_server_t *server;
     int epfd;
     int fd;
+    int idx; //sapool, handle socket index
     size_t ep_size;
 };
 
@@ -127,6 +138,9 @@ nf_LF_readline_worker(void *);
 
 extern int 
 nf_LF_readnf_worker(void * );
+
+int 
+nf_SA_readline_worker(void *);
 
 extern int
 set_pthread_data(nf_server_pdata_t *data);

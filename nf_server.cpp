@@ -1,7 +1,4 @@
-
 #include "nf_server.h"
-#include "nf_server_core.h"
-#include "pool_register.h"
 
 namespace nf
 {
@@ -56,6 +53,9 @@ namespace nf
          
         sev_data->need_join = 1; 
         //std:: cout << "listen fd : " << sev_data->sev_socket << std::endl;
+        
+        Allocate :: init();    
+    
         return g_pool[sev_data->server_type].run(sev_data); 
     }
     
