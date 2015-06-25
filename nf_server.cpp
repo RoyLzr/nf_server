@@ -42,8 +42,14 @@ namespace nf
     int NfServer :: run()
     {
         int ret;
+        Log :: init("/root/nf_server/test/log");
         if( (ret = nf_server_init(sev_data) ) < 0 )
-        {    std::cout << "init error" << std::endl; return -1;}
+        {   
+            //Log :: WARN("init error");
+            return -1;
+        }
+
+        Log :: DEBUG("init ok test %d %d\n", 11, 12);
         
         if( (ret = nf_server_bind(sev_data) ) < 0 )
         {    std::cout << "bind error" << std::endl; return -1;}

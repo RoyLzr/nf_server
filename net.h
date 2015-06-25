@@ -34,6 +34,8 @@
 #include <sys/epoll.h>
 #include <signal.h>
 #include <limits.h>
+#include "commonn/asynLog.h"
+#include <stdarg.h>
 
 typedef struct _rio_t
 {

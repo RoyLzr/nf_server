@@ -1,11 +1,14 @@
-server: net.o nf_server.o nf_server_core.o server_simple.o lfpool.o configParser.o sapool.o queue.o memCache.o
+server: net.o nf_server.o nf_server_core.o server_simple.o lfpool.o configParser.o sapool.o queue.o memCache.o log.o
 	rm -rf libs; 
 	mkdir libs; 
-	g++  -o server server_simple.o queue.o net.o nf_server.o nf_server_core.o memCache.o lfpool.o configParser.o sapool.o -lpthread; 
+	g++  -o server server_simple.o asynLog.o queue.o net.o nf_server.o nf_server_core.o memCache.o lfpool.o configParser.o sapool.o -lpthread; 
 	ls | grep '\.o' | xargs -I{} mv {} libs
 
 net.o: ../net.h ../net.cpp
 	g++ -g -c ../net.cpp
+
+log.o: ../commonn/asynLog.cpp
+	g++ -g -c ../commonn/asynLog.cpp
 
 queue.o:../commonn/queue.cpp
 	g++ -g -c ../commonn/queue.cpp

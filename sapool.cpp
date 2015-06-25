@@ -53,6 +53,7 @@ sapool_init(nf_server_t *sev)
         if (sev->pool == NULL) 
         {
             std :: cout << "malloc sapool error" << std::endl;
+            
             return -1;
         }
         memset(sev->pool, 0, sizeof(sapool_t));
