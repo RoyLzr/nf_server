@@ -167,7 +167,7 @@ int
 nf_server_get_writed_size();
 
 int
-nf_server_set_writed_size();
+nf_server_set_writed_size(int size);
 
 int
 nf_server_get_qsize(nf_server_t * sev);

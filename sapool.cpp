@@ -322,11 +322,19 @@ int check_socket_queue(nf_server_t *sev)
     {
         if (pool->sockets[i].status != IDLE) 
         {
-            std :: cout << "socket queue is not empty" << std :: endl;
+            switch(pool->sockets[i].status)
+            {
+                case (READY):
+                Log :: NOTICE("CONNECTION POOL IS NOT EMPTY tid : %d idx : %d READY ", pthread_self(), i);
+                    break;
+                case (BUSY):
+                Log :: NOTICE("CONNECTION POOL IS NOT EMPTY tid : %d idx : %d BUSY ", pthread_self(), i);
+                    break;
+            }
             return -1;
         }
     }
-    std :: cout << "socket queue is empty" << std :: endl;
+    Log :: NOTICE("CONNECTION POOL IS EMPTY pid : %d ", pthread_self());
     return 0;
 }
 
@@ -351,6 +359,7 @@ sapool_main(void *param)
 
     while(check_socket_queue(sev) != 0) 
     {
+        Log :: WARN("SVR STOPPED CONNECTION POOL IS NOT EMPTY ");
         sapool_produce(sev, (struct sockaddr *)&addr, &addr_len);
     }
 
@@ -409,7 +418,10 @@ sapool_produce(nf_server_t * sev, struct sockaddr * addr,
     int ret = 0;
     sapool_t *pool = (sapool_t *) sev->pool;
     int sev_sock = sev->sev_socket;
-
+    char ip[40];
+    int len = 40;
+    int port;
+    
     sapool_check_timeout(sev);
 
     int num = epoll_wait(pool->epfd, pool->ep_events, pool->size, pool->check_interval);
@@ -426,8 +438,13 @@ sapool_produce(nf_server_t * sev, struct sockaddr * addr,
             int cli_sock = net_accept(sev_sock, addr, addrlen);
             if (cli_sock < 0) 
             {
+                Log :: WARN("ACCEPT %d ERROR ", sev_sock);
                 continue;
             }
+            
+            get_tcp_sockaddr(ip, &port, (sockaddr_in *)addr, len);
+            Log :: NOTICE("ACCEPT SUCC FROM CLIENT: %s:%d  new fd : %d ", 
+                           ip, port, cli_sock);
 
             set_sev_socketopt(sev, cli_sock);
 
@@ -682,7 +699,7 @@ sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
         //server stop; handle left dta in socket
         shutdown(pdata->fd, SHUT_WR);
         for(;sev->cb_work(pdata) == 0;);
-        close(pdata->epfd);
+            close(pdata->epfd);
     }
     
     //ret < 0 时,close fd, 因为事件已经从 epoll中移除

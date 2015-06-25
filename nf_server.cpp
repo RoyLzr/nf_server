@@ -45,20 +45,25 @@ namespace nf
         Log :: init("/root/nf_server/test/log");
         if( (ret = nf_server_init(sev_data) ) < 0 )
         {   
-            //Log :: WARN("init error");
+            Log :: ERROR("nf_server.cpp : 48 INIT ERROR \n");
             return -1;
         }
 
-        Log :: DEBUG("init ok test %d %d\n", 11, 12);
+        Log :: DEBUG("nf_server.cpp : 52 INIT OK", 11, 12);
         
         if( (ret = nf_server_bind(sev_data) ) < 0 )
-        {    std::cout << "bind error" << std::endl; return -1;}
+        {    
+            Log :: ERROR("nf_server.cpp : 56 BIND ERROR"); 
+            return -1;
+        }
         
         if( (ret = nf_server_listen(sev_data) ) < 0 )
-        {    std::cout << "listen error" << std::endl; return -1;}
+        {    
+            Log :: ERROR("nf_server.cpp : 62 LISTEN ERROR"); 
+            return -1;
+        }
          
         sev_data->need_join = 1; 
-        //std:: cout << "listen fd : " << sev_data->sev_socket << std::endl;
         
         Allocate :: init();    
     
@@ -88,7 +93,8 @@ namespace nf
             close(sev_data->sev_socket);
         g_pool[sev_data->server_type].destroy(sev_data);   
         
-        printf("close thread ok\n"); 
+        Log :: NOTICE("nf_server.cpp : 97 CLOSE THREAD SUCC \n");
+ 
         if( sev_data->pdata != NULL)
         { 
             for(int i = 0; i < sev_data->pthread_num; i++)
@@ -104,11 +110,9 @@ namespace nf
             }
         }
         Singleton<ConfigParser>::destroy();
-        std::cout << "close thread ok" << std::endl;
         free(sev_data->pdata);
         free(sev_data);
-        std::cout << "close server succ" << std::endl;
-
+        Log :: NOTICE("nf_server.cpp : 115 CLOSE SERVER SUCC \n");
     }
     
     int NfServer :: pause()
