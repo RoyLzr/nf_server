@@ -43,10 +43,12 @@ struct _nf_server_pdata_t
     void *read_buf;
     size_t read_size;
     size_t readed_size;
-
+    int read_start;
+    
     void *write_buf;
     size_t write_size;
     size_t writed_size;
+    int write_start;
 
     void *usr_buf;
     size_t usr_size;
@@ -107,9 +109,11 @@ struct _nf_server_t
 
 };
 
-enum {
+enum 
+{
     NFSVR_LFPOOL = 0,    //建议用于多线程短连接                                                                   
-    NFSVR_SAPOOL,        //建议用于多线程长连接      
+    NFSVR_SAPOOL,        //建议用于多线程长连接     
+    NFSVR_RAPOOL,        //reactor + pthread IO密集，thread 数与核有关
     NFSVR_POOL_NUM,     //当前有多少个pool    
 };   
 
@@ -139,6 +143,9 @@ nf_LF_readline_worker(void *);
 extern int 
 nf_LF_readnf_worker(void * );
 
+extern int 
+nf_RA_readline_worker(void * );
+
 int 
 nf_SA_readline_worker(void *);
 
@@ -154,6 +161,12 @@ nf_server_get_read_buf();
 void * 
 nf_server_get_write_buf();
 
+int 
+nf_server_get_thread_epfd();
+
+int 
+nf_server_get_thread_id();
+
 int
 nf_server_get_readto();
 
@@ -168,6 +181,9 @@ nf_server_get_writed_size();
 
 int
 nf_server_set_writed_size(int size);
+
+int
+nf_server_set_writed_start(int size);
 
 int
 nf_server_get_qsize(nf_server_t * sev);

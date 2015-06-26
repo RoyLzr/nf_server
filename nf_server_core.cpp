@@ -41,8 +41,35 @@ nf_server_get_read_buf()
         return NULL;
     }
     else
-        return ptr->read_buf;
+        return (char *)ptr->read_buf + ptr->read_start;
 }
+
+int 
+nf_server_get_thread_id()
+{
+    nf_server_pdata_t * ptr = get_pdata();
+    if (ptr == NULL) 
+    {
+        std :: cout << "empty read buf" << std :: endl;
+        return -1;
+    }
+    else
+        return ptr->id;
+}
+
+int 
+nf_server_get_thread_epfd()
+{
+    nf_server_pdata_t * ptr = get_pdata();
+    if (ptr == NULL) 
+    {
+        std :: cout << "empty read buf" << std :: endl;
+        return -1;
+    }
+    else
+        return ptr->epfd;
+}
+
 
 void * 
 nf_server_get_write_buf()
@@ -54,7 +81,7 @@ nf_server_get_write_buf()
         return NULL;
     }
     else
-        return ptr->write_buf;
+        return (char *)ptr->write_buf + ptr->write_start;
 }
 
 int
@@ -130,6 +157,19 @@ nf_server_set_writed_size(int n)
         return -1;
     }
     ptr->writed_size = n;
+    return 1;
+}
+
+int
+nf_server_set_writed_start(int n)
+{
+    nf_server_pdata_t *ptr = get_pdata();
+    if (ptr == NULL) 
+    {
+        std :: cout << "empty writed size" << std :: endl;
+        return -1;
+    }
+    ptr->write_start = n;
     return 1;
 }
 

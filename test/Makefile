@@ -1,7 +1,7 @@
-server: net.o nf_server.o nf_server_core.o nf_server_app.o server_simple.o lfpool.o configParser.o sapool.o queue.o memCache.o log.o
+server: net.o nf_server.o rapool.o nf_server_core.o nf_server_app.o server_simple.o lfpool.o configParser.o sapool.o queue.o memCache.o log.o
 	rm -rf libs; 
 	mkdir libs; 
-	g++  -o server server_simple.o asynLog.o queue.o net.o nf_server_app.o nf_server.o nf_server_core.o memCache.o lfpool.o configParser.o sapool.o -lpthread; 
+	g++  -o server server_simple.o rapool.o asynLog.o queue.o net.o nf_server_app.o nf_server.o nf_server_core.o memCache.o lfpool.o configParser.o sapool.o -lpthread; 
 	ls | grep '\.o' | xargs -I{} mv {} libs
 
 net.o: ../net.h ../net.cpp
@@ -29,6 +29,8 @@ nf_server.o: ../nf_server_core.h ../nf_server_core.cpp ../net.h ../net.cpp ../nf
 
 sapool.o:
 	g++ -g -c ../sapool.cpp
+rapool.o:
+	g++ -g -c ../rapool.cpp
 
 server_simple.o: ../nf_server_core.h ../nf_server_core.cpp ../net.h ../net.cpp ../nf_server.h ../nf_server.cpp server_simple.cpp
 	g++ -g -c server_simple.cpp

@@ -50,6 +50,36 @@ rio_read(rio_t *rp, char *usrbuf, size_t n)
     return cnt;
 }
 
+int 
+readn(int fd, void *usrbuf, size_t n)
+{
+    int nleft = n;
+    int nread = 0;
+    char * buf = (char *)usrbuf;
+    
+    while(nleft > 0)
+    {
+        nread = read(fd, buf, nleft);
+        if(nread == 0)
+            break;
+        else if(nread < 0)
+        {
+            if(errno == EAGAIN)
+            {
+                break;
+            }
+            if(errno == EINTR)
+            {
+                nread = 0;
+                continue;
+            }
+            return -1;
+        }
+        nleft -= nread;
+        buf += nread;
+    }
+    return n - nleft;
+}
 
 ssize_t 
 rio_readn(rio_t *rp, void *usrbuf, size_t n, int * st)
@@ -340,9 +370,16 @@ sendn(int fd, void *usrbuf, size_t n)
         nwrite = write(fd, buf, nleft);
         if(nwrite < 0)
         {
-            if(errno != EINTR)
-                return -1;
-            nwrite = 0;
+            if(errno == EINTR)
+            {
+                nwrite = 0;
+                continue;
+            }
+            if(errno == EAGAIN)
+            {
+                break;
+            }
+            return -1;
         }
         else if(nwrite == 0)
             break;
@@ -710,3 +747,11 @@ set_linger(int fd, int val)
                       (const char*)&li, sizeof(li));
 }
 
+int
+find_line(char * req, int end)
+{
+    for(int i = 0; i < end; i++)
+        if(*(req + i) == '\n')
+            return i;
+    return -1;
+}

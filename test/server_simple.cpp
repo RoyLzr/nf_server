@@ -24,7 +24,8 @@ int main(int argc, char *argv[])
     test->set_server_name(s);
     test->load_conf("server.conf");
     
-    test->set_work_callback(nf_SA_readline_worker); 
+    //test->set_work_callback(nf_SA_readline_worker); 
+    test->set_work_callback(nf_RA_readline_worker); 
     //test->set_work_readfun( nf_default_read );
     //test->set_work_writefun( nf_default_write );
      

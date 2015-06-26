@@ -107,8 +107,9 @@ Allocate :: deallocate(void * p, size_t n)
     n = ROUND_UP(n);
     if(n > MAX_BYTES)
     {
-        std::cout << "free malloc space" << std::endl;
+        Log :: DEBUG("FREE MALLOC SPACE %d tid : %lu ", n, pthread_self()); 
         free(p);
+        p = NULL;
         return;
     }
     int index = FREELIST_INDEX(n);
@@ -118,8 +119,8 @@ Allocate :: deallocate(void * p, size_t n)
     q->free_list_link = *my_free_list;
     *my_free_list = q;
     pthread_mutex_unlock(&mem_mutex[index]);
-    
-    std::cout << "free list space" << std::endl;
+   
+    Log :: DEBUG("FREE LIST SPACE  size = %d index = %d tid = %lu",n, index, pthread_self()); 
     return;
 }
 

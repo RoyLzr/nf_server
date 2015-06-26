@@ -22,6 +22,14 @@ extern long long sapool_get_queuenum(nf_server_t *);
 extern int sapool_pause(nf_server_t *);
 extern int sapool_resume(nf_server_t *);
 
+extern int rapool_init(nf_server_t *);
+extern int rapool_run(nf_server_t *);
+extern int rapool_join(nf_server_t *);
+extern int rapool_listen(nf_server_t *);
+extern int rapool_destroy(nf_server_t *);
+extern long long rapool_get_queuenum(nf_server_t *);
+extern int rapool_pause(nf_server_t *);
+extern int rapool_resume(nf_server_t *);
 
 //注册表内容格式
 typedef int (*init_pool)(nf_server_t *);
@@ -71,6 +79,17 @@ static const struct _pool_t g_pool[] = {
         sapool_get_queuenum,
         sapool_pause,
         sapool_resume
+    },
+    {
+        rapool_init,
+        rapool_run,
+        rapool_listen,
+        rapool_join,
+        rapool_destroy,
+        NULL,
+        rapool_get_queuenum,
+        rapool_pause,
+        rapool_resume
     }
 };
 

@@ -325,16 +325,16 @@ int check_socket_queue(nf_server_t *sev)
             switch(pool->sockets[i].status)
             {
                 case (READY):
-                Log :: NOTICE("CONNECTION POOL IS NOT EMPTY tid : %d idx : %d READY ", pthread_self(), i);
+                Log :: NOTICE("CONNECTION POOL IS NOT EMPTY tid : %lu idx : %d READY ", pthread_self(), i);
                     break;
                 case (BUSY):
-                Log :: NOTICE("CONNECTION POOL IS NOT EMPTY tid : %d idx : %d BUSY ", pthread_self(), i);
+                Log :: NOTICE("CONNECTION POOL IS NOT EMPTY tid : %lu idx : %d BUSY ", pthread_self(), i);
                     break;
             }
             return -1;
         }
     }
-    Log :: NOTICE("CONNECTION POOL IS EMPTY pid : %d ", pthread_self());
+    Log :: NOTICE("CONNECTION POOL IS EMPTY tid : %lu ", pthread_self());
     return 0;
 }
 
@@ -424,7 +424,7 @@ sapool_produce(nf_server_t * sev, struct sockaddr * addr,
     
     sapool_check_timeout(sev);
 
-    int num = epoll_wait(pool->epfd, pool->ep_events, pool->size, pool->check_interval);
+    int num = epoll_wait(pool->epfd, pool->ep_events, pool->size, 3000);
 
     if (num <= 0) 
     {

@@ -5,6 +5,7 @@
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
+#include "asynLog.h"
 
 enum {ALIGN = 8};
 enum {MAX_BYTES = 128};

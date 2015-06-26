@@ -156,5 +156,10 @@ default_hand(int sig);
 int
 set_linger(int fd, int val);
 
+int 
+find_line(char * req, int end);
+
+int
+readn(int fd, void *usrbuf, size_t n);
 
 #endif

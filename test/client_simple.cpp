@@ -50,16 +50,18 @@ void * work(void * arg)
         for(int j = 0; j < 100; j++)
         {
             int tes = 2;
-            if (send(fd, buf, 2, 0) <= 0)
-                std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
-            sleep(1);
-            if (send(fd, buf + 2, size - 2, 0) <= 0)
-                std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
-            if (send(fd, buf, size, 0) <= 0)
+            //if (send(fd, buf, 2, 0) <= 0)
+            //    std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
+            //sleep(1);
+            //if (send(fd, buf + 2, size - 2, 0) <= 0)
+            //    std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
+            char tmp[] = "123456";
+            if (send(fd, tmp, 6, 0) <= 0)
                 std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
             
-            if( (n = recv(fd, readbuf, 2 * size, MSG_WAITALL)) <= 0)
+            if((n = recv(fd, readbuf, 6, MSG_WAITALL)) <= 0)
                 std::cout <<  "recv error"  << ": " << strerror(errno) << std::endl;
+            std :: cout << "recv once succ" << std :: endl;
             //std::cout <<  readbuf  << ": " << i <<":" << n << std::endl;
         }
         //readbuf[n] = '\0';
@@ -72,7 +74,7 @@ int main(int argc, char *argv[])
     char buf[128] = "12345";
     char readbuf[128];
     pthread_t tid[100];
-    for(int i = 0; i < 100; i++)
+    for(int i = 0; i < 1; i++)
     {
         if( pthread_create(&tid[i], NULL, work, NULL) != 0) 
             return -1; 
