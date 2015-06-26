@@ -50,39 +50,62 @@ struct _rapool_t
  * @see 
  * @author Liu ZhaoRui
 **/
-int rapool_init(nf_server_t *);
+int 
+rapool_init(nf_server_t *);
 
-int rapool_run(nf_server_t *);
+int 
+rapool_run(nf_server_t *);
 
-int rapool_join(nf_server_t *);
+int 
+rapool_join(nf_server_t *);
 
-int rapool_destroy(nf_server_t *);
+int 
+rapool_destroy(nf_server_t *);
 
-long long rapool_get_queuenum(nf_server_t *);
+long long 
+rapool_get_queuenum(nf_server_t *);
 
-void * rapool_main(void *);
+void * 
+rapool_main(void *);
 
-void * rapool_workers(void *);
+void * 
+rapool_workers(void *);
 
-int rapool_produce(nf_server_t *sev, struct sockaddr *addr, 
-                   socklen_t *addrlen, int work_reactor);
+int 
+rapool_produce(nf_server_t *sev, struct sockaddr *addr, 
+               socklen_t *addrlen, int work_reactor);
 
-int rapool_reactor(rapool_t *pool, nf_server_pdata_t *data);
+int 
+rapool_reactor(rapool_t *pool, nf_server_pdata_t *data);
 
-int rapool_check_timeout(nf_server_t *sev);
+int 
+rapool_check_timeout(nf_server_t *sev);
 
-int rapool_add(nf_server_t *sev, int sock, 
-               struct sockaddr_in * addr);
+int 
+rapool_add(nf_server_t *sev, int sock, 
+           struct sockaddr_in * addr);
 
-int rapool_del(nf_server_t *sev, int idx, 
-               int keep_alive, bool remove=false);
+int 
+rapool_del(nf_server_t *sev, int idx, 
+           int keep_alive, bool remove=false);
 
-int rapool_epoll_add_read(nf_server_t *sev, 
-                          int idx, 
-                          int work_reactor);
+int 
+rapool_epoll_add_read(nf_server_t *sev, 
+                      int idx, 
+                      int work_reactor);
 
-int rapool_epoll_del(nf_server_t *sev, int idx, int id);
+int 
+rapool_epoll_mod_read(nf_server_t *sev, 
+                      int idx, 
+                      int work_reactor);
 
+int 
+rapool_epoll_del(nf_server_t *sev, int idx, int id);
+
+int 
+rapool_epoll_mod_write(nf_server_t *sev, 
+                       int idx, 
+                       int work_reactor);
 
 #endif  
 

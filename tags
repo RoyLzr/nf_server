@@ -9,21 +9,21 @@ Allocate	commonn/memCache.h	/^class Allocate$/;"	c
 BUFLEN	test/case/getline/server_simple.cpp	15;"	d	file:
 BUFLEN	test/case/getn/server_simple.cpp	15;"	d	file:
 BUFLEN	test/server_simple.cpp	14;"	d	file:
-BUSY	rapool.cpp	/^    BUSY$/;"	e	enum:__anon11	file:
-BUSY	sapool.cpp	/^    BUSY$/;"	e	enum:__anon13	file:
+BUSY	rapool.cpp	/^    BUSY$/;"	e	enum:__anon8	file:
+BUSY	sapool.cpp	/^    BUSY$/;"	e	enum:__anon10	file:
 CHUNK_NODE	commonn/memCache.h	/^enum {CHUNK_NODE = 20};$/;"	e	enum:__anon4
 ConfigParser	commonn/configParser.h	/^        ConfigParser(){}$/;"	f	class:ConfigParser
 ConfigParser	commonn/configParser.h	/^class ConfigParser$/;"	c
 DEBUG	commonn/asynLog.cpp	/^Log :: DEBUG(const char * fmt, ...)$/;"	f	class:Log
-DEFAULT_CHECK_INTERVAL	sapool.cpp	/^    DEFAULT_CHECK_INTERVAL = 10,  \/\/\/默认check_interval, 10ms$/;"	e	enum:__anon12	file:
-DEFAULT_QUEUE_LEN	sapool.cpp	/^    DEFAULT_QUEUE_LEN = 100,      \/\/\/默认的等待队列的长度 100$/;"	e	enum:__anon12	file:
-DEFAULT_SOCK_NUM	sapool.cpp	/^    DEFAULT_SOCK_NUM = 500,       \/\/\/同时维护的最大sock句柄数，500$/;"	e	enum:__anon12	file:
-DEFAULT_TIMEOUT	sapool.cpp	/^    DEFAULT_TIMEOUT = 60,         \/\/\/等待队列里面的默认超时时间t, 60s$/;"	e	enum:__anon12	file:
+DEFAULT_CHECK_INTERVAL	sapool.cpp	/^    DEFAULT_CHECK_INTERVAL = 10,  \/\/\/默认check_interval, 10ms$/;"	e	enum:__anon9	file:
+DEFAULT_QUEUE_LEN	sapool.cpp	/^    DEFAULT_QUEUE_LEN = 100,      \/\/\/默认的等待队列的长度 100$/;"	e	enum:__anon9	file:
+DEFAULT_SOCK_NUM	sapool.cpp	/^    DEFAULT_SOCK_NUM = 500,       \/\/\/同时维护的最大sock句柄数，500$/;"	e	enum:__anon9	file:
+DEFAULT_TIMEOUT	sapool.cpp	/^    DEFAULT_TIMEOUT = 60,         \/\/\/等待队列里面的默认超时时间t, 60s$/;"	e	enum:__anon9	file:
 ERROR	commonn/asynLog.cpp	/^Log :: ERROR(const char * fmt, ...)$/;"	f	class:Log
 FREELIST_INDEX	commonn/memCache.h	/^    static size_t FREELIST_INDEX(size_t n)$/;"	f	class:Allocate
-IDLE	rapool.cpp	/^    IDLE = 0,$/;"	e	enum:__anon11	file:
-IDLE	sapool.cpp	/^    IDLE = 0,$/;"	e	enum:__anon13	file:
-INIT	nf_server_core.h	/^    INIT    = 0,$/;"	e	enum:__anon7
+IDLE	rapool.cpp	/^    IDLE = 0,$/;"	e	enum:__anon8	file:
+IDLE	sapool.cpp	/^    IDLE = 0,$/;"	e	enum:__anon10	file:
+INIT	nf_server_core.h	/^    INIT    = 0,$/;"	e	enum:__anon11
 LEVEL	commonn/asynLog.cpp	/^int Log :: LEVEL = LOG_DEBUG;$/;"	m	class:Log	file:
 LEVEL	commonn/asynLog.h	/^    static int LEVEL;$/;"	m	class:Log
 LISTENER_PRIORITY	rapool.h	6;"	d
@@ -45,26 +45,26 @@ MAX	sapool.cpp	18;"	d	file:
 MAX_BYTES	commonn/memCache.h	/^enum {MAX_BYTES = 128};$/;"	e	enum:__anon2
 MutexLock	commonn/singleton.h	/^        MutexLock()$/;"	f	class:MutexLock
 MutexLock	commonn/singleton.h	/^class MutexLock$/;"	c
-NFSVR_LFPOOL	nf_server_core.h	/^    NFSVR_LFPOOL = 0,    \/\/建议用于多线程短连接                                                                   $/;"	e	enum:__anon8
-NFSVR_LONG_CONNEC	nf_server_core.h	/^    NFSVR_LONG_CONNEC$/;"	e	enum:__anon9
-NFSVR_POOL_NUM	nf_server_core.h	/^    NFSVR_POOL_NUM,     \/\/当前有多少个pool    $/;"	e	enum:__anon8
-NFSVR_RAPOOL	nf_server_core.h	/^    NFSVR_RAPOOL,        \/\/reactor + pthread IO密集，thread 数与核有关$/;"	e	enum:__anon8
-NFSVR_SAPOOL	nf_server_core.h	/^    NFSVR_SAPOOL,        \/\/建议用于多线程长连接     $/;"	e	enum:__anon8
-NFSVR_SHORT_CONNEC	nf_server_core.h	/^    NFSVR_SHORT_CONNEC = 0,$/;"	e	enum:__anon9
+NFSVR_LFPOOL	nf_server_core.h	/^    NFSVR_LFPOOL = 0,    \/\/建议用于多线程短连接                                                                   $/;"	e	enum:__anon12
+NFSVR_LONG_CONNEC	nf_server_core.h	/^    NFSVR_LONG_CONNEC$/;"	e	enum:__anon13
+NFSVR_POOL_NUM	nf_server_core.h	/^    NFSVR_POOL_NUM,     \/\/当前有多少个pool    $/;"	e	enum:__anon12
+NFSVR_RAPOOL	nf_server_core.h	/^    NFSVR_RAPOOL,        \/\/reactor + pthread IO密集，thread 数与核有关$/;"	e	enum:__anon12
+NFSVR_SAPOOL	nf_server_core.h	/^    NFSVR_SAPOOL,        \/\/建议用于多线程长连接     $/;"	e	enum:__anon12
+NFSVR_SHORT_CONNEC	nf_server_core.h	/^    NFSVR_SHORT_CONNEC = 0,$/;"	e	enum:__anon13
 NOTICE	commonn/asynLog.cpp	/^Log :: NOTICE(const char * fmt, ...)$/;"	f	class:Log
 NfServer	nf_server.cpp	/^    NfServer :: NfServer()$/;"	f	class:nf::NfServer
 NfServer	nf_server.h	/^    class NfServer$/;"	c	namespace:nf
-PAUSE	nf_server_core.h	/^    PAUSE   = 2,$/;"	e	enum:__anon7
-RA_CHECK_INTERVAL	rapool.cpp	/^    RA_CHECK_INTERVAL = 10,  \/\/\/默认check_interval, 10ms$/;"	e	enum:__anon10	file:
-RA_SOCK_NUM	rapool.cpp	/^    RA_SOCK_NUM = 500,       \/\/\/同时维护的最大sock句柄数，500$/;"	e	enum:__anon10	file:
-RA_TIMEOUT	rapool.cpp	/^    RA_TIMEOUT = 60,         \/\/\/等待队列里面的默认超时时间t, 60s$/;"	e	enum:__anon10	file:
-READY	sapool.cpp	/^    READY,$/;"	e	enum:__anon13	file:
+PAUSE	nf_server_core.h	/^    PAUSE   = 2,$/;"	e	enum:__anon11
+RA_CHECK_INTERVAL	rapool.cpp	/^    RA_CHECK_INTERVAL = 10,  \/\/\/默认check_interval, 10ms$/;"	e	enum:__anon7	file:
+RA_SOCK_NUM	rapool.cpp	/^    RA_SOCK_NUM = 500,       \/\/\/同时维护的最大sock句柄数，500$/;"	e	enum:__anon7	file:
+RA_TIMEOUT	rapool.cpp	/^    RA_TIMEOUT = 60,         \/\/\/等待队列里面的默认超时时间t, 60s$/;"	e	enum:__anon7	file:
+READY	sapool.cpp	/^    READY,$/;"	e	enum:__anon10	file:
 ROUND_UP	commonn/memCache.h	/^    static size_t ROUND_UP(size_t n)$/;"	f	class:Allocate
-RUNNING	nf_server_core.h	/^    RUNNING = 1,$/;"	e	enum:__anon7
-SERVER_STATUS_T	nf_server_core.h	/^}SERVER_STATUS_T;$/;"	t	typeref:enum:__anon7
+RUNNING	nf_server_core.h	/^    RUNNING = 1,$/;"	e	enum:__anon11
+SERVER_STATUS_T	nf_server_core.h	/^}SERVER_STATUS_T;$/;"	t	typeref:enum:__anon11
 STATUS	commonn/asynLog.cpp	/^int Log :: STATUS = LOG_INIT;$/;"	m	class:Log	file:
 STATUS	commonn/asynLog.h	/^    static int STATUS;   $/;"	m	class:Log
-STOP	nf_server_core.h	/^    STOP    = 3$/;"	e	enum:__anon7
+STOP	nf_server_core.h	/^    STOP    = 3$/;"	e	enum:__anon11
 Section	commonn/configParser.h	/^class Section$/;"	c
 Server	commonn/Server.h	/^class Server$/;"	c
 Singleton	commonn/singleton.h	/^class Singleton$/;"	c
@@ -284,6 +284,7 @@ rapool_del	rapool.cpp	/^rapool_del(nf_server_t *sev, int idx, int alive, bool re
 rapool_destroy	rapool.cpp	/^int rapool_destroy(nf_server_t *sev)$/;"	f
 rapool_epoll_add_read	rapool.cpp	/^rapool_epoll_add_read(nf_server_t *sev, int idx, int work_reactor)$/;"	f
 rapool_epoll_del	rapool.cpp	/^rapool_epoll_del(nf_server_t * sev, int idx, int work_reactor)$/;"	f
+rapool_epoll_mod_write	rapool.cpp	/^rapool_epoll_mod_write(nf_server_t *sev, int idx, int work_reactor)$/;"	f
 rapool_get_queuenum	rapool.cpp	/^rapool_get_queuenum(nf_server_t *sev)$/;"	f
 rapool_init	rapool.cpp	/^rapool_init(nf_server_t *sev)$/;"	f
 rapool_join	rapool.cpp	/^rapool_join(nf_server_t *sev)$/;"	f
@@ -291,7 +292,6 @@ rapool_listen	rapool.cpp	/^rapool_listen(nf_server_t *sev)$/;"	f
 rapool_main	rapool.cpp	/^rapool_main(void *param)$/;"	f
 rapool_pause	rapool.cpp	/^rapool_pause(nf_server_t *sev)$/;"	f
 rapool_produce	rapool.cpp	/^rapool_produce(nf_server_t * sev, struct sockaddr * addr, $/;"	f
-rapool_pthread_cond_timewait	rapool.cpp	/^rapool_pthread_cond_timewait(rapool_t *pool)$/;"	f
 rapool_reactor	rapool.cpp	/^rapool_reactor(rapool_t * pool, nf_server_pdata_t * pdata)$/;"	f
 rapool_resume	rapool.cpp	/^int rapool_resume(nf_server_t *sev)$/;"	f
 rapool_run	rapool.cpp	/^rapool_run(nf_server_t *sev)$/;"	f

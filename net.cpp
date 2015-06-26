@@ -19,6 +19,9 @@ void rio_init(rio_t *rp, int fd, int len)
 
     rp->cache = NULL;
     rp->cache_len = 0;
+
+    rp->w_cache = NULL;
+    rp->w_cache_len = 0;
 }
 
 static ssize_t
@@ -755,3 +758,16 @@ find_line(char * req, int end)
             return i;
     return -1;
 }
+
+void
+move_forward(char * req, int start, int end)
+{
+    int j = 0;
+    for(int i = start; i < end; i++)
+    {
+        *(req + j) = *(req + i);
+        j++;
+    }
+    return;
+}
+

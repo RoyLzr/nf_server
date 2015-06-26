@@ -438,6 +438,46 @@ rapool_epoll_add_read(nf_server_t *sev, int idx, int work_reactor)
 }
 
 int 
+rapool_epoll_mod_read(nf_server_t *sev, int idx, int work_reactor)
+{
+    rapool_t *pool = (rapool_t *) sev->pool;
+    struct epoll_event ev;
+    ev.data.fd = idx;
+    ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
+    int sock = pool->sockets[idx].sock;
+    
+    if (epoll_ctl(sev->pdata[work_reactor].epfd, EPOLL_CTL_MOD, sock, &ev) < 0) 
+    {
+        Log :: WARN("MOD EPOLL EVNENT READ TO  REACTOR ERROR: %d STR:%s", 
+                    work_reactor, strerror(errno));
+        return -1;
+    }
+    Log :: NOTICE("SUCC MOD EPOLL EVNENT READ TO REACTOR : %d, FD : %d", 
+                work_reactor, sock);
+    return 0;
+}
+
+int 
+rapool_epoll_mod_write(nf_server_t *sev, int idx, int work_reactor)
+{
+    rapool_t *pool = (rapool_t *) sev->pool;
+    struct epoll_event ev;
+    ev.data.fd = idx;
+    ev.events = EPOLLOUT | EPOLLHUP | EPOLLERR;
+    int sock = pool->sockets[idx].sock;
+    
+    if (epoll_ctl(sev->pdata[work_reactor].epfd, EPOLL_CTL_MOD, sock, &ev) < 0) 
+    {
+        Log :: WARN("MOD EPOLL EVNENT WRITE TO REACTOR ERROR: %d STR:%s", 
+                    work_reactor, strerror(errno));
+        return -1;
+    }
+    Log :: NOTICE("SUCC MOD EPOLL EVNENT READ TO REACTOR : %d, FD : %d", 
+                work_reactor, sock);
+    return 0;
+}
+
+int 
 rapool_epoll_del(nf_server_t * sev, int idx, int work_reactor)
 {
     rapool_t *pool = (rapool_t *) sev->pool;
@@ -477,6 +517,13 @@ rapool_del(nf_server_t *sev, int idx, int alive, bool remove)
                                    pool->sockets[idx].rp.cache_len);
         pool->sockets[idx].rp.cache = NULL;
         pool->sockets[idx].rp.cache_len = 0; 
+       
+ 
+        if(pool->sockets[idx].rp.w_cache != NULL)
+            Allocate :: deallocate(pool->sockets[idx].rp.w_cache, 
+                                   pool->sockets[idx].rp.w_cache_len);
+        pool->sockets[idx].rp.w_cache = NULL;
+        pool->sockets[idx].rp.w_cache_len = 0; 
     } 
     return 0;
 }

@@ -169,7 +169,7 @@ nf_server_set_writed_start(int n)
         std :: cout << "empty writed size" << std :: endl;
         return -1;
     }
-    ptr->write_start = n;
+    ptr->write_start += n;
     return 1;
 }
 

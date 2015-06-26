@@ -47,6 +47,11 @@ typedef struct _rio_t
 
     char * cache;
     int cache_len;
+    
+    char * w_cache;
+    int w_cache_len;
+    int w_allo_len;    
+ 
 } rio_t;
 
 void  
@@ -161,5 +166,8 @@ find_line(char * req, int end);
 
 int
 readn(int fd, void *usrbuf, size_t n);
+
+void
+move_forward(char * req, int start, int end);
 
 #endif
