@@ -136,7 +136,7 @@ nf_SA_readline_worker(void * data)
     //event loop
     while(sev->run)
     {
-        ret = epoll_wait(pdata->epfd, events, 1, readto * 20);
+        ret = epoll_wait(pdata->epfd, events, 1, 1000);
         if(ret == 0)
         {
             std::cout << "read timeout error" << std::endl; 
@@ -319,7 +319,7 @@ nf_RA_readline_worker(void * data)
     //event loop
     while(sev->run)
     {
-        int num = epoll_wait(pdata->epfd, events, 1, readto * 20);
+        int num = epoll_wait(pdata->epfd, events, 1, 1000);
         if(num == 0)
         {   
             Log :: DEBUG("nf_server_app : 325 BEGIN TIMEOUT TEST");
@@ -391,7 +391,8 @@ nf_RA_readline_worker(void * data)
 
                 req[n + clen] = '\0';
                 Log :: DEBUG("READ DATA %d byte VALUE : %s" ,n + clen, req);
-               
+                
+                //READ ANALYSIS 
                 int start, end; 
                 start = 0; 
                 for(int i = 0; *(req + i) != '\0'; i++)
@@ -403,7 +404,7 @@ nf_RA_readline_worker(void * data)
                         pdata->read_start = start;
                         pdata->readed_size = i - start + 1;
                         sev->p_handle();
-                        start = end + 1; 
+                        start = i + 1; 
                     }
                 }
 
@@ -415,7 +416,12 @@ nf_RA_readline_worker(void * data)
                     memcpy(rp->cache, req + start, len);
                     Log :: DEBUG("READ DUMP CACHE %d bytes VAL : %s ", len, rp->cache);
                 }
-    
+                /* 
+                if(pdata->write_size > 0)
+                {
+                    
+                } 
+                */
                 if((n = sendn_to_ms(sock, res, pdata->writed_size, writeto * 20)) < 0)
                 {
                     Log :: WARN("WRITE ERROR THREAD ID %d, ERROR %s",
@@ -423,7 +429,11 @@ nf_RA_readline_worker(void * data)
                     rapool_del(sev, idx, 0, true);
                     continue;
                 }
-                
+
+                pdata->read_start = 0;
+                pdata->readed_size = 0;
+                pdata->write_start = 0;
+                pdata->writed_size = 0; 
                 Log :: DEBUG("WRITE DATA %d byte VALUE : %s" ,n, res);
             }
         }

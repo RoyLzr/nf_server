@@ -465,6 +465,9 @@ rapool_del(nf_server_t *sev, int idx, int alive, bool remove)
             rapool_epoll_del(sev, idx, id);  // remove it from epoll event sets
         if (pool->sockets[idx].sock >= 0) 
             close(pool->sockets[idx].sock);
+        
+        Log :: NOTICE("RELEASE CONN POOL %d FD : ", 
+                      idx, pool->sockets[idx].sock);
 
         pool->sockets[idx].sock = -1;
         pool->sockets[idx].status = IDLE;
@@ -495,18 +498,6 @@ rapool_workers(void * param)
 
     pthread_exit(NULL);
     return NULL;
-}
-
-int 
-rapool_pthread_cond_timewait(rapool_t *pool)
-{
-    struct timeval now;
-    struct timespec timeout;
-    gettimeofday(&now, 0);
-    timeout.tv_sec = now.tv_sec + 5;
-    timeout.tv_nsec = now.tv_usec * 1000;
-    pthread_cond_timedwait(&pool->ready_cond, &pool->ready_mutex, &timeout);
-    return 0;
 }
 
 int 

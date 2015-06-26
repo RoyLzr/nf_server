@@ -156,7 +156,7 @@ nf_server_set_writed_size(int n)
         std :: cout << "empty writed size" << std :: endl;
         return -1;
     }
-    ptr->writed_size = n;
+    ptr->writed_size += n;
     return 1;
 }
 

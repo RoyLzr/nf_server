@@ -34,7 +34,7 @@ void * work(void * arg)
     char ip[] = "127.0.0.1";
     set_tcp_sockaddr(ip, 1025, &server_address);
 
-    for(int i = 0; i < 2; i++)
+    for(int i = 0; i < 1; i++)
     {
         int fd = socket(AF_INET, SOCK_STREAM, 0);
         set_linger(fd, 0);
@@ -47,7 +47,7 @@ void * work(void * arg)
         }
         buf[size] = '\0';
         //std :: cout << buf << std :: endl;
-        for(int j = 0; j < 100; j++)
+        for(int j = 0; j < 2; j++)
         {
             int tes = 2;
             //if (send(fd, buf, 2, 0) <= 0)
@@ -55,14 +55,19 @@ void * work(void * arg)
             //sleep(1);
             //if (send(fd, buf + 2, size - 2, 0) <= 0)
             //    std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
-            char tmp[] = "123456";
-            if (send(fd, tmp, 6, 0) <= 0)
+            char tmp1[] = "12345";
+            char tmp2[] = "\n123\n";
+            if (send(fd, tmp1, 5, 0) <= 0)
                 std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
-            
-            if((n = recv(fd, readbuf, 6, MSG_WAITALL)) <= 0)
+            sleep(1);
+            send(fd, tmp1, 5, 0);
+            sleep(1);
+            send(fd, tmp2, 5, 0);
+
+            if((n = recv(fd, readbuf, 15, MSG_WAITALL)) <= 0)
                 std::cout <<  "recv error"  << ": " << strerror(errno) << std::endl;
-            std :: cout << "recv once succ" << std :: endl;
-            //std::cout <<  readbuf  << ": " << i <<":" << n << std::endl;
+            //std :: cout << "recv once succ" << std :: endl;
+            std::cout <<  readbuf  << " : " << n << std::endl;
         }
         //readbuf[n] = '\0';
         close(fd);        

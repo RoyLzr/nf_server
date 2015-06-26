@@ -83,7 +83,6 @@ int rapool_epoll_add_read(nf_server_t *sev,
 
 int rapool_epoll_del(nf_server_t *sev, int idx, int id);
 
-int rapool_pthread_cond_timewait(rapool_t *pool);
 
 #endif  
 
