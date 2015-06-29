@@ -1,0 +1,120 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ALIGN	memCache.h	/^enum {ALIGN = 8};$/;"	e	enum:__anon1
+Allocate	memCache.h	/^class Allocate$/;"	c
+CHUNK_NODE	memCache.h	/^enum {CHUNK_NODE = 20};$/;"	e	enum:__anon4
+ConfigParser	configParser.h	/^        ConfigParser(){}$/;"	f	class:ConfigParser
+ConfigParser	configParser.h	/^class ConfigParser$/;"	c
+DEBUG	asynLog.cpp	/^Log :: DEBUG(const char * fmt, ...)$/;"	f	class:Log
+ERROR	asynLog.cpp	/^Log :: ERROR(const char * fmt, ...)$/;"	f	class:Log
+FREELIST_INDEX	memCache.h	/^    static size_t FREELIST_INDEX(size_t n)$/;"	f	class:Allocate
+LEVEL	asynLog.cpp	/^int Log :: LEVEL = LOG_DEBUG;$/;"	m	class:Log	file:
+LEVEL	asynLog.h	/^    static int LEVEL;$/;"	m	class:Log
+LISTS	memCache.h	/^enum {LISTS = MAX_BYTES\/ALIGN};$/;"	e	enum:__anon3
+LOG_DEBUG	asynLog.h	/^    LOG_DEBUG,$/;"	e	enum:__anon5
+LOG_ERROR	asynLog.h	/^    LOG_ERROR,$/;"	e	enum:__anon5
+LOG_INIT	asynLog.h	/^    LOG_INIT,$/;"	e	enum:__anon6
+LOG_MAXLINE	asynLog.h	/^    LOG_MAXLINE = 1000$/;"	e	enum:__anon5
+LOG_NOTICE	asynLog.h	/^    LOG_NOTICE,$/;"	e	enum:__anon5
+LOG_RUN	asynLog.h	/^    LOG_RUN,$/;"	e	enum:__anon6
+LOG_STOP	asynLog.h	/^    LOG_STOP$/;"	e	enum:__anon6
+LOG_WARN	asynLog.h	/^    LOG_WARN, $/;"	e	enum:__anon5
+Lock	singleton.h	/^        static MutexLock Lock;$/;"	m	class:Singleton
+Lock	singleton.h	/^MutexLock Singleton<T>::Lock;$/;"	m	class:Singleton
+Log	asynLog.h	/^class Log$/;"	c
+MAX_BYTES	memCache.h	/^enum {MAX_BYTES = 128};$/;"	e	enum:__anon2
+MutexLock	singleton.h	/^        MutexLock()$/;"	f	class:MutexLock
+MutexLock	singleton.h	/^class MutexLock$/;"	c
+NOTICE	asynLog.cpp	/^Log :: NOTICE(const char * fmt, ...)$/;"	f	class:Log
+ROUND_UP	memCache.h	/^    static size_t ROUND_UP(size_t n)$/;"	f	class:Allocate
+STATUS	asynLog.cpp	/^int Log :: STATUS = LOG_INIT;$/;"	m	class:Log	file:
+STATUS	asynLog.h	/^    static int STATUS;   $/;"	m	class:Log
+Section	configParser.h	/^class Section$/;"	c
+Server	Server.h	/^class Server$/;"	c
+Singleton	singleton.h	/^class Singleton$/;"	c
+Timer	timer.h	/^class Timer$/;"	c
+WARN	asynLog.cpp	/^Log :: WARN(const char * fmt, ...)$/;"	f	class:Log
+_ASYN_LOG_	asynLog.h	2;"	d
+_CONFIG_PARSER_H	configParser.h	2;"	d
+_MEM_CACHE_	memCache.h	2;"	d
+_QUEUE_H	queue.h	2;"	d
+_SERVER_H	Server.h	9;"	d
+_TIMER_	timer.h	2;"	d
+_initialized	singleton.h	/^        static bool _initialized;$/;"	m	class:Singleton
+_initialized	singleton.h	/^bool Singleton<T>::_initialized = false;$/;"	m	class:Singleton
+_instance	singleton.h	/^        static T * _instance;$/;"	m	class:Singleton
+_instance	singleton.h	/^T * Singleton<T>::_instance = NULL;$/;"	m	class:Singleton
+_queue_t	queue.h	/^struct _queue_t$/;"	s
+_singleton_h	singleton.h	2;"	d
+add_prefix	asynLog.cpp	/^add_prefix(char * dest, const string &add)$/;"	f
+add_timer_ms	timer.cpp	/^Timer :: add_timer_ms(long long time, $/;"	f	class:Timer
+allocate	memCache.cpp	/^Allocate :: allocate(size_t n)$/;"	f	class:Allocate
+array	queue.h	/^    int *array;$/;"	m	struct:_queue_t
+buffer	asynLog.cpp	/^char Log :: buffer[LOG_MAXLINE];$/;"	m	class:Log	file:
+buffer	asynLog.h	/^    static char buffer[LOG_MAXLINE];$/;"	m	class:Log
+cap	queue.h	/^    int cap;$/;"	m	struct:_queue_t
+client_data	memCache.h	/^        char client_data[1];$/;"	m	union:Allocate::obj
+create_q	queue.cpp	/^int create_q(queue_t *q, int qcap)$/;"	f
+ctime	asynLog.cpp	/^ctime(char * t_time, size_t n)$/;"	f
+deallocate	memCache.cpp	/^Allocate :: deallocate(void * p, size_t n)$/;"	f	class:Allocate
+del_timer_ms	timer.cpp	/^Timer :: del_timer_ms(long long time)$/;"	f	class:Timer
+destroy	singleton.h	/^        static void destroy()$/;"	f	class:Singleton
+destroy_q	queue.cpp	/^int destroy_q(queue_t *q)$/;"	f
+empty_q	queue.cpp	/^int empty_q(queue_t *q)$/;"	f
+empty_str	configParser.cpp	/^static const std::string empty_str = "";$/;"	v	file:
+expire_timer_ms	timer.cpp	/^Timer :: expire_timer_ms()$/;"	f	class:Timer
+fp	asynLog.cpp	/^FILE * Log :: fp; $/;"	m	class:Log	file:
+fp	asynLog.h	/^    static FILE * fp; $/;"	m	class:Log
+free_list	memCache.cpp	/^Allocate :: obj * Allocate :: free_list[LISTS] = $/;"	m	class:Allocate	file:
+free_list	memCache.h	/^    static obj * free_list[LISTS];$/;"	m	class:Allocate
+free_list_link	memCache.h	/^        union obj * free_list_link;$/;"	m	union:Allocate::obj	typeref:union:Allocate::obj::obj
+front	queue.h	/^    int front;$/;"	m	struct:_queue_t
+get	configParser.cpp	/^const std::string & Section :: get(const std::string key) const$/;"	f	class:Section
+get	configParser.cpp	/^const std::string& ConfigParser :: get(const std::string sectionName, const std::string keyName) const$/;"	f	class:ConfigParser
+get_file	asynLog.h	/^    static FILE * get_file()$/;"	f	class:Log
+get_time_msec	timer.cpp	/^Timer :: get_time_msec(struct timeval * tv)$/;"	f	class:Timer
+init	asynLog.cpp	/^Log :: init(const char * name)$/;"	f	class:Log
+init	memCache.cpp	/^Allocate :: init()$/;"	f	class:Allocate
+instance	singleton.h	/^        static T * instance()$/;"	f	class:Singleton
+is_empty_q	queue.cpp	/^int is_empty_q(queue_t *q)$/;"	f
+is_full_q	queue.cpp	/^int is_full_q(queue_t *q)$/;"	f
+items	configParser.h	/^        std::map<std::string, std::string> items;$/;"	m	class:Section
+lock	singleton.h	/^        void lock()$/;"	f	class:MutexLock
+log_buffer	asynLog.cpp	/^queue<string> Log :: log_buffer;$/;"	m	class:Log	file:
+log_buffer	asynLog.h	/^    static queue<string> log_buffer;   $/;"	m	class:Log
+log_cond	asynLog.cpp	/^pthread_cond_t Log:: log_cond;$/;"	m	class:Log	file:
+log_cond	asynLog.h	/^    static pthread_cond_t  log_cond;$/;"	m	class:Log
+log_mutex	asynLog.cpp	/^pthread_mutex_t Log :: log_mutex;$/;"	m	class:Log	file:
+log_mutex	asynLog.h	/^    static pthread_mutex_t log_mutex;$/;"	m	class:Log
+mSections	configParser.h	/^    std::map<std::string, Section> mSections;$/;"	m	class:ConfigParser
+mem_mutex	memCache.cpp	/^pthread_mutex_t Allocate :: mem_mutex[LISTS];$/;"	m	class:Allocate	file:
+mem_mutex	memCache.h	/^    static pthread_mutex_t mem_mutex[LISTS];$/;"	m	class:Allocate
+mutex	singleton.h	/^        pthread_mutex_t mutex;$/;"	m	class:MutexLock
+obj	memCache.h	/^    union obj$/;"	u	class:Allocate
+parser_file	configParser.cpp	/^bool ConfigParser :: parser_file(const std::string &file)$/;"	f	class:ConfigParser
+pop_q	queue.cpp	/^int pop_q(queue_t *q, int *val)$/;"	f
+produce_log	asynLog.cpp	/^Log :: produce_log(int event, char * s, const char * fmt, va_list args)$/;"	f	class:Log
+push_q	queue.cpp	/^int push_q(queue_t *q, int val)$/;"	f
+queue_t	queue.h	/^typedef struct _queue_t queue_t;$/;"	t	typeref:struct:_queue_t
+rear	queue.h	/^    int rear;$/;"	m	struct:_queue_t
+refill	memCache.cpp	/^Allocate :: refill(size_t n)$/;"	f	class:Allocate
+scan	configParser.cpp	/^void ConfigParser :: scan() const$/;"	f	class:ConfigParser
+scan	configParser.cpp	/^void Section :: scan() const$/;"	f	class:Section
+set	configParser.h	/^        inline void set(const std::string &key, const std::string &val)$/;"	f	class:Section
+set	configParser.h	/^    inline void set(const std::string &sectionName, const std::string &keyName, $/;"	f	class:ConfigParser
+set_file	asynLog.h	/^    static void set_file(FILE * file)$/;"	f	class:Log
+size	queue.h	/^    int size;$/;"	m	struct:_queue_t
+stop	asynLog.h	/^    static void stop()$/;"	f	class:Log
+str_prefix	asynLog.cpp	/^string Log :: str_prefix[4] = {"[DEBUG]  ", $/;"	m	class:Log	file:
+str_prefix	asynLog.h	/^    static string str_prefix[4];$/;"	m	class:Log
+timer	timer.h	/^        multimap<long long, pair<timer_callback_proc, void *>> timer;$/;"	m	class:Timer
+timer_callback_proc	timer.h	/^        typedef int (* timer_callback_proc)(void * param);$/;"	t	class:Timer
+top_timer_ms	timer.cpp	/^Timer :: top_timer_ms()$/;"	f	class:Timer
+unlock	singleton.h	/^        void unlock()$/;"	f	class:MutexLock
+write_log	asynLog.cpp	/^Log :: write_log(void *)$/;"	f	class:Log
+~ConfigParser	configParser.h	/^        virtual ~ConfigParser(){}$/;"	f	class:ConfigParser
+~MutexLock	singleton.h	/^        ~MutexLock()$/;"	f	class:MutexLock

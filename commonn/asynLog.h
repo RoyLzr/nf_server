@@ -18,7 +18,7 @@ enum
     LOG_NOTICE,
     LOG_WARN, 
     LOG_ERROR,
-    LOG_MAXLINE = 1000
+    LOG_MAXLINE = 6000
 };
 
 enum

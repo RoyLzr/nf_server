@@ -51,11 +51,12 @@ Log :: write_log(void *)
         if(STATUS != LOG_RUN)
             return NULL;
         
-        string val = log_buffer.front();
-        log_buffer.pop();
+        //string val = log_buffer.front();
+        //log_buffer.pop();
  
-        fprintf(fp, "%s\n", val.c_str());
+        fprintf(fp, "%s\n", (log_buffer.front()).c_str());
         fflush(fp);
+        log_buffer.pop();
 
         pthread_mutex_unlock(&log_mutex);
     } 

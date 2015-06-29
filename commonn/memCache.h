@@ -7,8 +7,8 @@
 #include <stdio.h>
 #include "asynLog.h"
 
-enum {ALIGN = 8};
-enum {MAX_BYTES = 128};
+enum {ALIGN = 64};
+enum {MAX_BYTES = 1024};
 enum {LISTS = MAX_BYTES/ALIGN};
 enum {CHUNK_NODE = 20};
 

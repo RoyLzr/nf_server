@@ -57,8 +57,6 @@ rapool_init(nf_server_t *sev)
     Log :: NOTICE("RAPOOL.cpp MALLOC RA-POOL SUCC");
      
     pool = (rapool_t *) sev->pool;
-    pthread_mutex_init(&pool->ready_mutex, NULL);
-    pthread_cond_init(&pool->ready_cond, NULL);
 
     //创建socket资源
     pool->size = ssiz;
@@ -66,12 +64,9 @@ rapool_init(nf_server_t *sev)
     
     for(int i = 0; i < ssiz; i++)
     {
-        pool->sockets[i].rp.rio_ptr = ((char *) malloc(sizeof(char) * 
-                                    sev->thread_usr_buf)); 
-        if(pool->sockets[i].rp.rio_ptr == NULL)
-            return -1;
-        memset(pool->sockets[i].rp.rio_ptr, 0, sev->thread_usr_buf); 
-        rio_init(&pool->sockets[i].rp, -1, sev->thread_usr_buf); 
+        pool->sockets[i].rp.rio_ptr = NULL;
+        pool->sockets[i].sock_timeout = 0;
+        rio_init(&pool->sockets[i].rp, -1, -1); 
     }
 
     if (pool->sockets == NULL) 
@@ -216,7 +211,6 @@ rapool_run(nf_server_t *sev)
 
     Log :: NOTICE("CREATE REACTOR NUM : %d", sev->run_thread_num);
     sev->status = RUNNING;
-    pthread_attr_destroy(&thread_attr);
     return 0;
 }
 
@@ -280,9 +274,6 @@ int rapool_destroy(nf_server_t *sev)
     //此时消费线程都已退出，就此关闭所有已连接sockfd
     rapool_close_pool_sockets(sev, false);
 
-    pthread_mutex_destroy(&pool->ready_mutex);
-    pthread_cond_destroy(&pool->ready_cond);
-
     if (pool->sockets != NULL) 
     {
         free (pool->sockets);
@@ -337,8 +328,10 @@ rapool_main(void *param)
 }
 
 int 
-rapool_produce(nf_server_t * sev, struct sockaddr * addr, 
-                   socklen_t * addrlen, int work_reacotr)
+rapool_produce(nf_server_t * sev, 
+               struct sockaddr * addr, 
+               socklen_t * addrlen, 
+               int work_reacotr)
 {
     int ret = 0;
     rapool_t *pool = (rapool_t *) sev->pool;
@@ -347,8 +340,9 @@ rapool_produce(nf_server_t * sev, struct sockaddr * addr,
     int len = 40;
     int port;
     int idx;
+    long long key_timer;    
 
-    int num = epoll_wait(pool->epfd, pool->ep_events, pool->size, pool->timeout * 1000);
+    int num = epoll_wait(pool->epfd, pool->ep_events, pool->size, pool->timeout);
 
     if (num <= 0) 
     {
@@ -366,7 +360,7 @@ rapool_produce(nf_server_t * sev, struct sockaddr * addr,
             
         get_tcp_sockaddr(ip, &port, (sockaddr_in *)addr, len);
         Log :: NOTICE("ACCEPT SUCC FROM CLIENT: %s:%d  new fd : %d ", 
-                           ip, port, cli_sock);
+                      ip, port, cli_sock);
 
         set_sev_socketopt(sev, cli_sock);
 
@@ -374,14 +368,20 @@ rapool_produce(nf_server_t * sev, struct sockaddr * addr,
         if ((idx = rapool_add(sev, cli_sock, (struct sockaddr_in *) addr)) < 0) 
         {
             close(cli_sock);
-            ret = -1;
+            return -1;
         }
         //add cli_sock to reactor
         if (rapool_epoll_add_read(sev, idx, work_reacotr) < 0)
         {
             close(cli_sock);
-            ret = -1;
+            return -1;
         }
+        //add timer
+        rapool_t * pool = (rapool_t *) sev->pool;
+        pool->sockets[idx].sock_timeout = (sev->pdata[work_reacotr].timer).add_timer_ms(
+                                           1000, 
+                                           call_back_timeout, 
+                                           &(pool->sockets[idx]));
     } 
     return ret;
 }
@@ -407,7 +407,6 @@ rapool_add(nf_server_t * sev, int sock, struct sockaddr_in *addr)
     }
 
     pool->sockets[idx].status = BUSY;
-    pool->sockets[idx].last_active = time(NULL);
     pool->sockets[idx].addr = *addr;
     pool->sockets[idx].sock = sock;
     
@@ -472,7 +471,7 @@ rapool_epoll_mod_write(nf_server_t *sev, int idx, int work_reactor)
                     work_reactor, strerror(errno));
         return -1;
     }
-    Log :: NOTICE("SUCC MOD EPOLL EVNENT READ TO REACTOR : %d, FD : %d", 
+    Log :: NOTICE("SUCC MOD EPOLL EVNENT WRITE TO REACTOR : %d, FD : %d", 
                 work_reactor, sock);
     return 0;
 }
@@ -485,8 +484,9 @@ rapool_epoll_del(nf_server_t * sev, int idx, int work_reactor)
     ev.data.fd = idx;
     ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
     int sock = pool->sockets[idx].sock;
-
-    if (epoll_ctl(pool->epfd, EPOLL_CTL_DEL, sock, &ev) < 0) 
+    int epfd = sev->pdata[work_reactor].epfd;
+    
+    if (epoll_ctl(epfd, EPOLL_CTL_DEL, sock, &ev) < 0) 
     {
         std :: cout << "del socket error: " << strerror(errno) << std :: endl;
         return -1;
@@ -509,21 +509,21 @@ rapool_del(nf_server_t *sev, int idx, int alive, bool remove)
         Log :: NOTICE("RELEASE CONN POOL %d FD : ", 
                       idx, pool->sockets[idx].sock);
 
-        pool->sockets[idx].sock = -1;
-        pool->sockets[idx].status = IDLE;
-
         if(pool->sockets[idx].rp.cache != NULL)
             Allocate :: deallocate(pool->sockets[idx].rp.cache, 
                                    pool->sockets[idx].rp.cache_len);
         pool->sockets[idx].rp.cache = NULL;
         pool->sockets[idx].rp.cache_len = 0; 
-       
  
         if(pool->sockets[idx].rp.w_cache != NULL)
             Allocate :: deallocate(pool->sockets[idx].rp.w_cache, 
-                                   pool->sockets[idx].rp.w_cache_len);
+                                   pool->sockets[idx].rp.w_allo_len);
         pool->sockets[idx].rp.w_cache = NULL;
         pool->sockets[idx].rp.w_cache_len = 0; 
+        pool->sockets[idx].rp.w_allo_len = 0; 
+        
+        pool->sockets[idx].sock = -1;
+        pool->sockets[idx].status = IDLE;
     } 
     return 0;
 }
@@ -600,4 +600,49 @@ int rapool_resume(nf_server_t *sev)
     sev->status = RUNNING;
     return 0;
 }
+
+int call_back_timeout(void * param)
+{
+    rapool_sock_item_t * sock_item = (rapool_sock_item_t *) param;
+    int id = nf_server_get_thread_id(); 
+    Log :: WARN("====TIME OUT FD : %d REACOTR %d WILL CLEAN ===", 
+                sock_item->sock, id);
+    
+    struct epoll_event ev;
+    ev.data.fd = -1;
+    ev.events = EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLOUT;
+    int epfd = nf_server_get_thread_epfd();
+   
+    if(sock_item->sock < 0)
+        return 0;
+ 
+    if (epoll_ctl(epfd, EPOLL_CTL_DEL, sock_item->sock, &ev) < 0) 
+    {
+        Log :: WARN("TIMEOUT DEL EPOLL SOCK TIMEOUT : %s", 
+                    strerror(errno));
+    }
+    
+    //CLEAN CONNECTION POOL    
+    if (sock_item->sock >= 0) 
+        close(sock_item->sock);
+       
+    if(sock_item->rp.cache != NULL)
+        Allocate :: deallocate(sock_item->rp.cache, 
+                               sock_item->rp.cache_len);
+    sock_item->rp.cache = NULL;
+    sock_item->rp.cache_len = 0; 
+ 
+    if(sock_item->rp.w_cache != NULL)
+        Allocate :: deallocate(sock_item->rp.w_cache, 
+                               sock_item->rp.w_allo_len);
+    sock_item->rp.w_cache = NULL;
+    sock_item->rp.w_cache_len = 0; 
+    sock_item->rp.w_allo_len = 0; 
+        
+    sock_item->sock = -1;
+    sock_item->status = IDLE;
+
+    return 0;
+}
+
 

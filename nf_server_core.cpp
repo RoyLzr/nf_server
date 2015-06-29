@@ -273,11 +273,6 @@ nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
         return -1;
     memset(pdata->write_buf, 0, sizeof(char) * pdata->write_size);
     
-    pdata->usr_buf = malloc(sizeof(char) * pdata->usr_size);
-    if(pdata->usr_buf == NULL)
-        return -1;
-    memset(pdata->usr_buf, 0, sizeof(char) * pdata->usr_size);
-
     if(sev->server_type == NFSVR_LFPOOL)
     {
         pdata->rio.rio_ptr = (char *)malloc(sizeof(char) * pdata->usr_size);
@@ -325,6 +320,8 @@ nf_server_init(nf_server_t * sev)
                                      instance()->get("pool", "check_interval")).c_str());
     sev->timeout = (size_t)atoi((Singleton<ConfigParser>::
                                      instance()->get("pool", "timeout")).c_str());
+    sev->socksize = (size_t)atoi((Singleton<ConfigParser>::
+                                     instance()->get("pool", "sock_num")).c_str());
 
     //Ïß³ÌÊý
     sev->pthread_num = (size_t)atoi((Singleton<ConfigParser>::

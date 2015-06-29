@@ -3,7 +3,7 @@
 enum 
 {
     DEFAULT_CHECK_INTERVAL = 10,  ///默认check_interval, 10ms
-    DEFAULT_TIMEOUT = 60,         ///等待队列里面的默认超时时间t, 60s
+    DEFAULT_TIMEOUT = 60000,         ///等待队列里面的默认超时时间t, 60s
     DEFAULT_QUEUE_LEN = 100,      ///默认的等待队列的长度 100
     DEFAULT_SOCK_NUM = 500,       ///同时维护的最大sock句柄数，500
 };
@@ -372,6 +372,8 @@ sapool_check_timeout(nf_server_t *sev)
 {
     sapool_t * pool = (sapool_t *) sev->pool;
     time_t curtime = time(NULL);
+    curtime *= 1000;
+
     if (curtime < pool->next_check_time) 
     {
         return 0;
@@ -424,7 +426,7 @@ sapool_produce(nf_server_t * sev, struct sockaddr * addr,
     
     sapool_check_timeout(sev);
 
-    int num = epoll_wait(pool->epfd, pool->ep_events, pool->size, 3000);
+    int num = epoll_wait(pool->epfd, pool->ep_events, pool->size, pool->timeout);
 
     if (num <= 0) 
     {
@@ -516,7 +518,7 @@ sapool_add(nf_server_t * sev, int sock, struct sockaddr_in *addr)
     }
 
     pool->sockets[idx].status = READY;
-    pool->sockets[idx].last_active = time(NULL);
+    pool->sockets[idx].last_active = time(NULL) * 1000;
     pool->sockets[idx].addr = *addr;
     pool->sockets[idx].sock = sock;
     pool->using_size++;
@@ -584,7 +586,7 @@ sapool_del(nf_server_t *sev, int idx, int alive, bool remove)
     } 
     else 
     {
-        pool->sockets[idx].last_active = time(NULL);
+        pool->sockets[idx].last_active = time(NULL) * 1000;
         pool->sockets[idx].status = READY;
         sapool_epoll_add(sev, idx);
     }

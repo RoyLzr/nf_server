@@ -3,6 +3,11 @@
 #include "rapool.h"
 
 
+enum
+{
+    IDLE = 0
+};
+
 int 
 nf_LF_readline_worker(void * data)
 {
@@ -315,30 +320,46 @@ nf_RA_readline_worker(void * data)
     
     struct epoll_event events[ssiz], ev;
    
-    pdata->write_start = 0; 
+    pdata->write_start = 0;
+
+    int timeout = (pdata->timer).top_timer_ms();
+     
     //event loop
     while(sev->run)
     {
-        int num = epoll_wait(pdata->epfd, events, 1, pool->timeout * 1000);
-        if(num == 0)
-        {   
-            Log :: DEBUG("nf_server_app : 325 BEGIN TIMEOUT TEST");
-            continue;
-        }
+        Log :: DEBUG("TRACE WORK REACTOR TIMEOUT %d ", timeout);
         
+        if(timeout == 0 || timeout > pool->check_interval)
+            timeout = pool->check_interval;
+        else if(timeout < 0)
+            timeout = 0;
+        
+        int num = epoll_wait(pdata->epfd, events, ssiz, timeout);
+        
+        //handle timeout event 
+        (pdata->timer).expire_timer_ms();
+ 
         if(num < 0)
         {
             Log :: WARN("nf_server_app: 331 PDATA ID : %d EPOLL WAIT ERROR: %s", 
                         pdata->id, strerror(errno));
             continue;
-        } 
+        }
+        Log :: DEBUG("SEV WRITE TO : %d", sev->write_to); 
         //events analyse
         for(int i = 0; i < num; i++)
         {
             int idx = events[i].data.fd;
             int sock = pool->sockets[idx].sock;
             rio_t * rp = &(pool->sockets[idx].rp);
+            int sock_timeout = pool->sockets[idx].sock_timeout;
             
+            if(pool->sockets[idx].status == IDLE || pool->sockets[idx].sock < 0)
+                continue;
+            
+            Log :: DEBUG("EVENT LOOP Handle pool pos %d", idx);
+
+
             //清空 读数据的 缓存区
             rp->rio_fd = sock;
             rp->rio_cnt = 0;
@@ -349,13 +370,15 @@ nf_RA_readline_worker(void * data)
                 Log :: WARN("EPOLL HUP FD : %d POOL POS : %d",
                              pool->sockets[idx].sock, idx);
                 rapool_del(sev, idx, 0, true);
+                (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                 continue;
             }
             else if(events[i].events & EPOLLERR)
             {
-                Log :: WARN("APP : 356 EPOLL ERROR FD : %d POOL POS : %d",
+                Log :: WARN("APP : 356 EPOLL ERROR FD : %d POOL POS : %d : %s",
                              pool->sockets[idx].sock, idx);
                 rapool_del(sev, idx, 0, true);
+                (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                 continue;
             }
             else if( events[i].events & EPOLLIN )
@@ -379,6 +402,7 @@ nf_RA_readline_worker(void * data)
                     Log :: WARN("READ ERROR THREAD ID %d, ERROR %s",
                                 pdata->id, strerror(errno));
                     rapool_del(sev, idx, 0, true);
+                    (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                     continue;
                 }
                 if( n == 0)
@@ -386,6 +410,7 @@ nf_RA_readline_worker(void * data)
                     Log :: WARN("READ FIN ID %d",
                                 pdata->id);
                     rapool_del(sev, idx, 0, true);
+                    (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                     continue;
                 }
 
@@ -426,23 +451,29 @@ nf_RA_readline_worker(void * data)
                         Log :: WARN("WRITE ERROR THREAD ID %d, ERROR %s",
                                     pdata->id, strerror(errno));
                         rapool_del(sev, idx, 0, true);
+                        (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                         continue;
                     }
                     Log :: DEBUG("WRITE DATA %d byte LEFT : %d" ,n, pdata->writed_size - n);
                     //send not enough, need to store write cache
                     if(n < pdata->writed_size) 
                     {
-                        rp->w_cache = (char *) Allocate :: allocate(pdata->write_size - n);
-                        rp->w_cache_len = pdata->write_size - n;
+                        rp->w_cache = (char *) Allocate :: allocate(pdata->writed_size - n);
+                        rp->w_cache_len = pdata->writed_size - n;
                         rp->w_allo_len = rp->w_cache_len;
 
                         memcpy(rp->w_cache, res + n, rp->w_cache_len);
                         Log :: DEBUG("WRITE DUMP CACHE %d bytes VAL : %s ", 
                                      rp->w_cache_len, rp->w_cache);
                         //若发送不全，更改下次监控为写事件，否则为读事件不变
+                        
                         rapool_epoll_mod_write(sev, idx, pdata->id);
                     }
-                } 
+                }
+                (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
+                pool->sockets[idx].sock_timeout = (pdata->timer).add_timer_ms(sev->write_to, 
+                                                   call_back_timeout, 
+                                                   &pool->sockets[idx]);
                 //clear work space 
                 pdata->read_start = 0;
                 pdata->readed_size = 0;
@@ -461,11 +492,12 @@ nf_RA_readline_worker(void * data)
                                 pdata->id, strerror(errno));
 
                     rapool_del(sev, idx, 0, true);
+                    (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                     continue;
                 }
                 Log :: DEBUG("WRITE event data %d byte LEFT : %d" ,n, rp->w_cache_len - n);
             
-                //send not enough, need to store write cache
+                //send not enough, need to send again
                 if(n < rp->w_cache_len) 
                 {
                     move_forward(rp->w_cache, n, rp->w_cache_len);
@@ -473,19 +505,26 @@ nf_RA_readline_worker(void * data)
                     Log :: DEBUG("WRITE event LEFT %d bytes VAL : %s ", 
                                  rp->w_cache_len, rp->w_cache);
                     //下个事件仍监听写
-                    continue;
+                    goto WRITE_END;
                 }
                 //write succ, wait read event
-                Log :: DEBUG("BACK DUMP DATA IN WRITE %d bytes %s", rp->w_allo_len, rp->cache);
-                Allocate :: deallocate(rp->cache, rp->w_allo_len);
+                Log :: DEBUG("BACK DUMP DATA IN WRITE %d bytes %s", rp->w_allo_len, rp->w_cache);
+                Allocate :: deallocate(rp->w_cache, rp->w_allo_len);
                 
                 rp->w_cache_len = 0; 
                 rp->w_cache = NULL;
                 rp->w_allo_len = 0; 
 
                 rapool_epoll_mod_read(sev, idx, pdata->id);
+                WRITE_END:
+                (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
+                pool->sockets[idx].sock_timeout = (pdata->timer).add_timer_ms(sev->write_to, 
+                                                                              call_back_timeout, 
+                                                                              &pool->sockets[idx]);
             }
-        } 
+        }
+        //frest timeout
+        timeout = (pdata->timer).top_timer_ms();
     }
     return 0;
 }
@@ -497,7 +536,6 @@ nf_default_handle()
     char * write_buf = (char *) nf_server_get_write_buf(); 
     int readed_size = nf_server_get_readed_size();
     strncpy(write_buf, read_buf, readed_size);
-    std :: cout << "server read data : " << read_buf << std :: endl;
 
     if (nf_server_set_writed_size(readed_size) < 0)
         std :: cout << "set writed size error " << std :: endl;

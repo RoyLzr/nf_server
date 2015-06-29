@@ -101,12 +101,21 @@ namespace nf
             {
                 std::cout << i << std::endl;
                 if( sev_data->pdata[i].read_buf != NULL)
+                {    
                     free(sev_data->pdata[i].read_buf);
+                    sev_data->pdata[i].read_buf = NULL;
+                }
                 if( sev_data->pdata[i].write_buf != NULL)
+                {
                     free(sev_data->pdata[i].write_buf);
+                    sev_data->pdata[i].write_buf = NULL;
+                }
                 if(sev_data->server_type == NFSVR_LFPOOL 
                    && sev_data->pdata[i].rio.rio_ptr != NULL)
+                {
                     free(sev_data->pdata[i].rio.rio_ptr);
+                    sev_data->pdata[i].rio.rio_ptr = NULL;
+                }
             }
         }
         Singleton<ConfigParser>::destroy();

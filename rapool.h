@@ -14,9 +14,9 @@ struct _rapool_sock_item_t
     int status;
     //int epoll_staus;
     int sock;
-    time_t last_active;
     struct sockaddr_in addr;
     
+    long long sock_timeout;    
     rio_t rp;
 };
 
@@ -35,10 +35,6 @@ struct _rapool_t
 
     int * run;
     int sev_sock_id;
-
-    pthread_mutex_t ready_mutex;
-    pthread_cond_t  ready_cond;
-
     pthread_t main;
 };
 
@@ -72,22 +68,28 @@ void *
 rapool_workers(void *);
 
 int 
-rapool_produce(nf_server_t *sev, struct sockaddr *addr, 
-               socklen_t *addrlen, int work_reactor);
+rapool_produce(nf_server_t *sev, 
+               struct sockaddr *addr, 
+               socklen_t *addrlen, 
+               int work_reactor);
 
 int 
-rapool_reactor(rapool_t *pool, nf_server_pdata_t *data);
+rapool_reactor(rapool_t *pool, 
+               nf_server_pdata_t *data);
 
 int 
 rapool_check_timeout(nf_server_t *sev);
 
 int 
-rapool_add(nf_server_t *sev, int sock, 
+rapool_add(nf_server_t *sev, 
+           int sock, 
            struct sockaddr_in * addr);
 
 int 
-rapool_del(nf_server_t *sev, int idx, 
-           int keep_alive, bool remove=false);
+rapool_del(nf_server_t *sev, 
+           int idx, 
+           int keep_alive, 
+           bool remove=false);
 
 int 
 rapool_epoll_add_read(nf_server_t *sev, 
@@ -107,5 +109,6 @@ rapool_epoll_mod_write(nf_server_t *sev,
                        int idx, 
                        int work_reactor);
 
+int call_back_timeout(void * param);
 #endif  
 

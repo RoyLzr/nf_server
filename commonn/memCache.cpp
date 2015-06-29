@@ -31,6 +31,8 @@ Allocate :: allocate(size_t n)
         return NULL;
     obj ** my_free_list;
     obj * result;
+    if(n > MAX_BYTES)
+        std:: cout << n << std::endl;
     n = ROUND_UP(n);
     int index = FREELIST_INDEX(n);
     if(n > MAX_BYTES)

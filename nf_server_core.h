@@ -58,6 +58,8 @@ struct _nf_server_pdata_t
     int fd;
     int idx; //sapool, handle socket index
     size_t ep_size;
+
+    Timer timer;
 };
 
 struct _nf_server_t

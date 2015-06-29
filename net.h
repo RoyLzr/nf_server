@@ -35,19 +35,20 @@
 #include <signal.h>
 #include <limits.h>
 #include "commonn/asynLog.h"
+#include "commonn/timer.h"
 #include <stdarg.h>
 
 typedef struct _rio_t
 {
     int rio_fd;
-    int rio_cnt;
-    size_t rio_len;
-    char * rio_bufptr;
-    char * rio_ptr;
+    int rio_cnt;      // ÄÚÖÃ·â×°readÊ±Ê¹ÓÃ
+    size_t rio_len;   // ²»½¨ÒéÊ¹ÓÃ·â×°read²Ù×÷
+    char * rio_bufptr;// ½¨ÒéÖ±½Ó¶Áµ½Ïß³Ì¹¤×÷¿¿Õ¼ä 
+    char * rio_ptr;   
 
     char * cache;
     int cache_len;
-    
+
     char * w_cache;
     int w_cache_len;
     int w_allo_len;    
