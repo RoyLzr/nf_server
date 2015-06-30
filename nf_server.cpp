@@ -97,7 +97,7 @@ namespace nf
  
         if( sev_data->pdata != NULL)
         { 
-            for(int i = 0; i < sev_data->pthread_num; i++)
+            for(int i = 1; i < sev_data->pthread_num; i++)
             {
                 std::cout << i << std::endl;
                 if( sev_data->pdata[i].read_buf != NULL)
