@@ -9,7 +9,6 @@ Timer :: add_timer_ms(long long time,
     gettimeofday(&tv, NULL);
     int msec = get_time_msec(&tv);
     msec += time;
-    //pair<timer_callback_proc, void *> tmp = make_pair
     timer.insert(make_pair(msec, make_pair(proc, param)));
     return msec;
 }
@@ -20,18 +19,13 @@ Timer :: del_timer_ms(long long time, void * param)
     
     multimap<long long, pair<timer_callback_proc, void *> > :: iterator iter = timer.find(time);
     int num = timer.count(time);
-    int ret = 0;
     for(int i = 0; i != num; i++, iter++)
     {
         if((iter->second).second == param)
         {
             timer.erase(iter);
-            ret ++;
-            //std :: cout << "num : " << num << "clean one"<< std::endl
-            //return;
         } 
     }
-    std :: cout << "size : num : ret" << timer.size()<< " " <<num << "  " << ret << std::endl;
     return;
 }
 
