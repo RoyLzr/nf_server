@@ -1,9 +1,22 @@
+//**********************************************************
+//          Nf_server 1.0
+//
+//  Description:
+//  pool_register: 不同的模型 将其对应函数填充注册表实现模型
+//                 用C 模拟 多态，方便模型扩展
+//                 
+//
+// Author: Liu ZhaoRui
+//         liuzhaorui1@163.com
+//**********************************************************
+
 #ifndef _NFSERVER_REGISTER_H
 #define _NFSERVER_REGISTER_H
 
 #include "nf_server_core.h"
 
 //注册内容
+//leader-follower model
 extern int lfpool_init(nf_server_t *);
 extern int lfpool_run(nf_server_t *);
 extern int lfpool_join(nf_server_t *);
@@ -13,6 +26,7 @@ extern long long lfpool_get_queuenum(nf_server_t *);
 extern int lfpool_pause(nf_server_t *);
 extern int lfpool_resume(nf_server_t *);
 
+//reactor-sync model
 extern int sapool_init(nf_server_t *);
 extern int sapool_run(nf_server_t *);
 extern int sapool_join(nf_server_t *);
@@ -22,6 +36,7 @@ extern long long sapool_get_queuenum(nf_server_t *);
 extern int sapool_pause(nf_server_t *);
 extern int sapool_resume(nf_server_t *);
 
+//reactor with multi thread model
 extern int rapool_init(nf_server_t *);
 extern int rapool_run(nf_server_t *);
 extern int rapool_join(nf_server_t *);
@@ -57,6 +72,7 @@ struct _pool_t
 };
 
 //开始注册
+//全局注册表，别的模块通过调用g_pool 模型切换
 static const struct _pool_t g_pool[] = {
     {
         lfpool_init,

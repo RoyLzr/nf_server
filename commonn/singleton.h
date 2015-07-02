@@ -1,3 +1,14 @@
+//**********************************************************
+//          Net Utility 1.0
+//
+//  Description:
+//  单例模板，nf_server 中用于文本解析，实现解析一次，四处
+//  使用
+//
+// Author: Liu ZhaoRui
+//         liuzhaorui1@163.com
+//**********************************************************
+
 #ifndef _singleton_h
 #define _singleton_h
 

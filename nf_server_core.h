@@ -1,8 +1,15 @@
-/*
- * brief nf_server data-structure
- * author liuzhaorui
- * email  liuzhaorui1@163.com
- */
+
+//**********************************************************
+//          Nf_server 1.0
+//
+//  Description:
+//  server/thread 核心数据结构
+//
+//  核心server调用函数， server 类对该核心库的封装
+//
+// Author: Liu ZhaoRui
+//         liuzhaorui1@163.com
+//**********************************************************
 
 #ifndef _NFSERVER_CORE_H
 #define _NFSERVER_CORE_H

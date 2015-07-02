@@ -1,3 +1,14 @@
+//**********************************************************
+//          Nf_server 1.0
+//
+//  Description:
+//  leader-follower model
+//  线程模型，每个线程维护一个fd, 适合短连接，快速处理任务
+//
+// Author: Liu ZhaoRui
+//         liuzhaorui1@163.com
+//**********************************************************
+
 #include <sys/epoll.h>
 #include <pthread.h>
 #include "nf_server_core.h"

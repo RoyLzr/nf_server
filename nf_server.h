@@ -1,10 +1,12 @@
-/*
- * brief nf_server
- * server 类
- * author liuzhaorui
- * email  liuzhaorui1@163.com
- */
-
+//**********************************************************
+//          Nf_server 1.0
+//
+//  Description:
+//  nf_server 封装类，对底层server服务封装
+//
+// Author: Liu ZhaoRui
+//         liuzhaorui1@163.com
+//**********************************************************
 
 #ifndef _NF_SERVER_H
 #define _NF_SERVER_H
@@ -93,7 +95,7 @@ namespace nf
         nf_server_t * get_server_data();
  
     protected:
-        nf_server_t *sev_data;
+        nf_server_t *sev_data; //server 核心数据结构
             
     };
 }

@@ -1,3 +1,15 @@
+//**********************************************************
+//          Net Utility 1.0
+//
+//  Description:
+//  conf 文件解析类，支持格式
+//  [section]
+//  key=value
+//
+// Author: Liu ZhaoRui
+//         liuzhaorui1@163.com
+//**********************************************************
+
 #ifndef _CONFIG_PARSER_H
 #define _CONFIG_PARSER_H
 

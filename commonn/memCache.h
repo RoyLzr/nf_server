@@ -1,3 +1,14 @@
+//**********************************************************
+//          Net Utility 1.0
+//
+//  Description:
+//  tiny memory cache. 支持 16个级别的 内存大小块分配
+//  server 动态内存 通过内存池使用
+//
+// Author: Liu ZhaoRui
+//         liuzhaorui1@163.com
+//**********************************************************
+
 #ifndef _MEM_CACHE_
 #define _MEM_CACHE_
 

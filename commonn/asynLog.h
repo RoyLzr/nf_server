@@ -1,3 +1,14 @@
+
+//**********************************************************
+//          Net Utility 1.0
+//
+//  Description:
+//  异步LOG 写数据,支持 DEBUG NOTICE WARN ERROR
+//
+// Author: Liu ZhaoRui
+//         liuzhaorui1@163.com
+//**********************************************************
+
 #ifndef _ASYN_LOG_
 #define _ASYN_LOG_
 
