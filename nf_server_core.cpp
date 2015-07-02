@@ -1,6 +1,6 @@
 #include "nf_server_core.h"
-#include "sapool.h"
 #include "pool_register.h"
+
 
 static pthread_key_t pkey;
 static pthread_once_t ponce = PTHREAD_ONCE_INIT;

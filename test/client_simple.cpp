@@ -28,8 +28,8 @@ int createData(char * tmp, int off)
 
 void * work(void * arg)
 {
-    char buf[2048];
-    char readbuf[2048];
+    char buf[9999];
+    char readbuf[9999];
     struct sockaddr_in server_address;
     char ip[] = "127.0.0.1";
     set_tcp_sockaddr(ip, 1025, &server_address);
@@ -57,13 +57,13 @@ void * work(void * arg)
         {
             int tes = 2;
               
-            if (send(fd, buf, 2, 0) <= 0)
+            if (send(fd, buf, size, 0) <= 0)
                 std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
-            if (send(fd, buf + 2, size - 2, 0) <= 0)
+            if (send(fd, buf, size, 0) <= 0)
                 std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
             
-            //if((n = recv(fd, readbuf, size, MSG_WAITALL)) <= 0)
-            //    std::cout <<  "recv error"  << ": " << strerror(errno) << std::endl;
+            if((n = recv(fd, readbuf, size * 2, MSG_WAITALL)) <= 0)
+                std::cout <<  "recv error"  << ": " << strerror(errno) << std::endl;
         
             std :: cout << "recv once succ : " << j++ << std :: endl;
             //std::cout <<  readbuf  << " : " << n << std::endl;

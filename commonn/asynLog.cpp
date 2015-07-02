@@ -23,6 +23,7 @@ Log :: init(const char * name)
     pthread_mutex_init(&log_mutex, NULL);
     pthread_cond_init(&log_cond, NULL);
     
+     
     fp = fopen(name, "w+");
     if(fp != NULL)
         set_file(fp);

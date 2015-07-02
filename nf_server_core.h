@@ -7,11 +7,7 @@
 #ifndef _NFSERVER_CORE_H
 #define _NFSERVER_CORE_H
 
-struct _sapool_sock_item_t;
-struct _sapool_t;
-typedef _sapool_sock_item_t sapool_sock_item_t;
-typedef _sapool_t sapool_t;
-
+struct _pool_t;
 
 #include "net.h"
 #include "commonn/singleton.h"

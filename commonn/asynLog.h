@@ -62,6 +62,11 @@ class Log
     {
         STATUS = LOG_STOP;    
     }
+    
+    static void set_level(int level)
+    {
+        LEVEL = level;    
+    }
  
     static pthread_mutex_t log_mutex;
     static pthread_cond_t  log_cond;

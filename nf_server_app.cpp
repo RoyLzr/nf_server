@@ -1,4 +1,3 @@
-#include "nf_server_core.h"
 #include "sapool.h"
 #include "rapool.h"
 
@@ -523,8 +522,9 @@ nf_RA_readline_worker(void * data)
                                                                               &pool->sockets[idx]);
             }
         }
-        //frest timeout
+        //fresh timeout
         timeout = (pdata->timer).top_timer_ms();
+        //printf("timeout = %d\n", timeout);
     }
     return 0;
 }

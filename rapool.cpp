@@ -370,18 +370,19 @@ rapool_produce(nf_server_t * sev,
             close(cli_sock);
             return -1;
         }
-        //add cli_sock to reactor
-        if (rapool_epoll_add_read(sev, idx, work_reacotr) < 0)
-        {
-            close(cli_sock);
-            return -1;
-        }
         //add timer
         rapool_t * pool = (rapool_t *) sev->pool;
         pool->sockets[idx].sock_timeout = (sev->pdata[work_reacotr].timer).add_timer_ms(
                                            1000, 
                                            call_back_timeout, 
                                            &(pool->sockets[idx]));
+
+        //add cli_sock to reactor,order is important
+        if (rapool_epoll_add_read(sev, idx, work_reacotr) < 0)
+        {
+            close(cli_sock);
+            return -1;
+        }
     } 
     return ret;
 }

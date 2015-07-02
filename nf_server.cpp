@@ -42,7 +42,12 @@ namespace nf
     int NfServer :: run()
     {
         int ret;
-        Log :: init(Singleton<ConfigParser>::instance()->get("server", "logPath").c_str());
+        Log :: init(Singleton<ConfigParser>::instance()->get("server", 
+                                                             "logPath").c_str());
+
+        Log :: set_level(atoi(Singleton<ConfigParser>::instance()->get("server", 
+                                                                  "logLevel").c_str()));
+
         if( (ret = nf_server_init(sev_data) ) < 0 )
         {   
             Log :: ERROR("nf_server.cpp : 48 INIT ERROR \n");

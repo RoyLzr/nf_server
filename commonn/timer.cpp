@@ -19,6 +19,7 @@ Timer :: del_timer_ms(long long time, void * param)
     
     multimap<long long, pair<timer_callback_proc, void *> > :: iterator iter = timer.find(time);
     int num = timer.count(time);
+    //printf("%lld   %lld\n", time, timer.begin()->first);
     for(int i = 0; i != num; i++, iter++)
     {
         if((iter->second).second == param)
@@ -26,6 +27,7 @@ Timer :: del_timer_ms(long long time, void * param)
             timer.erase(iter);
         } 
     }
+    //printf("timersize = %d\n", timer.size());
     return;
 }
 
@@ -45,6 +47,7 @@ Timer :: top_timer_ms()
         return 0;
 
     long long time = (timer.begin())->first;
+    //printf("begin = %lld\n", time);
     struct timeval tv;
     gettimeofday(&tv, NULL);
     int msec = get_time_msec(&tv);
