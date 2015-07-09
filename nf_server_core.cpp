@@ -11,6 +11,12 @@ create_key_once(void)
     pthread_key_create(&pkey, NULL);
 }
 
+void 
+pthread_key_del(void)
+{
+    pthread_key_delete(pkey);
+}
+
 int 
 set_pthread_data(nf_server_pdata_t *data)
 {

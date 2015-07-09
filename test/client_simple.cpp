@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
     char buf[128] = "12345";
     char readbuf[128];
     pthread_t tid[100];
-    for(int i = 0; i < 2; i++)
+    for(int i = 0; i < 2000; i++)
     {
         if( pthread_create(&tid[i], NULL, work, NULL) != 0) 
             return -1; 

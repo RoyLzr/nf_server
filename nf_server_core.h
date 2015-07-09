@@ -202,4 +202,7 @@ nf_server_get_socksize(nf_server_t * sev);
 void 
 nf_default_handle();
 
+void 
+pthread_key_del(void);
+
 #endif

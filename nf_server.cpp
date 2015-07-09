@@ -78,7 +78,8 @@ namespace nf
     int NfServer :: stop()
     {
         sev_data->run = 0;
-        Log :: set_status(2); 
+        Log :: NOTICE("SVR STOPPED");
+        //Log :: set_status(2); 
         return 0;
     }
     
@@ -93,7 +94,6 @@ namespace nf
     
     int NfServer :: destroy()
     {
-        NfServer :: stop();
         NfServer :: join();    
         if ( sev_data->sev_socket >= 0)
             close(sev_data->sev_socket);
@@ -103,7 +103,7 @@ namespace nf
  
         if( sev_data->pdata != NULL)
         { 
-            for(int i = 1; i < sev_data->pthread_num; i++)
+            for(int i = 0; i < sev_data->pthread_num; i++)
             {
                 std::cout << i << std::endl;
                 if( sev_data->pdata[i].read_buf != NULL)
@@ -128,6 +128,7 @@ namespace nf
         free(sev_data->pdata);
         free(sev_data);
         Log :: NOTICE("nf_server.cpp : 115 CLOSE SERVER SUCC \n");
+        sleep(1);
     }
     
     int NfServer :: pause()

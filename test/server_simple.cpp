@@ -16,8 +16,8 @@
 int main(int argc, char *argv[])
 {
     
-    //signal(SIGINT, default_hand);
-    //signal(SIGHUP, default_hand);
+    signal(SIGINT, default_hand);
+    signal(SIGHUP, default_hand);
 
     nf::NfServer *test =  new nf::NfServer();
     char s[] = "test server";

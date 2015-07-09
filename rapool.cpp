@@ -268,14 +268,13 @@ rapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
             close(pool->sockets[i].sock);
             pool->sockets[i].status = IDLE;
             pool->sockets[i].sock = -1;
-        }
-
         if(pool->sockets[i].rp.w_allo_cache != NULL)
             Allocate :: deallocate(pool->sockets[i].rp.w_allo_cache, 
                                    pool->sockets[i].rp.w_allo_len);
         if(pool->sockets[i].rp.cache != NULL)
             Allocate :: deallocate(pool->sockets[i].rp.cache, 
                                    pool->sockets[i].rp.cache_len);
+        }
     }
 }
 
@@ -570,8 +569,8 @@ rapool_workers(void * param)
     {
         rapool_reactor((rapool_t *) sev->pool, pdata);
     }
-    rapool_close_pool_sockets(sev, false);
     
+    pthread_key_del();
     pthread_exit(NULL);
     return NULL;
 }
