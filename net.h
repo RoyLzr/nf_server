@@ -50,6 +50,8 @@ typedef struct _rio_t
     int cache_len;
 
     char * w_cache;
+    char * w_allo_cache;
+    
     int w_cache_len;
     int w_allo_len;    
  

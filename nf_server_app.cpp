@@ -328,6 +328,8 @@ nf_RA_readline_worker(void * data)
     int ssiz = nf_server_get_socksize(sev);
     
     struct epoll_event events[ssiz], ev;
+    memset(&ev, 0, sizeof(ev));
+    memset(events, 0, sizeof(events));
    
     pdata->write_start = 0;
 
@@ -354,7 +356,7 @@ nf_RA_readline_worker(void * data)
                         pdata->id, strerror(errno));
             continue;
         }
-        Log :: DEBUG("SEV WRITE TO : %d", sev->write_to); 
+
         //events analyse
         for(int i = 0; i < num; i++)
         {
@@ -468,6 +470,8 @@ nf_RA_readline_worker(void * data)
                     if(n < pdata->writed_size) 
                     {
                         rp->w_cache = (char *) Allocate :: allocate(pdata->writed_size - n);
+                        rp->w_allo_cache = rp->w_cache;    
+                    
                         rp->w_cache_len = pdata->writed_size - n;
                         rp->w_allo_len = rp->w_cache_len;
 
@@ -518,11 +522,12 @@ nf_RA_readline_worker(void * data)
                 }
                 //write succ, wait read event
                 Log :: DEBUG("BACK DUMP DATA IN WRITE %d bytes %s", rp->w_allo_len, rp->w_cache);
-                Allocate :: deallocate(rp->w_cache, rp->w_allo_len);
+                Allocate :: deallocate(rp->w_allo_cache, rp->w_allo_len);
                 
                 rp->w_cache_len = 0; 
                 rp->w_cache = NULL;
                 rp->w_allo_len = 0; 
+                rp->w_allo_cache = NULL; 
 
                 rapool_epoll_mod_read(sev, idx, pdata->id);
                 WRITE_END:

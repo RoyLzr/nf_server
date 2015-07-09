@@ -26,7 +26,7 @@ namespace nf
             NfServer();
             virtual ~NfServer();
         
-        virtual int load_conf(const std::string &);
+        virtual int load_conf(const std::string );
 
         virtual int run();
         /**

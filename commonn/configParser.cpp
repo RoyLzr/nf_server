@@ -2,7 +2,8 @@
 
 static const std::string empty_str = "";
 
-const std::string & Section :: get(const std::string key) const
+const std::string & 
+Section :: get(const std::string key) const
 {
     std::map<std::string, std::string>::const_iterator it;
     it = items.find(key);
@@ -12,7 +13,8 @@ const std::string & Section :: get(const std::string key) const
 } 
 
 
-bool ConfigParser :: parser_file(const std::string &file)
+bool 
+ConfigParser :: parser_file(const std::string &file)
 {
     mSections.erase(mSections.begin(), mSections.end());
 
@@ -21,15 +23,17 @@ bool ConfigParser :: parser_file(const std::string &file)
         return false;
     std::string line;
     Section *curSection(NULL);
-
+    
     while(instm.peek() != EOF)
     {
         std::getline(instm, line);
         //del last '\r' char
-        if (*line.rbegin() == '\n' || *line.rbegin() == '\r')
-            line.erase(line.end() - 1);
+        
         if (line.empty() || line[0] == '#')
             continue;
+        if (*(line.rbegin()) == '\n' || *(line.rbegin()) == '\r')
+            line.erase(line.end() - 1);
+        
         if ('[' == line[0])     //is scetion
         {
             if (']' != line[line.length()-1])
@@ -59,7 +63,8 @@ bool ConfigParser :: parser_file(const std::string &file)
 }
 
 
-const std::string& ConfigParser :: get(const std::string sectionName, const std::string keyName) const
+const std::string& 
+ConfigParser :: get(const std::string sectionName, const std::string keyName) const
 {
     std::map<std::string, Section>::const_iterator itr;
     itr = mSections.find(sectionName);
@@ -70,7 +75,8 @@ const std::string& ConfigParser :: get(const std::string sectionName, const std:
     return empty_str;
 }
 
-void Section :: scan() const
+void 
+Section :: scan() const
 {
     std::map<std::string, std::string>::const_iterator it;
     for( it = items.begin(); it != items.end(); it++)
@@ -79,7 +85,8 @@ void Section :: scan() const
     }
 }
 
-void ConfigParser :: scan() const
+void 
+ConfigParser :: scan() const
 {
     std::map<std::string, Section>::const_iterator it_section;
     for( it_section = mSections.begin(); it_section != mSections.end(); it_section++)

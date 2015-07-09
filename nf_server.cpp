@@ -32,7 +32,7 @@ namespace nf
         return sev_data;
     }
 
-    int NfServer :: load_conf(const std::string & conf_path)
+    int NfServer :: load_conf(const std::string conf_path)
     {
         Singleton<ConfigParser>::instance()->parser_file(conf_path);
         Singleton<ConfigParser>::instance()->scan();
@@ -78,6 +78,7 @@ namespace nf
     int NfServer :: stop()
     {
         sev_data->run = 0;
+        Log :: set_status(2); 
         return 0;
     }
     

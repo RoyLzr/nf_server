@@ -190,6 +190,7 @@ nf_server_t *
 nf_server_create(const char * sev_name)
 {
     nf_server_t *sev = (nf_server_t *)malloc(sizeof(nf_server_t));
+    memset(sev, 0, sizeof(nf_server_t));
     if(sev == NULL)
         return NULL;
    
@@ -201,7 +202,8 @@ nf_server_create(const char * sev_name)
     sev->backlog = 2048;
     sev->thread_write_buf = 0;
     sev->thread_read_buf = 0;
-   
+    sev->pool = NULL;  
+ 
     sev->stack_size = 10485760;  //10M
     sev->sev_socket = -1;    
     
@@ -242,6 +244,7 @@ nf_pdata_init(nf_server_pdata_t * pdata, nf_server_t * sev)
     pdata->id = 0;
     pdata->server = sev;
     pdata->fd = -1;
+    pdata->epfd = -1;
      
     pdata->read_buf = NULL;
     pdata->write_buf = NULL;
@@ -342,6 +345,8 @@ nf_server_init(nf_server_t * sev)
   
     //线程内容 初始化 
     sev->pdata = (nf_server_pdata_t *) malloc(sizeof(nf_server_pdata_t) * (sev->pthread_num));
+    memset(sev->pdata, 0, sizeof(nf_server_pdata_t) * (sev->pthread_num));    
+
     if (sev->pdata == NULL)
         return -1;
     

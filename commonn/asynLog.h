@@ -49,7 +49,7 @@ class Log
     static int STATUS;   
     static int LEVEL;
 
-    static void produce_log(int event, char * buff, const char * fmt, va_list args); 
+    static void produce_log(int event, const char * fmt, va_list args); 
     public:
 
     static int DEBUG(const char * fmt, ...); 
@@ -62,6 +62,11 @@ class Log
     static void set_file(FILE * file)
     {
         fp = file;
+    }
+    
+    static void set_status(int status)
+    {
+        STATUS = status;
     }
  
     static FILE * get_file()

@@ -41,6 +41,7 @@ Log :: init(const char * name)
 void *
 Log :: write_log(void *)
 {
+    string content;
     while(STATUS == LOG_RUN)
     {
         pthread_mutex_lock(&log_mutex);
@@ -52,27 +53,26 @@ Log :: write_log(void *)
         if(STATUS != LOG_RUN)
             return NULL;
         
-        //string val = log_buffer.front();
-        //log_buffer.pop();
- 
-        fprintf(fp, "%s\n", (log_buffer.front()).c_str());
-        fflush(fp);
+        content = log_buffer.front();
         log_buffer.pop();
-
+ 
         pthread_mutex_unlock(&log_mutex);
-    } 
+        
+        fprintf(fp, "%s\n", (content).c_str());
+        //fflush(fp);
+    }
+    fflush(fp); 
     return NULL;
 }
 
 int
 Log :: DEBUG(const char * fmt, ...)
 {
-    char buff[LOG_MAXLINE];
     if (LEVEL <= LOG_DEBUG)
     {   
         va_list args;
         va_start(args, fmt);
-        produce_log(LOG_DEBUG, buff, fmt, args);
+        produce_log(LOG_DEBUG, fmt, args);
         va_end(args);
 
     }
@@ -81,12 +81,11 @@ Log :: DEBUG(const char * fmt, ...)
 int
 Log :: ERROR(const char * fmt, ...)
 {
-    char buff[LOG_MAXLINE];
     if (LEVEL <= LOG_ERROR)
     {   
         va_list args;
         va_start(args, fmt);
-        produce_log(LOG_ERROR, buff, fmt, args);
+        produce_log(LOG_ERROR, fmt, args);
         va_end(args);
      
     }
@@ -96,12 +95,11 @@ Log :: ERROR(const char * fmt, ...)
 int
 Log :: NOTICE(const char * fmt, ...)
 {
-    char buff[LOG_MAXLINE];
     if (LEVEL <= LOG_NOTICE)
     {   
         va_list args;
         va_start(args, fmt);
-        produce_log(LOG_NOTICE, buff, fmt, args);
+        produce_log(LOG_NOTICE, fmt, args);
         va_end(args);
 
     }
@@ -112,12 +110,11 @@ Log :: NOTICE(const char * fmt, ...)
 int
 Log :: WARN(const char * fmt, ...)
 {
-    char buff[LOG_MAXLINE];
     if (LEVEL <= LOG_WARN)
     {   
         va_list args;
         va_start(args, fmt);
-        produce_log(LOG_WARN, buff, fmt, args);
+        produce_log(LOG_WARN, fmt, args);
         va_end(args);
      
     }
@@ -152,10 +149,12 @@ ctime(char * t_time, size_t n)
 }
 
 void
-Log :: produce_log(int event, char * s, const char * fmt, va_list args)
+Log :: produce_log(int event, const char * fmt, va_list args)
 {
     int offset = 0;
     char now[20];
+    char s[LOG_MAXLINE];
+    char * tmp = s;
     switch(event)
     {
         case LOG_DEBUG:

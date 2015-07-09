@@ -20,6 +20,7 @@ add_listen_socket(nf_server_t *sev, int listenfd)
 {
     rapool_t *pool = (rapool_t *)sev->pool;
     int idx = 0;
+    int work = 0;
     //监听句柄永远处于busy状态这样不回被关闭
     pool->sockets[idx].status = BUSY;
     pool->sockets[idx].sock = listenfd;
@@ -27,7 +28,7 @@ add_listen_socket(nf_server_t *sev, int listenfd)
     char tmp[] = "0.0.0.0";
     set_tcp_sockaddr(tmp, 0, &(pool->sockets[idx].addr));
 
-    return rapool_epoll_add_read(sev, idx, 0);
+    return rapool_epoll_add_read(sev, idx, work);
 }
 
 int 
@@ -61,11 +62,17 @@ rapool_init(nf_server_t *sev)
     //创建socket资源
     pool->size = ssiz;
     pool->sockets = (rapool_sock_item_t *) malloc (sizeof(rapool_sock_item_t) * ssiz);
-    
+    memset(pool->sockets, 0, sizeof(rapool_sock_item_t) * ssiz);   
+ 
     for(int i = 0; i < ssiz; i++)
     {
         pool->sockets[i].rp.rio_ptr = NULL;
+        pool->sockets[i].rp.cache = NULL;
+        pool->sockets[i].rp.w_cache = NULL;
+        pool->sockets[i].rp.w_allo_cache = NULL;
+
         pool->sockets[i].sock_timeout = 0;
+        pool->sockets[i].sock = -1;
         rio_init(&pool->sockets[i].rp, -1, -1); 
     }
 
@@ -262,6 +269,13 @@ rapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
             pool->sockets[i].status = IDLE;
             pool->sockets[i].sock = -1;
         }
+
+        if(pool->sockets[i].rp.w_allo_cache != NULL)
+            Allocate :: deallocate(pool->sockets[i].rp.w_allo_cache, 
+                                   pool->sockets[i].rp.w_allo_len);
+        if(pool->sockets[i].rp.cache != NULL)
+            Allocate :: deallocate(pool->sockets[i].rp.cache, 
+                                   pool->sockets[i].rp.cache_len);
     }
 }
 
@@ -421,7 +435,10 @@ int
 rapool_epoll_add_read(nf_server_t *sev, int idx, int work_reactor)
 {
     rapool_t *pool = (rapool_t *) sev->pool;
+
     struct epoll_event ev;
+    memset(&ev, 0, sizeof(ev));
+
     ev.data.fd = idx;
     ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
     int sock = pool->sockets[idx].sock;
@@ -441,7 +458,10 @@ int
 rapool_epoll_mod_read(nf_server_t *sev, int idx, int work_reactor)
 {
     rapool_t *pool = (rapool_t *) sev->pool;
+    
     struct epoll_event ev;
+    memset(&ev, 0, sizeof(ev));
+    
     ev.data.fd = idx;
     ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
     int sock = pool->sockets[idx].sock;
@@ -461,7 +481,10 @@ int
 rapool_epoll_mod_write(nf_server_t *sev, int idx, int work_reactor)
 {
     rapool_t *pool = (rapool_t *) sev->pool;
+    
     struct epoll_event ev;
+    memset(&ev, 0, sizeof(ev));
+    
     ev.data.fd = idx;
     ev.events = EPOLLOUT | EPOLLHUP | EPOLLERR;
     int sock = pool->sockets[idx].sock;
@@ -481,7 +504,10 @@ int
 rapool_epoll_del(nf_server_t * sev, int idx, int work_reactor)
 {
     rapool_t *pool = (rapool_t *) sev->pool;
+    
     struct epoll_event ev;
+    memset(&ev, 0, sizeof(ev));
+    
     ev.data.fd = idx;
     ev.events = EPOLLIN | EPOLLHUP | EPOLLERR;
     int sock = pool->sockets[idx].sock;
@@ -517,9 +543,10 @@ rapool_del(nf_server_t *sev, int idx, int alive, bool remove)
         pool->sockets[idx].rp.cache_len = 0; 
  
         if(pool->sockets[idx].rp.w_cache != NULL)
-            Allocate :: deallocate(pool->sockets[idx].rp.w_cache, 
+            Allocate :: deallocate(pool->sockets[idx].rp.w_allo_cache, 
                                    pool->sockets[idx].rp.w_allo_len);
         pool->sockets[idx].rp.w_cache = NULL;
+        pool->sockets[idx].rp.w_allo_cache = NULL;
         pool->sockets[idx].rp.w_cache_len = 0; 
         pool->sockets[idx].rp.w_allo_len = 0; 
         
@@ -543,7 +570,8 @@ rapool_workers(void * param)
     {
         rapool_reactor((rapool_t *) sev->pool, pdata);
     }
-
+    rapool_close_pool_sockets(sev, false);
+    
     pthread_exit(NULL);
     return NULL;
 }
@@ -610,6 +638,8 @@ int call_back_timeout(void * param)
                 sock_item->sock, id);
     
     struct epoll_event ev;
+    memset(&ev, 0, sizeof(ev));
+    
     ev.data.fd = -1;
     ev.events = EPOLLIN | EPOLLHUP | EPOLLERR | EPOLLOUT;
     int epfd = nf_server_get_thread_epfd();
@@ -634,9 +664,10 @@ int call_back_timeout(void * param)
     sock_item->rp.cache_len = 0; 
  
     if(sock_item->rp.w_cache != NULL)
-        Allocate :: deallocate(sock_item->rp.w_cache, 
+        Allocate :: deallocate(sock_item->rp.w_allo_cache, 
                                sock_item->rp.w_allo_len);
     sock_item->rp.w_cache = NULL;
+    sock_item->rp.w_allo_cache = NULL; 
     sock_item->rp.w_cache_len = 0; 
     sock_item->rp.w_allo_len = 0; 
         

@@ -38,7 +38,9 @@ Allocate :: allocate(size_t n)
     if(n > MAX_BYTES)
     {
         std:: cout << n <<" : malloc space "<<std::endl;
-        return malloc(n);
+        void * tmp = malloc(n);
+        memset(tmp, '\0', n);
+        return tmp;
     }
 
     pthread_mutex_lock(&(mem_mutex[index]));
@@ -66,6 +68,7 @@ Allocate :: refill(size_t n)
         return NULL;
 
     char * chunk = (char *) malloc(CHUNK_NODE * n);
+    memset(chunk, '\0', CHUNK_NODE * n);
     if(chunk == NULL)
         return NULL;
 

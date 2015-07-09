@@ -31,8 +31,8 @@ class Timer
         typedef int (* timer_callback_proc)(void * param);
         
         long long add_timer_ms(long long time, 
-                          timer_callback_proc proc, 
-                          void * param);
+                               timer_callback_proc proc, 
+                               void * param);
 
         void del_timer_ms(long long time, 
                           void *);

@@ -25,7 +25,8 @@ Timer :: del_timer_ms(long long time, void * param)
         if((iter->second).second == param)
         {
             timer.erase(iter);
-        } 
+            break;
+        }
     }
     //printf("timersize = %d\n", timer.size());
     return;

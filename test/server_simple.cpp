@@ -16,13 +16,14 @@
 int main(int argc, char *argv[])
 {
     
-    signal(SIGINT, default_hand);
-    signal(SIGHUP, default_hand);
+    //signal(SIGINT, default_hand);
+    //signal(SIGHUP, default_hand);
 
     nf::NfServer *test =  new nf::NfServer();
     char s[] = "test server";
     test->set_server_name(s);
-    test->load_conf("server.conf");
+    string conf("server.conf");
+    test->load_conf(conf);
     
     //test->set_work_callback(nf_SA_readline_worker); 
     test->set_work_callback(nf_RA_readline_worker); 

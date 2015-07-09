@@ -13,6 +13,7 @@
 #define _MEM_CACHE_
 
 #include <pthread.h>
+#include <string.h>
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
