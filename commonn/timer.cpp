@@ -14,7 +14,7 @@ Timer :: add_timer_ms(long long time,
 }
 
 void
-Timer :: del_timer_ms(long long time, void * param)
+Timer :: del_timer_ms(long long time, const void * const param)
 {
     
     multimap<long long, pair<timer_callback_proc, void *> > :: iterator iter = timer.find(time);
@@ -33,7 +33,7 @@ Timer :: del_timer_ms(long long time, void * param)
 }
 
 long long
-Timer :: get_time_msec(struct timeval * tv)
+Timer :: get_time_msec(const struct timeval * tv)
 {
     long long time = 0;
     time += tv->tv_sec * 1000;
@@ -44,7 +44,7 @@ Timer :: get_time_msec(struct timeval * tv)
 long long
 Timer :: top_timer_ms()
 {
-    if(timer.size() <= 0)
+    if(timer.empty())
         return 0;
 
     long long time = (timer.begin())->first;
@@ -77,9 +77,10 @@ Timer :: expire_timer_ms()
         else
             break;
     }
-    for(; del_iter != iter; del_iter ++)
+    for(; msec >= del_iter->first; )
     {
-        timer.erase(del_iter);        
+        timer.erase(del_iter);  
+        del_iter = timer.begin();      
     }
     return;
 }

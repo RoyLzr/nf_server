@@ -59,7 +59,7 @@ void * work(void * arg)
               
             if (send(fd, buf, 10, 0) <= 0)
                 std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
-            sleep(1);
+            //sleep(1);
             if (send(fd, buf+10, size-10, 0) <= 0)
                 std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
             

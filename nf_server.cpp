@@ -97,8 +97,8 @@ namespace nf
         NfServer :: join();    
         if ( sev_data->sev_socket >= 0)
             close(sev_data->sev_socket);
-        g_pool[sev_data->server_type].destroy(sev_data);   
         
+        g_pool[sev_data->server_type].destroy(sev_data);   
         Log :: NOTICE("nf_server.cpp : 97 CLOSE THREAD SUCC \n");
  
         if( sev_data->pdata != NULL)

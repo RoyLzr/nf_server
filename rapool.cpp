@@ -154,21 +154,21 @@ rapool_run(nf_server_t *sev)
     ret = pthread_attr_init(&thread_attr);
     if (ret) 
     {
-        std :: cout << "error thread attr init" << std :: endl;
+        Log :: ERROR("error thread attr init");
         return -1;
     }
 
     ret = pthread_attr_setinheritsched(&thread_attr, PTHREAD_EXPLICIT_SCHED);
     if (ret) 
     {
-        std :: cout << "error thread set herit sched" << std :: endl;
+        Log :: ERROR( "error thread set herit sched");
         return -1;
     }
 
     ret = pthread_attr_setschedpolicy(&thread_attr, SCHED_FIFO);
     if (ret) 
     {
-        std :: cout << "error thread set schedpolicy" << std :: endl;
+        Log :: ERROR("error thread set schedpolicy");
         return -1;
     }
 
@@ -176,7 +176,7 @@ rapool_run(nf_server_t *sev)
     ret = pthread_attr_setschedparam(&thread_attr, &param);
     if (ret) 
     {
-        std :: cout << "error thread set listen priority" << std :: endl;
+        Log :: ERROR("error thread set listen priority"); 
         return -1;
     }
 
@@ -197,7 +197,7 @@ rapool_run(nf_server_t *sev)
     ret = pthread_attr_setschedparam(&thread_attr, &param);
     if (ret) 
     {
-        std :: cout << "error thread set work priority" << std :: endl;
+        Log :: ERROR("error thread set work priority"); 
         return -1;
     }
 
@@ -210,6 +210,7 @@ rapool_run(nf_server_t *sev)
         if (ret) 
         {
             Log:: ERROR("CREATE WORK THREAD ERROR ID : %d", i);
+            exit(0); 
             return -1;
         }
         Log :: NOTICE("CREATE WORK THREAD SUCC ID : %d", i);
@@ -514,7 +515,7 @@ rapool_epoll_del(nf_server_t * sev, int idx, int work_reactor)
     
     if (epoll_ctl(epfd, EPOLL_CTL_DEL, sock, &ev) < 0) 
     {
-        std :: cout << "del socket error: " << strerror(errno) << std :: endl;
+        Log :: WARN("del socket error: %s", strerror(errno));
         return -1;
     }
     return 0;

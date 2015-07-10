@@ -403,7 +403,8 @@ nf_RA_readline_worker(void * data)
                     memcpy(req, rp->cache, rp->cache_len);
                     clen = rp->cache_len;
                     
-                    Log :: DEBUG("BACK DUMP DATA IN READ %d bytes %s", clen, rp->cache);
+                    //Log :: DEBUG("BACK DUMP DATA IN READ %d bytes %s", clen, rp->cache);
+                    Log :: DEBUG("BACK DUMP DATA IN READ %d ", clen);
                     Allocate :: deallocate(rp->cache, rp->cache_len);
                     rp->cache_len = 0; 
                     rp->cache = NULL;
@@ -426,7 +427,8 @@ nf_RA_readline_worker(void * data)
                 }
 
                 req[n + clen] = '\0';
-                Log :: DEBUG("READ DATA %d byte VALUE : %s" ,n + clen, req);
+                //Log :: DEBUG("READ DATA %d byte VALUE : %s" ,n + clen, req);
+                Log :: DEBUG("READ DATA %d byte " ,n + clen);
                 
                 //READ ANALYSIS 
                 int start, end; 
@@ -435,8 +437,8 @@ nf_RA_readline_worker(void * data)
                 {
                     if(*(req + i) == '\n')
                     {
-                        Log :: DEBUG("SEARCHING REQ LINE FD : %d POS : %d VAL : %s" , 
-                                     sock, i, req);
+                        //Log :: DEBUG("SEARCHING REQ LINE FD : %d POS : %d VAL : %s" , 
+                        //             sock, i, req);
                         pdata->read_start = start;
                         pdata->readed_size = i - start + 1;
                         sev->p_handle();

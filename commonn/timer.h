@@ -35,7 +35,7 @@ class Timer
                                void * param);
 
         void del_timer_ms(long long time, 
-                          void *);
+                          const void * const );
 
         void expire_timer_ms();
 
@@ -43,8 +43,8 @@ class Timer
     
     private:
         multimap<long long, pair<timer_callback_proc, void *> > timer;
-        long long get_time_usec(struct timeval * );
-        long long get_time_msec(struct timeval * );
+        long long get_time_usec(const struct timeval * );
+        long long get_time_msec(const struct timeval * );
 
 };
 

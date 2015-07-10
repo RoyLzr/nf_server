@@ -43,7 +43,7 @@ nf_server_get_read_buf()
     nf_server_pdata_t *ptr = get_pdata();
     if (ptr == NULL) 
     {
-        std :: cout << "empty read buf" << std :: endl;
+        Log :: ERROR("NF_SVR_CORE : GET READ BUF EMPTY");
         return NULL;
     }
     else
@@ -56,7 +56,7 @@ nf_server_get_thread_id()
     nf_server_pdata_t * ptr = get_pdata();
     if (ptr == NULL) 
     {
-        std :: cout << "empty read buf" << std :: endl;
+        Log :: ERROR("NF_SVR_CORE : GET READ THREAD_ID EMPTY");
         return -1;
     }
     else
@@ -69,7 +69,7 @@ nf_server_get_thread_epfd()
     nf_server_pdata_t * ptr = get_pdata();
     if (ptr == NULL) 
     {
-        std :: cout << "empty read buf" << std :: endl;
+        Log :: ERROR("NF_SVR_CORE : GET EPFD EMPTY");
         return -1;
     }
     else
@@ -83,7 +83,7 @@ nf_server_get_write_buf()
     nf_server_pdata_t *ptr = get_pdata();
     if (ptr == NULL) 
     {
-        std :: cout << "empty wirte buf" << std :: endl;
+        Log :: ERROR("NF_SVR_CORE : GET WRITE BUF EMPTY");
         return NULL;
     }
     else
@@ -96,7 +96,7 @@ nf_server_get_readto()
     nf_server_pdata_t *ptr = get_pdata();
     if (ptr == NULL) 
     {
-        std :: cout << "empty readto" << std :: endl;
+        Log :: ERROR("NF_SVR_CORE : GET READ TIMEOUT EMPTY");
         return -1;
     }
     else
@@ -109,7 +109,7 @@ nf_server_get_writeto()
     nf_server_pdata_t *ptr = get_pdata();
     if (ptr == NULL) 
     {
-        std :: cout << "empty readto" << std :: endl;
+        Log :: ERROR("NF_SVR_CORE : GET WRITE TIMEOUT EMPTY");
         return -1;
     }
     else
@@ -121,7 +121,7 @@ nf_server_get_qsize(nf_server_t * sev)
 {
     if (sev == NULL) 
     {
-        std :: cout << "empty qsize" << std :: endl;
+        Log :: ERROR("NF_SVR_CORE : GET QUEUE SIZE EMPTY");
         return -1;
     }
     else
@@ -133,7 +133,7 @@ nf_server_get_socksize(nf_server_t * sev)
 {
     if (sev == NULL) 
     {
-        std :: cout << "empty socketsize" << std :: endl;
+        Log :: ERROR("NF_SVR_CORE : GET SOCK SIZE EMPTY");
         return -1;
     }
     else
@@ -146,7 +146,7 @@ nf_server_get_readed_size()
     nf_server_pdata_t *ptr = get_pdata();
     if (ptr == NULL) 
     {
-        std :: cout << "empty readed size" << std :: endl;
+        Log :: ERROR("NF_SVR_CORE : GET READED SIZE EMPTY");
         return -1;
     }
     else
@@ -159,7 +159,7 @@ nf_server_set_writed_size(int n)
     nf_server_pdata_t *ptr = get_pdata();
     if (ptr == NULL) 
     {
-        std :: cout << "empty writed size" << std :: endl;
+        Log :: ERROR("NF_SVR_CORE : SET WRITED SIZE EMPTY");
         return -1;
     }
     ptr->writed_size += n;
@@ -172,7 +172,7 @@ nf_server_set_writed_start(int n)
     nf_server_pdata_t *ptr = get_pdata();
     if (ptr == NULL) 
     {
-        std :: cout << "empty writed size" << std :: endl;
+        Log :: ERROR("NF_SVR_CORE : SET WRITED START EMPTY");
         return -1;
     }
     ptr->write_start += n;
@@ -185,7 +185,7 @@ nf_server_get_writed_size()
     nf_server_pdata_t *ptr = get_pdata();
     if (ptr == NULL) 
     {
-        std :: cout << "empty writed size" << std :: endl;
+        Log :: ERROR("NF_SVR_CORE : GET WRITED SIZE EMPTY");
         return -1;
     }
     else
@@ -405,7 +405,7 @@ int nf_server_bind(nf_server_t * sev)
     {
         if( (sev->sev_socket = socket(PF_INET, SOCK_STREAM, 0) ) < 0 )
         {
-            std::cout << "create sock: " << strerror(errno) << std::endl;
+            Log :: ERROR("NF_SVR_CORE : CREATE SOCKET ERROR : %s", strerror(errno));
             return -1; 
         }
     }
@@ -441,7 +441,7 @@ int nf_server_listen(nf_server_t * sev)
         close(sev->sev_socket);
         return -1;    
     }
-    std::cout << "listen ok" << std::endl;
+    Log :: NOTICE("LISTEN SOCKET START OK");
     //listen º¯ÊýÎª¿Õ
     if( g_pool[sev->server_type].listen == NULL)
         return 0;

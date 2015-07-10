@@ -38,6 +38,7 @@ Allocate :: allocate(size_t n)
     if(n > MAX_BYTES)
     {
         std:: cout << n <<" : malloc space "<<std::endl;
+        Log :: NOTICE ("MEMCACHE MALLOC SPACE : %d", n);
         void * tmp = malloc(n);
         memset(tmp, '\0', n);
         return tmp;
@@ -49,6 +50,7 @@ Allocate :: allocate(size_t n)
     if(result == 0)
     {
         std:: cout << n << " : expand list space "<<std::endl;
+        Log :: NOTICE ("MEMCACHE EXPAND POOL SPACE : %d", n);
         void * r = refill(n);
         
         pthread_mutex_unlock(&mem_mutex[index]);
