@@ -18,7 +18,7 @@ TCP  IPV4通信，全部基于线程操作，提升为实时进程调度，需�
 
 ### Half reactor/Half sync 模型
 
-      (1) main 线程负责启动所有工作线程，启动成功后负责外部发送信号。
+      (1) main 线程负责启动所有工作线程，启动成功后负责监听外部发送的信号。
 
       (2) 一个reactor 线程负责监听连接池里所有连接及等待连接的socket
       
@@ -35,7 +35,7 @@ TCP  IPV4通信，全部基于线程操作，提升为实时进程调度，需�
 
 ### Reactor + 多线程模型
 
-       (1) main 线程负责启动所有工作线程，启动成功后负责外部发送信号。
+       (1) main 线程负责启动所有工作线程，启动成功后负责监听外部发送的信号。
 
        (2)一个reactor 线程负责监等待连接的socket, 若监听socket 有事件发生，则accept，并执行： 
       
@@ -48,26 +48,31 @@ TCP  IPV4通信，全部基于线程操作，提升为实时进程调度，需�
       
       （5）适用于IO频繁操作。注册运行的回调函数时，主要不要有阻塞，等待操作。 
 
-#介绍：
 
+框架使用：
+-----------------------------------  
 
-（1）多线程模型
+### 目的
 
-（2）支持长连接、短连接
-
-（3）多种的连接池管理模式：lfpool、sapool(未开发)
-
-（4）采用回调方式，开发者只需关心数据处理逻辑部分
-
-（5）快速的开发网络服务
-
-
-#目的：
-
-
-托管与client端的连接管理、内存管理、数据的读取和发送。应用方只需要设置读取数据后，进行操作的回调函数，
-
-发送的回调函数，集中于业务逻辑处理。
+      （1）托管与client端的连接管理、内存管理、数据的读取和发送， LOG读写等。
+      
+      （2）应用方只需要设置回调函数，从指定内存中读数据，业务处理，存储数据到发送内存中。
+          框架自动进行读写。
+  
+### simple echo example        
+      void
+      nf_default_handle()
+      {
+           char * read_buf = (char *) nf_server_get_read_buf();
+           char * write_buf = (char *) nf_server_get_write_buf();
+           
+           int readed_size = nf_server_get_readed_size();
+           strncpy(write_buf, read_buf, readed_size);
+           
+           nf_server_set_writed_size(readed_size);
+           nf_server_set_writed_start(readed_size);
+      }
+      
 
 
 #基本架构：
