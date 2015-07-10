@@ -9,29 +9,32 @@ TCP  IPV4通信，全部基于线程操作，提升为实时进程调度，需�
 #支持模式: 
 
 
-线程模型： leader-follower
+##线程模型 leader-follower
 
-每线程管理一个连接，试用与短链接、快速连接
-
-
-Half reactor/Half sync 模型
-
-main 线程负责启动所有工作线程，启动成功后负责外部发送信号。
-
-一个reactor 线程负责监听连接池里所有连接及等待连接的socket, 若监听socket 有事件发生，则注册事件到循环事件队列中。
-
-同步worker 线程负责从循环事件队列中获取事件，执行相应操作。
+   每线程管理一个连接，试用与短链接、快速连接
 
 
-Reactor + 多线程模型
 
-main 线程负责启动所有工作线程，启动成功后负责外部发送信号。
+##Half reactor/Half sync 模型
 
-一个reactor 线程负责监等待连接的socket, 若监听socket 有事件发生，则accept 连接到的socket 并执行： 
-1. 注册该socket 到连接池中
-2. 负载均衡，将该socket 注册到一个压力较小的子reactor 中
+   main 线程负责启动所有工作线程，启动成功后负责外部发送信号。
 
-其余worker 线程 为子reactor， 每一个子reactor 维护 监听 reactor注册过来的事件。
+   一个reactor 线程负责监听连接池里所有连接及等待连接的socket, 若监听socket 有事件发生，则注册事件到循环事件队列中。
+
+   同步worker 线程负责从循环事件队列中获取事件，执行相应操作。
+
+
+
+##Reactor + 多线程模型
+
+   main 线程负责启动所有工作线程，启动成功后负责外部发送信号。
+
+   一个reactor 线程负责监等待连接的socket, 若监听socket 有事件发生，则accept 连接到的socket 并执行： 
+     1. 注册该socket 到连接池中
+     2. 负载均衡，将该socket 注册到一个压力较小的子reactor 中
+
+   其余worker 线程 为子reactor， 每一个子reactor 维护 监听 reactor注册过来的事件。
+
 
 
 #介绍：
