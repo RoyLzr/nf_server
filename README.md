@@ -66,8 +66,11 @@ TCP  IPV4通信，全部基于线程操作，提升为实时进程调度，需�
            char * read_buf = (char *) nf_server_get_read_buf();
            char * write_buf = (char *) nf_server_get_write_buf();
            
+           
            int readed_size = nf_server_get_readed_size();
            strncpy(write_buf, read_buf, readed_size);
+           
+           //Log :: NOTICE("CALL BACK READ DATA %d", readed_size);
            
            nf_server_set_writed_size(readed_size);
            nf_server_set_writed_start(readed_size);
