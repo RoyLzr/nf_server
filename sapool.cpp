@@ -135,7 +135,7 @@ sapool_get_queuenum(nf_server_t *sev)
 int 
 sapool_run(nf_server_t *sev)
 {
-    int i = 0;
+    //int i = 0;
     int ret = 0;
     sapool_t *pool = (sapool_t *)sev->pool;
 
@@ -202,7 +202,7 @@ sapool_run(nf_server_t *sev)
     }
 
     //创建逻辑处理子线程
-    for (i=1; i<sev->pthread_num; ++i) 
+    for (size_t i=1; i<sev->pthread_num; ++i) 
     {
         sev->pdata[i].id = i;
         ret = pthread_create(&sev->pdata[i].pid, &thread_attr, 
@@ -318,7 +318,7 @@ int sapool_destroy(nf_server_t *sev)
 int check_socket_queue(nf_server_t *sev)
 {
     sapool_t *pool = (sapool_t *)sev->pool;
-    for (u_int i=0; i< pool->size; ++i) 
+    for (int i=0; i< pool->size; ++i) 
     {
         if (pool->sockets[i].status != IDLE) 
         {
@@ -706,7 +706,6 @@ sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
     
     //ret < 0 时,close fd, 因为事件已经从 epoll中移除
     //此处 不用再次 移除
-    EXIT:
     if(pdata->epfd > 0)
         close(pdata->epfd);
     sapool_del(sev, idx, 0);

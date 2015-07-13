@@ -37,6 +37,7 @@ namespace nf
         Singleton<ConfigParser>::instance()->parser_file(conf_path);
         Singleton<ConfigParser>::instance()->scan();
         //Singleton<ConfigParser>::destroy();
+        return true;
     }
 
     int NfServer :: run()
@@ -103,7 +104,7 @@ namespace nf
  
         if( sev_data->pdata != NULL)
         { 
-            for(int i = 0; i < sev_data->pthread_num; i++)
+            for(size_t i = 0; i < sev_data->pthread_num; i++)
             {
                 std::cout << i << std::endl;
                 if( sev_data->pdata[i].read_buf != NULL)
@@ -129,6 +130,7 @@ namespace nf
         free(sev_data);
         Log :: NOTICE("nf_server.cpp : 115 CLOSE SERVER SUCC \n");
         sleep(1);
+        return true;
     }
     
     int NfServer :: pause()

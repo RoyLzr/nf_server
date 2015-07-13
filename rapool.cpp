@@ -107,7 +107,7 @@ rapool_init(nf_server_t *sev)
     
     //创建epoll句柄
     //SUB REACTOR
-    for (int i=1; i< sev->pthread_num; ++i) 
+    for (size_t i=1; i< sev->pthread_num; ++i) 
     {
         sev->pdata[i].epfd = epoll_create(ssiz);
         if (pool->epfd < 0) 
@@ -145,7 +145,7 @@ rapool_get_queuenum(nf_server_t *sev)
 int 
 rapool_run(nf_server_t *sev)
 {
-    int i = 0;
+    //int i = 0;
     int ret = 0;
     rapool_t *pool = (rapool_t *)sev->pool;
 
@@ -202,7 +202,7 @@ rapool_run(nf_server_t *sev)
     }
 
     //创建逻辑处理子线程
-    for (i = 1; i < sev->pthread_num; ++i) 
+    for (size_t i = 1; i < sev->pthread_num; ++i) 
     {
         sev->pdata[i].id = i;
         ret = pthread_create(&sev->pdata[i].pid, &thread_attr, 
@@ -321,7 +321,7 @@ rapool_main(void *param)
 
     set_fd_noblock(sev->sev_socket);
      
-    int work_thread = 1;
+    size_t work_thread = 1;
     while (sev->run) 
     {
         //负载均衡, simple 轮询
@@ -354,7 +354,7 @@ rapool_produce(nf_server_t * sev,
     int len = 40;
     int port;
     int idx;
-    long long key_timer;    
+    //long long key_timer;    
 
     int num = epoll_wait(pool->epfd, pool->ep_events, pool->size, pool->timeout);
 
@@ -579,10 +579,10 @@ rapool_workers(void * param)
 int 
 rapool_reactor(rapool_t * pool, nf_server_pdata_t * pdata)
 {
-    int idx;
+    //int idx;
     nf_server_t * sev = (nf_server_t *)pdata->server;
    
-    int ret = sev->cb_work(pdata);
+    sev->cb_work(pdata);
     if(!sev->run) 
     {
         close(pdata->epfd);

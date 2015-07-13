@@ -16,7 +16,7 @@ string Log :: str_prefix[4] = {"[DEBUG]  ",
 int 
 Log :: init(const char * name)
 {
-    size_t path_len;
+    //size_t path_len;
     FILE * fp;
     pthread_t write_t;    
     
@@ -154,7 +154,7 @@ Log :: produce_log(int event, const char * fmt, va_list args)
     int offset = 0;
     char now[20];
     char s[LOG_MAXLINE];
-    char * tmp = s;
+    //char * tmp = s;
     switch(event)
     {
         case LOG_DEBUG:

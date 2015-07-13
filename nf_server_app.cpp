@@ -27,7 +27,7 @@ nf_LF_readline_worker(void * data)
     int epfd = pdata->epfd;
     int fd = pdata->fd;
     int readsize = pdata->read_size;   
-    int writesize = pdata->write_size;   
+    //int writesize = pdata->write_size;   
     nf_server_t *sev = pdata->server; 
      
     pdata->rio.rio_fd = pdata->fd;
@@ -44,7 +44,7 @@ nf_LF_readline_worker(void * data)
     int readto = nf_server_get_readto();
     int writeto = nf_server_get_writeto();
      
-    struct epoll_event events[1], ev;
+    struct epoll_event events[1];
     
     //event loop
     while(sev->run)
@@ -126,7 +126,7 @@ nf_SA_readline_worker(void * data)
     int epfd = pdata->epfd;
     int fd = pdata->fd;
     int readsize = pdata->read_size;   
-    int writesize = pdata->write_size;   
+    //int writesize = pdata->write_size;   
     int idx = pdata->idx;    
     rio_t * rp = &(pool->sockets[idx].rp); 
 
@@ -142,10 +142,10 @@ nf_SA_readline_worker(void * data)
         return -1;
     }      
 
-    int readto = nf_server_get_readto();
+    //int readto = nf_server_get_readto();
     int writeto = nf_server_get_writeto();
      
-    struct epoll_event events[1], ev;
+    struct epoll_event events[1];
     
     //event loop
     while(sev->run)
@@ -245,8 +245,8 @@ nf_LF_readnf_worker(void * data)
     char * res = (char *) pdata->write_buf;
     int epfd = pdata->epfd;
     int fd = pdata->fd;
-    int readsize = pdata->read_size;   
-    int writesize = pdata->write_size;   
+    //int readsize = pdata->read_size;   
+    //int writesize = pdata->write_size;   
     nf_server_t *sev = pdata->server; 
      
     int ret;
@@ -260,7 +260,7 @@ nf_LF_readnf_worker(void * data)
     int readto = nf_server_get_readto();
     int writeto = nf_server_get_writeto();
      
-    struct epoll_event events[1], ev;
+    struct epoll_event events[1];
     
     //event loop
     while(sev->run)
@@ -316,15 +316,15 @@ nf_RA_readline_worker(void * data)
 
     char * req = (char *) pdata->read_buf;
     char * res = (char *) pdata->write_buf;
-    int epfd = pdata->epfd;
+    //int epfd = pdata->epfd;
     int readsize = pdata->read_size;   
-    int writesize = pdata->write_size;   
+    //int writesize = pdata->write_size;   
     nf_server_t *sev = pdata->server;
     rapool_t * pool = (rapool_t *) sev->pool; 
  
-    int ret;
-    int readto = nf_server_get_readto();
-    int writeto = nf_server_get_writeto();
+    //int ret;
+    //int readto = nf_server_get_readto();
+    //int writeto = nf_server_get_writeto();
     int ssiz = nf_server_get_socksize(sev);
     
     struct epoll_event events[ssiz], ev;
@@ -395,7 +395,6 @@ nf_RA_readline_worker(void * data)
             else if( events[i].events & EPOLLIN )
             {
                 int n;
-                int st;
                 int clen = 0;
                 //»Ö¸´ÉÏ´Î socket ×´Ì¬
                 if(rp->cache != NULL && rp->cache_len > 0)
@@ -431,7 +430,7 @@ nf_RA_readline_worker(void * data)
                 Log :: DEBUG("READ DATA %d byte " ,n + clen);
                 
                 //READ ANALYSIS 
-                int start, end; 
+                int start; 
                 start = 0; 
                 for(int i = 0; *(req + i) != '\0'; i++)
                 {
@@ -469,7 +468,7 @@ nf_RA_readline_worker(void * data)
                     }
                     Log :: DEBUG("WRITE DATA %d byte LEFT : %d" ,n, pdata->writed_size - n);
                     //send not enough, need to store write cache
-                    if(n < pdata->writed_size) 
+                    if((size_t)n < pdata->writed_size) 
                     {
                         rp->w_cache = (char *) Allocate :: allocate(pdata->writed_size - n);
                         rp->w_allo_cache = rp->w_cache;    
@@ -498,8 +497,6 @@ nf_RA_readline_worker(void * data)
             else if( events[i].events & EPOLLOUT )
             {
                 int n;
-                int st;
-                int clen = 0;
             
                 if((n = sendn(sock, rp->w_cache, rp->w_cache_len)) < 0)
                 {

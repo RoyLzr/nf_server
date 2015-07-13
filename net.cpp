@@ -41,7 +41,7 @@ rio_read(rio_t *rp, char *usrbuf, size_t n)
         else
             rp->rio_bufptr = rp->rio_ptr;      
     }
-    if(rp->rio_cnt < n)
+    if((size_t)rp->rio_cnt < n)
         cnt = rp->rio_cnt;
     else
         cnt = n;
@@ -120,8 +120,9 @@ rio_readline(rio_t *rp, void *usrbuf, size_t maxlen, int * st)
     int i;
     int nread;
     *st = 1;
+    int len = maxlen;    
 
-    for(i = 1; i < maxlen; i++)
+    for(i = 1; i < len; i++)
     {
         nread = rio_read(rp, &c, 1);
         if(nread == 0)
@@ -163,12 +164,12 @@ readn_to_ms(int fd, void *ptr, size_t nbytes, int msecs)
     
     nread = recv(fd, ptr, nbytes, MSG_DONTWAIT);
     
-    if(nread == nbytes)
-        return nread;
     if(nread == 0)
         return 0;
     if((nread < 0) && (errno != EAGAIN) && (errno != EWOULDBLOCK) &&(errno != EINTR))
         return -1;
+    if((size_t)nread == nbytes)
+        return nread;
     if (nread < 0) 
     {
         nread = 0;
@@ -264,7 +265,7 @@ rio_readn_to_ms(rio_t *rp, void *usrbuf, size_t n, int msecs)
     int sockflag;
     char * buf = (char *)usrbuf;
 
-    if(sockflag = fcntl(rp->rio_fd, F_GETFL, 0) < 0)
+    if((sockflag = fcntl(rp->rio_fd, F_GETFL, 0)) < 0)
         return -1;
     set_fd_noblock(rp->rio_fd);
     
@@ -317,12 +318,13 @@ rio_readline_to_ms(rio_t *rp, void *usrbuf, size_t maxlen, int msecs)
     struct timeval tv;
     tv.tv_sec = msecs/1000;
     tv.tv_usec = (msecs % 1000) * 1000;  
-
-    if(sockflag = fcntl(rp->rio_fd, F_GETFL, 0) < 0)
+    
+    int len = maxlen;
+    if((sockflag = fcntl(rp->rio_fd, F_GETFL, 0)) < 0)
         return -1;
     set_fd_noblock(rp->rio_fd);
 
-    for(i = 1; i < maxlen; i++)
+    for(i = 1; i < len; i++)
     {
         nread = rio_read(rp, &c, 1);
         if(nread == 0)
@@ -431,7 +433,7 @@ sendn_to_ms(int fd, const void *ptr, size_t nbytes, int msecs)
 
     if(getsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &old_tv, &oplen) < 0)
         return -1;
-    if(sockflag = fcntl(fd, F_GETFL, 0) < 0) 
+    if((sockflag = fcntl(fd, F_GETFL, 0)) < 0) 
         return -1;
 
     if (sockflag & O_NONBLOCK) 
@@ -729,7 +731,6 @@ net_ep_add_in1(int epfd, int fd)
 int 
 net_ep_del(int epfd, int fd)
 {
-    int ret;
     return epoll_ctl(epfd, EPOLL_CTL_DEL, fd, NULL);
 }
 

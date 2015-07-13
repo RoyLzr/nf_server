@@ -15,6 +15,7 @@ int empty_q(queue_t *q)
     q->size = 0;
     q->rear = 1;
     q->front = 0;
+    return 1;
 }
 
 int create_q(queue_t *q, int qcap)

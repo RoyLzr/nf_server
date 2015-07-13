@@ -60,6 +60,7 @@ ConfigParser :: parser_file(const std::string &file)
             curSection->set(k,v);
         }
     }
+    return true;
 }
 
 

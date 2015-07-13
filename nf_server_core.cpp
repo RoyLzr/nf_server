@@ -361,7 +361,7 @@ nf_server_init(nf_server_t * sev)
     if(sev->p_handle == NULL)
         sev->p_handle = nf_default_handle;
 
-    for(int i = 0; i < (sev->pthread_num); i++)
+    for(size_t i = 0; i < (sev->pthread_num); i++)
     { 
        if( (ret = nf_pdata_init(&sev->pdata[i], sev) ) < 0 )
             return -1;
@@ -426,6 +426,7 @@ int nf_server_bind(nf_server_t * sev)
     }
     
     ret = g_pool[sev->server_type].init(sev); 
+    Log :: NOTICE("NF_SVR_CORE : INIT POOL STATUS : %d", ret);
     return 0;
 }
 

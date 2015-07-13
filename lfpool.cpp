@@ -136,13 +136,14 @@ void * lf_main(void * param)
     EXIT:
     if(pdata->epfd > 0)
         close(pdata->epfd);
+    return NULL;
 }
 
 //启动线程池内线程
 int lfpool_run(nf_server_t * sev)
 {
     sev->run_thread_num = 0;
-    for(int i = 0; i < sev->pthread_num; ++i)
+    for(size_t i = 0; i < sev->pthread_num; ++i)
     {
         sev->pdata[i].id = i;
         int ret = 0;
