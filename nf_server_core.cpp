@@ -226,6 +226,7 @@ nf_server_create(const char * sev_name)
     sev->p_start = NULL;
     sev->p_end = NULL;
     sev->p_handle = NULL;     
+    sev->stratgy = NULL;
     
     sev->status = INIT;
 
@@ -355,9 +356,7 @@ nf_server_init(nf_server_t * sev)
 
     if (sev->pdata == NULL)
         return -1;
-    
-    if(sev->cb_work == NULL)
-        sev->cb_work = nf_LF_readline_worker;
+     
     if(sev->p_handle == NULL)
         sev->p_handle = nf_default_handle;
 

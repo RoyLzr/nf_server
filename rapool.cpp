@@ -582,7 +582,9 @@ rapool_reactor(rapool_t * pool, nf_server_pdata_t * pdata)
     //int idx;
     nf_server_t * sev = (nf_server_t *)pdata->server;
    
-    sev->cb_work(pdata);
+    //sev->cb_work(pdata);
+    sev->stratgy->work(pdata);    
+
     if(!sev->run) 
     {
         close(pdata->epfd);
@@ -677,4 +679,18 @@ int call_back_timeout(void * param)
     return 0;
 }
 
+int
+rapool_set_stratgy(nf_server_t * sev, BaseWork * sta)
+{
+    if(sta == NULL)
+    {
+        sev->stratgy = new RaReadLine();
+        return 0; 
+    }
+    RaBaseWork * test = dynamic_cast<RaBaseWork *>(sta);
+    assert(test != NULL);
+    sev->stratgy = test;
+             
+    return 0;
+}
 

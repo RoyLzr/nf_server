@@ -37,6 +37,7 @@
 #include "commonn/asynLog.h"
 #include "commonn/timer.h"
 #include <stdarg.h>
+#include <assert.h>
 
 typedef struct _rio_t
 {

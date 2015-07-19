@@ -10,7 +10,8 @@
 
 #include "sapool.h"
 #include "rapool.h"
-
+#include "lfpool.cpp"
+#include "nf_server_app.h"
 
 enum
 {
@@ -18,8 +19,9 @@ enum
 };
 
 int 
-nf_LF_readline_worker(void * data)
+LfReadLine :: work(void * data)
 {
+    Log :: NOTICE("LF READ LINE WORK");
     nf_server_pdata_t * pdata = (nf_server_pdata_t *) data;
 
     char * req = (char *) pdata->read_buf;
@@ -37,7 +39,7 @@ nf_LF_readline_worker(void * data)
     int ret;
     if((ret = net_ep_add_in(epfd, fd)) < 0)
     {
-        std :: cout << "add epoll error" << std :: endl;
+        Log :: WARN("add epoll error");
         return -1;
     }      
 
@@ -52,24 +54,24 @@ nf_LF_readline_worker(void * data)
         ret = epoll_wait(pdata->epfd, events, 1, readto * 20);
         if(ret == 0)
         {
-            std::cout << "read timeout error" << std::endl; 
+            Log :: WARN("APP EOPLL WAIT read timeout error"); 
             return -1;
         }
         else if(ret < 0)
         {
-            std::cout << "epoll wait error :" << strerror(errno) <<std::endl;   
+            Log :: WARN("APP epoll wait error : %s", strerror(errno));
             return -1;
         } 
         //events analyse
         
         if(events[0].events & EPOLLRDHUP)
         { 
-            std::cout << "event close fd error" << std::endl; 
+            Log :: WARN("APP event close fd error HUP");
             return -1;
         }
         else if(events[0].events & EPOLLERR )
         {
-            std::cout << "event fd  error" << std::endl; 
+            Log :: WARN("APP event fd error ERR");
             return -1;
         }
         else if( events[0].events & EPOLLIN )
@@ -77,13 +79,20 @@ nf_LF_readline_worker(void * data)
             int n;
             while((n = rio_readline_to_ms(&pdata->rio, req, readsize, readto)) > 0)   
             {
+                Log :: DEBUG("APP READ DATA IS LINE : %d", n);
                 pdata->readed_size = n;
                 sev->p_handle();
                 if((n = sendn_to_ms(pdata->rio.rio_fd, res, pdata->writed_size, writeto))< 0)
                 {
-                    std :: cout << "write error" << strerror(errno) << std :: endl;
+                    Log :: WARN ("write data error : %s",strerror(errno));
                         return -1;
                 }
+                pdata->read_start = 0;
+                pdata->readed_size = 0;
+                pdata->write_start = 0;
+                pdata->writed_size = 0; 
+
+                Log :: DEBUG("APP SEND DATA IS LINE SUCC: %d", n);
             }
         //Àë¿ª Ñ­»·¶Á Çé¿ö£º
         //1. send error, °üÀ¨ TIMEOUT ±Ö±½Ó Ó return 
@@ -95,9 +104,9 @@ nf_LF_readline_worker(void * data)
             if(n == 0|| errno != ETIMEDOUT )
             {
                 if( n == 0)
-                    std :: cout << "recv fin" << std :: endl;
-                else if( errno != ETIMEDOUT)
-                    std :: cout << "read error : " << strerror(errno) << std :: endl;
+                    Log :: WARN("recv fin");
+                else 
+                    Log :: WARN("read error : %s",strerror(errno) );
                 return -1;
             }
             if(errno == ETIMEDOUT && n != -1)
@@ -115,8 +124,9 @@ nf_LF_readline_worker(void * data)
 //3. rio cache   »ñÈ¡²ÉÓÃÄÚ´æ³Ø´úÌæmalloc
 
 int 
-nf_SA_readline_worker(void * data)
+SaReadLine :: work(void * data)
 {
+    Log :: NOTICE("APP SA READLINE WORK");
     nf_server_pdata_t * pdata = (nf_server_pdata_t *) data;
     nf_server_t * sev = (nf_server_t *) pdata->server;
     sapool_t * pool = (sapool_t *) sev->pool;    
@@ -138,7 +148,7 @@ nf_SA_readline_worker(void * data)
     int ret;
     if((ret = net_ep_add_in(epfd, fd)) < 0)
     {
-        std :: cout << "add epoll error" << std :: endl;
+        Log :: WARN("add epoll error");
         return -1;
     }      
 
@@ -153,24 +163,24 @@ nf_SA_readline_worker(void * data)
         ret = epoll_wait(pdata->epfd, events, 1, 1000);
         if(ret == 0)
         {
-            std::cout << "read timeout error" << std::endl; 
+            Log :: WARN("read timeout error"); 
             return -1;
         }
         else if(ret < 0)
         {
-            std::cout << "epoll wait error :" << strerror(errno) <<std::endl;   
+            Log :: WARN("epoll wait error : %s",strerror(errno));   
             return -1;
         } 
         //events analyse
         
         if(events[0].events & EPOLLRDHUP)
         { 
-            std::cout << "event close fd error" << std::endl; 
+            Log :: WARN("event close fd error"); 
             return -1;
         }
         else if(events[0].events & EPOLLERR )
         {
-            std::cout << "event fd  error" << std::endl; 
+            Log :: WARN("event fd  error"); 
             return -1;
         }
         else if( events[0].events & EPOLLIN )
@@ -184,7 +194,7 @@ nf_SA_readline_worker(void * data)
                 memcpy(req, rp->cache, rp->cache_len);
                 clen = rp->cache_len;
 
-                std :: cout << "back status of cache" << std::endl;
+                Log :: NOTICE("Back status of cache: %d", clen);
  
                 Allocate :: deallocate(rp->cache, rp->cache_len);
                 rp->cache_len = 0; 
@@ -196,22 +206,13 @@ nf_SA_readline_worker(void * data)
 
             while((n = rio_readline(rp, req + clen, readsize - clen, &st)) > 0)   
             {
-                if(n == 0)
-                {
-                    std :: cout << "recv fin" << std :: endl;
-                    return -1; 
-                }
-                else if(n < 0)
-                {
-                    std :: cout << "recv error : " << strerror(errno) << std :: endl;
-                    return -1; 
-                }
-                else if(st < 0)
+                Log :: DEBUG("APP READ LINE DATA : %d", n);
+                if(st < 0)
                 {
                     int len = clen + n -1;
                     if(len > 0)
                     {   
-                        std :: cout << "dump cache : " << len << std::endl;
+                        Log :: NOTICE("APP DUMP CACHE : %d", len );
                         rp->cache = (char *) Allocate :: allocate(len);
                     
                         rp->cache_len = len;
@@ -225,9 +226,24 @@ nf_SA_readline_worker(void * data)
                 sev->p_handle();
                 if((n = sendn_to_ms(rp->rio_fd, res, pdata->writed_size, writeto))< 0)
                 {
-                    std :: cout << "write error" << strerror(errno) << std :: endl;
+                    Log :: WARN("APP WRITE DATA ERROR: %s", strerror(errno));
                         return -1;
                 }
+                Log :: DEBUG("APP WRITE LINE DATA : %d", n);
+                pdata->read_start = 0;
+                pdata->readed_size = 0;
+                pdata->write_start = 0;
+                pdata->writed_size = 0; 
+            }
+            if(n == 0)
+            {
+                Log :: WARN( "APP RECV Fin" );
+                return -1; 
+            }
+            else if(n < 0)
+            {
+                Log :: WARN(" APP recv error : ", strerror(errno));
+                return -1; 
             }
         }
     }
@@ -235,82 +251,8 @@ nf_SA_readline_worker(void * data)
 }
 
 
-//LF µÄ readn ²»Ê¹ÓÃ»º´æÇø
-int 
-nf_LF_readnf_worker(void * data)
-{
-    nf_server_pdata_t * pdata = (nf_server_pdata_t *) data;
-
-    char * req = (char *) pdata->read_buf;
-    char * res = (char *) pdata->write_buf;
-    int epfd = pdata->epfd;
-    int fd = pdata->fd;
-    //int readsize = pdata->read_size;   
-    //int writesize = pdata->write_size;   
-    nf_server_t *sev = pdata->server; 
-     
-    int ret;
-    if((ret = net_ep_add_in(epfd, fd)) < 0)
-    {
-        std :: cout << "add epoll error : " << 
-        strerror(errno)<< std :: endl;
-        return -1;
-    }      
-
-    int readto = nf_server_get_readto();
-    int writeto = nf_server_get_writeto();
-     
-    struct epoll_event events[1];
-    
-    //event loop
-    while(sev->run)
-    {
-        ret = epoll_wait(pdata->epfd, events, 1, readto * 20);
-        if(ret == 0)
-        {
-            std::cout << "read timeout error" << std::endl; 
-            return -1;
-        }
-        else if(ret < 0)
-        {
-            std::cout << "epoll wait error :" << strerror(errno) <<std::endl;   
-            return -1;
-        } 
-        //events analyse
-        
-        if(events[0].events & EPOLLRDHUP)
-        { 
-            std::cout << "event close fd error" << std::endl; 
-            return -1;
-        }
-        else if(events[0].events & EPOLLERR )
-        {
-            std::cout << "event fd  error" << std::endl; 
-            return -1;
-        }
-        else if( events[0].events & EPOLLIN )
-        {
-            int n;
-            if ((n = readn_to_ms(pdata->fd, req, 6, readto)) < 0)
-            {
-                std :: cout << "read error : " << strerror(errno) << std::endl;
-                return -1;
-            }
-            pdata->readed_size = n;
-            sev->p_handle();
-    
-            if((n = sendn_to_ms(pdata->fd, res, pdata->writed_size, writeto)) < 0)
-            {
-                std :: cout << "write error : " << strerror(errno) << std :: endl;
-                return -1;
-            }
-        }
-    }
-    return 0;
-}
-
-int 
-nf_RA_readline_worker(void * data)
+int
+RaReadLine :: work(void * data)
 {
     nf_server_pdata_t * pdata = (nf_server_pdata_t *) data;
 

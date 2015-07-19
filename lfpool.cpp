@@ -12,13 +12,13 @@
 #include <sys/epoll.h>
 #include <pthread.h>
 #include "nf_server_core.h"
+#include "nf_server_app.h"
 #include "pool_register.h"
 
 typedef struct _lfpool_t 
 {   
     pthread_mutex_t lock;
 } lfpool_t;
-
 
 int lfpool_init(nf_server_t * sev)
 {
@@ -125,7 +125,7 @@ void * lf_main(void * param)
        set_sev_socketopt(sev, pdata->fd);
 
        //work
-       sev->cb_work(pdata);
+       sev->stratgy->work(pdata);
  
        net_ep_del(pdata->epfd, pdata->fd); 
        close(pdata->fd);
@@ -229,6 +229,20 @@ int lfpool_pause(nf_server_t *)
 
 int lfpool_resume(nf_server_t *)
 {
+    return 0;
+}
+
+int lfpool_set_stratgy(nf_server_t * sev, BaseWork * sta)
+{
+    if(sta == NULL)
+    {
+        sev->stratgy = new LfReadLine();
+        return 0; 
+    }
+    LfBaseWork * test = dynamic_cast<LfBaseWork *>(sta);
+    assert(test != NULL);
+    sev->stratgy = test;
+             
     return 0;
 }
 

@@ -17,6 +17,7 @@
 
 //注册内容
 //leader-follower model
+
 extern int lfpool_init(nf_server_t *);
 extern int lfpool_run(nf_server_t *);
 extern int lfpool_join(nf_server_t *);
@@ -25,6 +26,7 @@ extern long long lfpool_get_socknum(nf_server_t *);
 extern long long lfpool_get_queuenum(nf_server_t *);
 extern int lfpool_pause(nf_server_t *);
 extern int lfpool_resume(nf_server_t *);
+extern int lfpool_set_stratgy(nf_server_t *, BaseWork *);
 
 //reactor-sync model
 extern int sapool_init(nf_server_t *);
@@ -35,6 +37,7 @@ extern int sapool_destroy(nf_server_t *);
 extern long long sapool_get_queuenum(nf_server_t *);
 extern int sapool_pause(nf_server_t *);
 extern int sapool_resume(nf_server_t *);
+extern int sapool_set_stratgy(nf_server_t *, BaseWork *);
 
 //reactor with multi thread model
 extern int rapool_init(nf_server_t *);
@@ -45,6 +48,7 @@ extern int rapool_destroy(nf_server_t *);
 extern long long rapool_get_queuenum(nf_server_t *);
 extern int rapool_pause(nf_server_t *);
 extern int rapool_resume(nf_server_t *);
+extern int rapool_set_stratgy(nf_server_t *, BaseWork *);
 
 //注册表内容格式
 typedef int (*init_pool)(nf_server_t *);
@@ -56,6 +60,8 @@ typedef long long (*get_pool_socknum)(nf_server_t *);
 typedef long long (*get_pool_queuenum)(nf_server_t *);
 typedef int (*pause_pool)(nf_server_t *);
 typedef int (*resume_pool)(nf_server_t *);
+typedef int (*set_stragy_pool)(nf_server_t *, BaseWork *);
+ 
 
 //注册表
 struct _pool_t
@@ -69,6 +75,7 @@ struct _pool_t
     get_pool_queuenum get_queuenum;
     pause_pool pause;
     resume_pool resume;
+    set_stragy_pool set_stratgy;
 };
 
 //开始注册
@@ -83,7 +90,8 @@ static const struct _pool_t g_pool[] = {
         lfpool_get_socknum,
         lfpool_get_queuenum,
         lfpool_pause,
-        lfpool_resume
+        lfpool_resume,
+        lfpool_set_stratgy
     },
     {
         sapool_init,
@@ -94,7 +102,8 @@ static const struct _pool_t g_pool[] = {
         NULL,
         sapool_get_queuenum,
         sapool_pause,
-        sapool_resume
+        sapool_resume,
+        sapool_set_stratgy
     },
     {
         rapool_init,
@@ -105,7 +114,8 @@ static const struct _pool_t g_pool[] = {
         NULL,
         rapool_get_queuenum,
         rapool_pause,
-        rapool_resume
+        rapool_resume,
+        rapool_set_stratgy
     }
 };
 

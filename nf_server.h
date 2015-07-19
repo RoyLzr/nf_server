@@ -13,6 +13,7 @@
 
 #include <string>
 #include "nf_server_core.h"
+#include "nf_server_app.h"
 #include "pool_register.h"
 #include "commonn/Server.h"
 #include <iostream>
@@ -76,7 +77,7 @@ namespace nf
           *    
           **/
          
-        virtual int set_work_callback(nf_callback_proc run);
+        virtual int set_work_callback(BaseWork *run);
         /**
           * @brief callback º¯Êý
           * @return  int 0 ³É¹¦ -1 Ê§°Ü   
@@ -91,6 +92,8 @@ namespace nf
         virtual int set_thread_endfun(nf_handle_t end); 
         
         int set_server_name(const char *);
+    
+        virtual int set_handle( nf_handle_t handle ); 
         
         nf_server_t * get_server_data();
  

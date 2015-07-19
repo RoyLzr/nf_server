@@ -30,6 +30,7 @@ typedef enum
     STOP    = 3
 }SERVER_STATUS_T;
 
+class BaseWork;
 typedef int (* nf_callback_proc)(void *req);
 typedef void (* nf_handle_t)();
 
@@ -100,7 +101,9 @@ struct _nf_server_t
     int sev_socket; 
     int epfd;
     
+    BaseWork * stratgy;
     nf_callback_proc cb_work;
+    
     nf_server_pdata_t * pdata;
 
     nf_handle_t p_start;     
@@ -122,9 +125,16 @@ enum
     NFSVR_POOL_NUM,     //当前有多少个pool    
 };   
 
-enum{
+enum
+{
     NFSVR_SHORT_CONNEC = 0,
     NFSVR_LONG_CONNEC
+};
+
+class BaseWork
+{
+    public:
+        virtual int work(void *) = 0;
 };
 
 extern nf_server_t * 

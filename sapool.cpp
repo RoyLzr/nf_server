@@ -318,6 +318,8 @@ int sapool_destroy(nf_server_t *sev)
 int check_socket_queue(nf_server_t *sev)
 {
     sapool_t *pool = (sapool_t *)sev->pool;
+    if(pool == NULL)
+        return 0;
     for (int i=0; i< pool->size; ++i) 
     {
         if (pool->sockets[i].status != IDLE) 
@@ -522,7 +524,8 @@ sapool_add(nf_server_t * sev, int sock, struct sockaddr_in *addr)
     pool->sockets[idx].addr = *addr;
     pool->sockets[idx].sock = sock;
     pool->using_size++;
-
+    
+    Log :: NOTICE("ADD FD TO POOL fd : %d, pos : %d", sock, idx);
     if (sapool_epoll_add(sev, idx) != 0) 
     {
         return -1;
@@ -541,7 +544,7 @@ sapool_epoll_add(nf_server_t *sev, int idx)
     
     if (epoll_ctl(pool->epfd, EPOLL_CTL_ADD, sock, &ev) < 0) 
     {
-        std :: cout << "add socket error: " << strerror(errno) << std :: endl;
+        Log :: WARN("ADD SOCKET TO REACTOR ERROR: %s", strerror(errno));
         return -1;
     }
     return 0;
@@ -688,7 +691,7 @@ sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
         std::cout << strerror(errno) << std::endl;
     }      
 
-    int ret = sev->cb_work(pdata);
+    int ret = sev->stratgy->work(pdata);
     
     if (sev->run && ret == 0) 
     {
@@ -700,7 +703,7 @@ sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
     {
         //server stop; handle left dta in socket
         shutdown(pdata->fd, SHUT_WR);
-        for(;sev->cb_work(pdata) == 0;);
+        for(;sev->stratgy->work(pdata) == 0;);
             close(pdata->epfd);
     }
     
@@ -750,6 +753,21 @@ int sapool_resume(nf_server_t *sev)
     }
 
     sev->status = RUNNING;
+    return 0;
+}
+
+int
+sapool_set_stratgy(nf_server_t * sev, BaseWork * sta)
+{
+    if(sta == NULL)
+    {
+        sev->stratgy = new SaReadLine();
+        return 0; 
+    }
+    SaBaseWork * test = dynamic_cast<SaBaseWork *>(sta);
+    assert(test != NULL);
+    sev->stratgy = test;
+             
     return 0;
 }
 

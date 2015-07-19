@@ -37,6 +37,8 @@ namespace nf
         Singleton<ConfigParser>::instance()->parser_file(conf_path);
         Singleton<ConfigParser>::instance()->scan();
         //Singleton<ConfigParser>::destroy();
+        sev_data->server_type = (size_t)atoi((Singleton<ConfigParser>::
+                                instance()->get("server", "type")).c_str());
         return true;
     }
 
@@ -71,8 +73,11 @@ namespace nf
          
         sev_data->need_join = 1; 
         
-        Allocate :: init();    
-    
+        Allocate :: init();   
+        
+        if(sev_data->stratgy == NULL)
+            set_work_callback(NULL);
+ 
         return g_pool[sev_data->server_type].run(sev_data); 
     }
     
@@ -101,6 +106,8 @@ namespace nf
         
         g_pool[sev_data->server_type].destroy(sev_data);   
         Log :: NOTICE("nf_server.cpp : 97 CLOSE THREAD SUCC \n");
+        
+        //delete sev_data->stratgy;
  
         if( sev_data->pdata != NULL)
         { 
@@ -127,7 +134,7 @@ namespace nf
         }
         Singleton<ConfigParser>::destroy();
         free(sev_data->pdata);
-        free(sev_data);
+        //free(sev_data);
         Log :: NOTICE("nf_server.cpp : 115 CLOSE SERVER SUCC \n");
         sleep(1);
         return true;
@@ -139,11 +146,12 @@ namespace nf
     int NfServer :: resume()
     {   return 0 ;}
         
-    int NfServer :: set_work_callback(nf_callback_proc run)
+    int NfServer :: set_work_callback(BaseWork * run)
     {
         if( sev_data == NULL)
             return -1;
-        sev_data->cb_work = run;
+        //sev_data->cb_work = run;
+        g_pool[sev_data->server_type].set_stratgy(sev_data, run); 
         return 1;
     }
         
@@ -155,6 +163,14 @@ namespace nf
         if( sev_data == NULL)
             return -1;
         sev_data->p_start = start;
+        return 1;
+    }
+    
+    int NfServer :: set_handle( nf_handle_t handle ) 
+    {
+        if( sev_data == NULL)
+            return -1;
+        sev_data->p_handle = handle;
         return 1;
     }
         

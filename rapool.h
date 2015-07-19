@@ -14,6 +14,7 @@
 #define  __RAPOOL_H_
 
 #include "nf_server_core.h"
+#include "nf_server_app.h"
 
 #define LISTENER_PRIORITY    10
 #define WORKER_PRIORITY        5 
@@ -80,7 +81,6 @@ rapool_join(nf_server_t *);
 **/
 int 
 rapool_destroy(nf_server_t *);
-
 
 /**
  * @brief   no use
@@ -189,6 +189,13 @@ rapool_epoll_mod_write(nf_server_t *sev,
  * @brief   定时器使用的，超时后回调函数
  * @author  Liu ZhaoRui
 **/
-int call_back_timeout(void * param);
+int 
+call_back_timeout(void * param);
+
+
+int
+rapool_set_stratgy(nf_server_t *, BaseWork *);
+
+
 #endif  
 
