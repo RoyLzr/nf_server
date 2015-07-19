@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
     string conf("server.conf");
     test->load_conf(conf);
      
-    test->set_work_callback(new SaReadLine()); 
+    test->set_work_callback(new RaReadLine()); 
     test->set_handle(default_handle);
      
     if (test->run() < 0)

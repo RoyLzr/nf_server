@@ -381,6 +381,7 @@ sapool_check_timeout(nf_server_t *sev)
         return 0;
     }
     
+    Log :: NOTICE("SA SVR WILL CHECK TIMEOUT SOCKETS");
     pool->next_check_time = curtime + pool->timeout;
     time_t tmp = 0;
     
@@ -400,7 +401,8 @@ sapool_check_timeout(nf_server_t *sev)
                 {
                     sapool_del(sev, i, 0, true);
                     pool->using_size --;
-                    std :: cout << "socket pool timeout : " << i << std :: endl;
+                    Log :: WARN("=====SOCKET POOL TIMEOUT idx : %d fd : %d: ", 
+                                i, pool->sockets[i].sock);
                 } 
                 else if (pool->next_check_time > tmp) 
                 {
@@ -685,17 +687,10 @@ sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
     pdata->client_addr = pool->sockets[idx].addr;
     pdata->idx = idx;
 
-    pdata->epfd = net_ep_create(1);
-    if(pdata->epfd < 0)
-    {
-        std::cout << strerror(errno) << std::endl;
-    }      
-
     int ret = sev->stratgy->work(pdata);
     
     if (sev->run && ret == 0) 
     {
-        close(pdata->epfd);
         sapool_del(sev, idx, 1);
         return 0;
     } 
@@ -704,13 +699,10 @@ sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
         //server stop; handle left dta in socket
         shutdown(pdata->fd, SHUT_WR);
         for(;sev->stratgy->work(pdata) == 0;);
-            close(pdata->epfd);
     }
     
     //ret < 0 时,close fd, 因为事件已经从 epoll中移除
     //此处 不用再次 移除
-    if(pdata->epfd > 0)
-        close(pdata->epfd);
     sapool_del(sev, idx, 0);
     pdata->fd = -1;
     return 0;

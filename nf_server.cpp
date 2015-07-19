@@ -107,7 +107,7 @@ namespace nf
         g_pool[sev_data->server_type].destroy(sev_data);   
         Log :: NOTICE("nf_server.cpp : 97 CLOSE THREAD SUCC \n");
         
-        //delete sev_data->stratgy;
+        delete sev_data->stratgy;
  
         if( sev_data->pdata != NULL)
         { 
@@ -133,8 +133,9 @@ namespace nf
             }
         }
         Singleton<ConfigParser>::destroy();
+        sleep(1);
         free(sev_data->pdata);
-        //free(sev_data);
+        free(sev_data);
         Log :: NOTICE("nf_server.cpp : 115 CLOSE SERVER SUCC \n");
         sleep(1);
         return true;

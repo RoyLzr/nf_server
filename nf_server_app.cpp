@@ -133,8 +133,7 @@ SaReadLine :: work(void * data)
 
     char * req = (char *) pdata->read_buf;
     char * res = (char *) pdata->write_buf;
-    int epfd = pdata->epfd;
-    int fd = pdata->fd;
+    
     int readsize = pdata->read_size;   
     //int writesize = pdata->write_size;   
     int idx = pdata->idx;    
@@ -144,108 +143,76 @@ SaReadLine :: work(void * data)
     rp->rio_fd = pdata->fd;
     rp->rio_cnt = 0;
     rp->rio_bufptr = rp->rio_ptr; 
-     
-    int ret;
-    if((ret = net_ep_add_in(epfd, fd)) < 0)
-    {
-        Log :: WARN("add epoll error");
-        return -1;
-    }      
 
     //int readto = nf_server_get_readto();
     int writeto = nf_server_get_writeto();
-     
-    struct epoll_event events[1];
     
     //event loop
     while(sev->run)
     {
-        ret = epoll_wait(pdata->epfd, events, 1, 1000);
-        if(ret == 0)
+        int n;
+        int st;
+        int clen = 0;
+        //»Ö¸´ÉÏ´Î socket ×´Ì¬
+        if(rp->cache != NULL && rp->cache_len > 0)
         {
-            Log :: WARN("read timeout error"); 
-            return -1;
-        }
-        else if(ret < 0)
-        {
-            Log :: WARN("epoll wait error : %s",strerror(errno));   
-            return -1;
-        } 
-        //events analyse
-        
-        if(events[0].events & EPOLLRDHUP)
-        { 
-            Log :: WARN("event close fd error"); 
-            return -1;
-        }
-        else if(events[0].events & EPOLLERR )
-        {
-            Log :: WARN("event fd  error"); 
-            return -1;
-        }
-        else if( events[0].events & EPOLLIN )
-        {
-            int n;
-            int st;
-            int clen = 0;
-            //»Ö¸´ÉÏ´Î socket ×´Ì¬
-            if(rp->cache != NULL && rp->cache_len > 0)
-            {
-                memcpy(req, rp->cache, rp->cache_len);
-                clen = rp->cache_len;
+            memcpy(req, rp->cache, rp->cache_len);
+            clen = rp->cache_len;
 
-                Log :: NOTICE("Back status of cache: %d", clen);
+            Log :: NOTICE("Back status of cache: %d", clen);
  
-                Allocate :: deallocate(rp->cache, rp->cache_len);
-                rp->cache_len = 0; 
-                rp->cache = NULL;
-            }
+            Allocate :: deallocate(rp->cache, rp->cache_len);
+            rp->cache_len = 0; 
+            rp->cache = NULL;
+         }
             //ÎÞµÈ´ýÊ±¼äµÄ ·Ç×èÈû¶Á£¬¶Á¿ÕÐ­ÒéÕ»»º´æ£¬µ«Êý¾Ý´Õ²»ÂúÒ»ÐÐÊ±£¬
             //±£´æ×´Ì¬£¬ÊÍ·ÅÏß³Ì´¦Àí±ðµÄÊÂ¼þ¡£¶ñÐÔ·Êý¾Ý£¬Í¨¹ý³¬Ê±
             //¼ì²âÇå¿Õ`
 
-            while((n = rio_readline(rp, req + clen, readsize - clen, &st)) > 0)   
+         while((n = rio_readline(rp, req + clen, readsize - clen, &st)) > 0)   
+         {
+            Log :: DEBUG("APP READ LINE DATA : %d", n);
+            if(st < 0)
             {
-                Log :: DEBUG("APP READ LINE DATA : %d", n);
-                if(st < 0)
-                {
-                    int len = clen + n -1;
-                    if(len > 0)
-                    {   
-                        Log :: NOTICE("APP DUMP CACHE : %d", len );
-                        rp->cache = (char *) Allocate :: allocate(len);
+                int len = clen + n -1;
+                if(len > 0)
+                {   
+                    Log :: NOTICE("APP DUMP CACHE : %d", len );
+                    rp->cache = (char *) Allocate :: allocate(len);
                     
-                        rp->cache_len = len;
-                        memcpy(rp->cache, req, len);
+                    rp->cache_len = len;
+                    memcpy(rp->cache, req, len);
                         //return 0, ¹Ø±Õpdata->epfd, socket ×÷Îªready¼ÓÈëepoll
-                    }
+                 }
                     return 0;
-                }
-                pdata->readed_size = n + clen;
-                clen = 0;
-                sev->p_handle();
-                if((n = sendn_to_ms(rp->rio_fd, res, pdata->writed_size, writeto))< 0)
-                {
-                    Log :: WARN("APP WRITE DATA ERROR: %s", strerror(errno));
-                        return -1;
-                }
-                Log :: DEBUG("APP WRITE LINE DATA : %d", n);
-                pdata->read_start = 0;
-                pdata->readed_size = 0;
-                pdata->write_start = 0;
-                pdata->writed_size = 0; 
             }
-            if(n == 0)
+            
+            pdata->readed_size = n + clen;
+            clen = 0;
+            sev->p_handle();
+                
+            if((n = sendn_to_ms(rp->rio_fd, res, pdata->writed_size, writeto))< 0)
             {
-                Log :: WARN( "APP RECV Fin" );
-                return -1; 
+                Log :: WARN("APP WRITE DATA ERROR: %s", strerror(errno));
+                    return -1;
             }
-            else if(n < 0)
-            {
-                Log :: WARN(" APP recv error : ", strerror(errno));
-                return -1; 
-            }
-        }
+            Log :: DEBUG("APP WRITE LINE DATA : %d", n);
+               
+            pdata->read_start = 0;
+            pdata->readed_size = 0;
+            pdata->write_start = 0;
+            pdata->writed_size = 0; 
+         }
+         if(n == 0)
+         {
+            Log :: WARN( "APP RECV Fin" );
+            return -1; 
+         }
+         else if(n < 0)
+         {
+            Log :: WARN(" APP recv error : ", strerror(errno));
+            return -1; 
+         }
     }
     return 0;
 }

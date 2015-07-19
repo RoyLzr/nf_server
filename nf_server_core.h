@@ -135,6 +135,7 @@ class BaseWork
 {
     public:
         virtual int work(void *) = 0;
+        virtual ~BaseWork(){};
 };
 
 extern nf_server_t * 
