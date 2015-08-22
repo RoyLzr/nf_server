@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <errno.h>
 #include "../nf_server.h"
+#include "../factory.h"
 
 #define max 128
 #define BUFLEN 128
@@ -32,26 +33,24 @@ int main(int argc, char *argv[])
     
     signal(SIGINT, default_hand);
 
-    nf::NfServer *test =  new nf::NfServer();
-    char s[] = "test server";
-    test->set_server_name(s);
     string conf("server.conf");
-    test->load_conf(conf);
+    Factory * f_svr = new Factory(conf);
+
+    NfServer * svr = f_svr->create_svr();
      
-    test->set_work_callback(new RaReadLine()); 
-    test->set_handle(default_handle);
+    svr->set_work_callback(new SaReadLine()); 
+    svr->set_handle(default_handle);
      
-    if (test->run() < 0)
+    if (svr->run() < 0)
         std::cout << strerror(errno) << std::endl; 
     
     int time = sleep(65535);
     
-    test->stop();
+    svr->stop();
      
-    test->destroy();
+    svr->destroy();
     
-    free(test);
-    
-    std::cout << "run time : " << 65535 - time << std::endl;    
+    free(svr);
 
+    //std::cout << "run time : " << 65535 - time << std::endl;    
 }

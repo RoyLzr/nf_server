@@ -21,6 +21,7 @@
 #include "nf_server_core.h"
 #include "commonn/queue.h"
 #include "nf_server_app.h"
+#include "nf_server.h"
 
 #define LISTENER_PRIORITY    10
 #define WORKER_PRIORITY        5 
@@ -62,73 +63,81 @@ struct _sapool_t
     pthread_t main;
 };
 
-/**
- * @brief 
- *
- * @return  int 
- * @retval   
- * @see 
- * @author Liu ZhaoRui
-**/
-int 
-sapool_init(nf_server_t *);
 
-int 
-sapool_run(nf_server_t *);
+class SaServer : public NfServer
+{
+    public:
+        SaServer(){};
 
-int 
-sapool_join(nf_server_t *);
+        virtual ~SaServer(){};
 
-int 
-sapool_destroy(nf_server_t *);
+        virtual int svr_init(nf_server_t *);
 
-long long 
-sapool_get_queuenum(nf_server_t *);
+        virtual int svr_run(nf_server_t *);
 
-int
-sapool_set_stratgy(nf_server_t *, BaseWork *);
+        virtual int svr_join(nf_server_t *);
 
-void * 
-sapool_main(void *);
+        virtual int svr_listen(nf_server_t *);
 
-void * 
-sapool_workers(void *);
+        virtual int svr_destroy(nf_server_t *);
 
-int 
-sapool_produce(nf_server_t *sev, struct sockaddr *addr, 
-               socklen_t *addrlen);
+        virtual int svr_pause(nf_server_t *);
 
-int 
-sapool_consume(sapool_t *pool, nf_server_pdata_t *data);
+        virtual int svr_resume(nf_server_t *);
 
-int 
-sapool_check_timeout(nf_server_t *sev);
+        virtual int svr_set_stragy(nf_server_t *, BaseWork *);
 
-int 
-sapool_add(nf_server_t *sev, int sock, 
-           struct sockaddr_in * addr);
+        static long long sapool_get_queuenum(nf_server_t *);
 
-int 
-sapool_del(nf_server_t *sev, int idx, 
-           int keep_alive, bool remove=false);
+        static void * sapool_main(void *);
+        
+        static void * sapool_workers(void *);       
+        
+        static int 
+        sapool_produce(nf_server_t *sev, struct sockaddr *addr, 
+                       socklen_t *addrlen);
 
-int 
-sapool_epoll_add(nf_server_t *sev, int idx);
+        static int 
+        sapool_consume(sapool_t *pool, nf_server_pdata_t *data);
 
-int 
-sapool_epoll_del(nf_server_t *sev, int idx);
+        static int 
+        sapool_check_timeout(nf_server_t *sev);
 
-int 
-sapool_put(sapool_t *pool, int idx);
+        static int 
+        sapool_add(nf_server_t *sev, int sock, 
+                   struct sockaddr_in * addr);
 
-int 
-sapool_get(nf_server_t *sev, int *idx);
+        static int 
+        sapool_del(nf_server_t *sev, int idx, 
+                   int keep_alive, bool remove=false);
 
-int 
-sapool_pthread_cond_timewait(sapool_t *pool);
+        static int 
+        sapool_epoll_add(nf_server_t *sev, int idx);
 
-int 
-check_socket_queue(nf_server_t *sev);
+        static int 
+        sapool_epoll_del(nf_server_t *sev, int idx);
+
+        static int 
+        sapool_put(sapool_t *pool, int idx);
+
+        static int 
+        sapool_get(nf_server_t *sev, int *idx);
+
+        static int 
+        sapool_pthread_cond_timewait(sapool_t *pool);
+
+        static int 
+        check_socket_queue(nf_server_t *sev);
+        
+        static int 
+        add_listen_socket(nf_server_t *, int);
+        
+        static void 
+        sapool_close_pool_sockets(nf_server_t *, bool );
+
+    protected:
+        sapool_t * sa_pool;        
+};
 
 #endif  
 

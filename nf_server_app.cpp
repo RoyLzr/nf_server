@@ -10,7 +10,7 @@
 
 #include "sapool.h"
 #include "rapool.h"
-#include "lfpool.cpp"
+#include "lfpool.h"
 #include "nf_server_app.h"
 
 enum
@@ -289,7 +289,7 @@ RaReadLine :: work(void * data)
             { 
                 Log :: WARN("EPOLL HUP FD : %d POOL POS : %d",
                              pool->sockets[idx].sock, idx);
-                rapool_del(sev, idx, 0, true);
+                RaServer::rapool_del(sev, idx, 0, true);
                 (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                 continue;
             }
@@ -297,7 +297,7 @@ RaReadLine :: work(void * data)
             {
                 Log :: WARN("APP : 356 EPOLL ERROR FD : %d POOL POS : %d : %s",
                              pool->sockets[idx].sock, idx);
-                rapool_del(sev, idx, 0, true);
+                RaServer::rapool_del(sev, idx, 0, true);
                 (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                 continue;
             }
@@ -321,7 +321,7 @@ RaReadLine :: work(void * data)
                 {
                     Log :: WARN("READ ERROR THREAD ID %d, ERROR %s",
                                 pdata->id, strerror(errno));
-                    rapool_del(sev, idx, 0, true);
+                    RaServer::rapool_del(sev, idx, 0, true);
                     (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                     continue;
                 }
@@ -329,7 +329,7 @@ RaReadLine :: work(void * data)
                 {
                     Log :: WARN("READ FIN ID %d",
                                 pdata->id);
-                    rapool_del(sev, idx, 0, true);
+                    RaServer::rapool_del(sev, idx, 0, true);
                     (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                     continue;
                 }
@@ -371,7 +371,7 @@ RaReadLine :: work(void * data)
                     {
                         Log :: WARN("WRITE ERROR THREAD ID %d, ERROR %s",
                                     pdata->id, strerror(errno));
-                        rapool_del(sev, idx, 0, true);
+                        RaServer::rapool_del(sev, idx, 0, true);
                         (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                         continue;
                     }
@@ -390,12 +390,12 @@ RaReadLine :: work(void * data)
                                      rp->w_cache_len, rp->w_cache);
                         //若发送不全，更改下次监控为写事件，否则为读事件不变
                         
-                        rapool_epoll_mod_write(sev, idx, pdata->id);
+                        RaServer::rapool_epoll_mod_write(sev, idx, pdata->id);
                     }
                 }
                 (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                 pool->sockets[idx].sock_timeout = (pdata->timer).add_timer_ms(sev->write_to, 
-                                                   call_back_timeout, 
+                                                   RaServer::call_back_timeout, 
                                                    &pool->sockets[idx]);
                 //clear work space 
                 pdata->read_start = 0;
@@ -412,7 +412,7 @@ RaReadLine :: work(void * data)
                     Log :: WARN("WRITE ERROR THREAD ID %d, ERROR %s",
                                 pdata->id, strerror(errno));
 
-                    rapool_del(sev, idx, 0, true);
+                    RaServer::rapool_del(sev, idx, 0, true);
                     (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                     continue;
                 }
@@ -437,11 +437,11 @@ RaReadLine :: work(void * data)
                 rp->w_allo_len = 0; 
                 rp->w_allo_cache = NULL; 
 
-                rapool_epoll_mod_read(sev, idx, pdata->id);
+                RaServer::rapool_epoll_mod_read(sev, idx, pdata->id);
                 WRITE_END:
                 (pdata->timer).del_timer_ms(sock_timeout, &pool->sockets[idx]);
                 pool->sockets[idx].sock_timeout = (pdata->timer).add_timer_ms(sev->write_to, 
-                                                                              call_back_timeout, 
+                                                                              RaServer::call_back_timeout, 
                                                                               &pool->sockets[idx]);
             }
         }

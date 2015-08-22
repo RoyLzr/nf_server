@@ -15,8 +15,8 @@ enum
 
 #define MAX(a,b) (((a)>(b)) ? (a) : (b))
 
-static int 
-add_listen_socket(nf_server_t *sev, int listenfd)
+int  
+RaServer :: add_listen_socket(nf_server_t *sev, int listenfd)
 {
     rapool_t *pool = (rapool_t *)sev->pool;
     int idx = 0;
@@ -32,7 +32,7 @@ add_listen_socket(nf_server_t *sev, int listenfd)
 }
 
 int 
-rapool_init(nf_server_t *sev)
+RaServer :: svr_init(nf_server_t *sev)
 {
     int ssiz = nf_server_get_socksize(sev);
     rapool_t *pool = NULL;
@@ -136,14 +136,9 @@ rapool_init(nf_server_t *sev)
     return 0;
 }
 
-long long 
-rapool_get_queuenum(nf_server_t *sev)
-{
-    return 0;
-}
 
 int 
-rapool_run(nf_server_t *sev)
+RaServer :: svr_run(nf_server_t *sev)
 {
     //int i = 0;
     int ret = 0;
@@ -223,13 +218,25 @@ rapool_run(nf_server_t *sev)
 }
 
 int 
-rapool_listen(nf_server_t *sev)
+RaServer :: svr_listen(nf_server_t *sev)
 {
+    if(sev->backlog <= 5)
+        sev->backlog = 2048;
+
+    int backlog = sev->backlog;
+    if( listen(sev->sev_socket, backlog) < 0)
+    {
+        std::cout << "listen sock: " << strerror(errno) << std::endl;
+        close(sev->sev_socket);
+        return -1;    
+    }
+    Log :: NOTICE("LISTEN SOCKET START OK");
+    
     return add_listen_socket(sev, sev->sev_socket);
 }
 
 int 
-rapool_join(nf_server_t *sev)
+RaServer :: svr_join(nf_server_t *sev)
 {
     rapool_t *pool = (rapool_t *)sev->pool;
     if (sev->run_thread_num >= 0) 
@@ -243,8 +250,8 @@ rapool_join(nf_server_t *sev)
     return 0;
 }
 
-static void 
-rapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
+void 
+RaServer :: rapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
 {
     rapool_t * pool = (rapool_t *) sev->pool;
     //is_listenfd是true时，生产线程调用时，设置is_listenfd=true，先关闭监听sockfd
@@ -279,7 +286,8 @@ rapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
     }
 }
 
-int rapool_destroy(nf_server_t *sev)
+int 
+RaServer :: svr_destroy(nf_server_t *sev)
 {
     rapool_t *pool = (rapool_t *)sev->pool;
     if (pool == NULL) 
@@ -309,7 +317,7 @@ int rapool_destroy(nf_server_t *sev)
 }
 
 void * 
-rapool_main(void *param)
+RaServer :: rapool_main(void *param)
 {
     nf_server_pdata_t * pdata = (nf_server_pdata_t *) param;
     nf_server_t * sev = (nf_server_t *) pdata->server;
@@ -342,7 +350,7 @@ rapool_main(void *param)
 }
 
 int 
-rapool_produce(nf_server_t * sev, 
+RaServer :: rapool_produce(nf_server_t * sev, 
                struct sockaddr * addr, 
                socklen_t * addrlen, 
                int work_reacotr)
@@ -402,7 +410,7 @@ rapool_produce(nf_server_t * sev,
 }
 
 int 
-rapool_add(nf_server_t * sev, int sock, struct sockaddr_in *addr)
+RaServer :: rapool_add(nf_server_t * sev, int sock, struct sockaddr_in *addr)
 {
     rapool_t *pool = (rapool_t *) sev->pool;
     int idx = -1;
@@ -432,7 +440,7 @@ rapool_add(nf_server_t * sev, int sock, struct sockaddr_in *addr)
 }
 
 int 
-rapool_epoll_add_read(nf_server_t *sev, int idx, int work_reactor)
+RaServer :: rapool_epoll_add_read(nf_server_t *sev, int idx, int work_reactor)
 {
     rapool_t *pool = (rapool_t *) sev->pool;
 
@@ -455,7 +463,7 @@ rapool_epoll_add_read(nf_server_t *sev, int idx, int work_reactor)
 }
 
 int 
-rapool_epoll_mod_read(nf_server_t *sev, int idx, int work_reactor)
+RaServer :: rapool_epoll_mod_read(nf_server_t *sev, int idx, int work_reactor)
 {
     rapool_t *pool = (rapool_t *) sev->pool;
     
@@ -478,7 +486,7 @@ rapool_epoll_mod_read(nf_server_t *sev, int idx, int work_reactor)
 }
 
 int 
-rapool_epoll_mod_write(nf_server_t *sev, int idx, int work_reactor)
+RaServer :: rapool_epoll_mod_write(nf_server_t *sev, int idx, int work_reactor)
 {
     rapool_t *pool = (rapool_t *) sev->pool;
     
@@ -501,7 +509,7 @@ rapool_epoll_mod_write(nf_server_t *sev, int idx, int work_reactor)
 }
 
 int 
-rapool_epoll_del(nf_server_t * sev, int idx, int work_reactor)
+RaServer :: rapool_epoll_del(nf_server_t * sev, int idx, int work_reactor)
 {
     rapool_t *pool = (rapool_t *) sev->pool;
     
@@ -522,7 +530,7 @@ rapool_epoll_del(nf_server_t * sev, int idx, int work_reactor)
 }
 
 int 
-rapool_del(nf_server_t *sev, int idx, int alive, bool remove)
+RaServer :: rapool_del(nf_server_t *sev, int idx, int alive, bool remove)
 {
     rapool_t * pool = (rapool_t *) sev->pool;
     int id = nf_server_get_thread_id(); 
@@ -558,7 +566,7 @@ rapool_del(nf_server_t *sev, int idx, int alive, bool remove)
 
 
 void * 
-rapool_workers(void * param)
+RaServer :: rapool_workers(void * param)
 {
     
     nf_server_pdata_t *pdata = (nf_server_pdata_t *) param;
@@ -577,7 +585,7 @@ rapool_workers(void * param)
 }
 
 int 
-rapool_reactor(rapool_t * pool, nf_server_pdata_t * pdata)
+RaServer :: rapool_reactor(rapool_t * pool, nf_server_pdata_t * pdata)
 {
     //int idx;
     nf_server_t * sev = (nf_server_t *)pdata->server;
@@ -593,7 +601,7 @@ rapool_reactor(rapool_t * pool, nf_server_pdata_t * pdata)
 }
 
 int 
-rapool_pause(nf_server_t *sev)
+RaServer :: svr_pause(nf_server_t *sev)
 {
     if(sev->status != RUNNING) 
     {
@@ -614,7 +622,8 @@ rapool_pause(nf_server_t *sev)
     return 0;
 }
 
-int rapool_resume(nf_server_t *sev)
+int 
+RaServer :: svr_resume(nf_server_t *sev)
 {
     if(sev->status != PAUSE) 
     {
@@ -632,7 +641,8 @@ int rapool_resume(nf_server_t *sev)
     return 0;
 }
 
-int call_back_timeout(void * param)
+int 
+RaServer :: call_back_timeout(void * param)
 {
     rapool_sock_item_t * sock_item = (rapool_sock_item_t *) param;
     int id = nf_server_get_thread_id(); 
@@ -680,7 +690,7 @@ int call_back_timeout(void * param)
 }
 
 int
-rapool_set_stratgy(nf_server_t * sev, BaseWork * sta)
+RaServer :: svr_set_stragy(nf_server_t * sev, BaseWork * sta)
 {
     if(sta == NULL)
     {

@@ -45,6 +45,4 @@ class SaReadLine : public SaBaseWork
         virtual ~SaReadLine(){};
 };
 
-
-
 #endif

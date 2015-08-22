@@ -148,9 +148,6 @@ extern int
 nf_server_init(nf_server_t *);
 
 extern int 
-nf_server_listen(nf_server_t *);
-
-extern int 
 set_sev_socketopt(nf_server_t *, int);
 
 extern int 

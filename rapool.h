@@ -15,6 +15,7 @@
 
 #include "nf_server_core.h"
 #include "nf_server_app.h"
+#include "nf_server.h"
 
 #define LISTENER_PRIORITY    10
 #define WORKER_PRIORITY        5 
@@ -35,7 +36,7 @@ struct _rapool_sock_item_t
 };
 
 //连接池 数据结构
-struct _rapool_t
+typedef struct _rapool_t
 {
     rapool_sock_item_t * sockets;
     struct epoll_event * ep_events;
@@ -51,151 +52,108 @@ struct _rapool_t
     int * run;
     int sev_sock_id;
     pthread_t main;
+}rapool_t;
+
+
+class RaServer : public NfServer
+{
+    public:
+        RaServer(){};
+
+        virtual ~RaServer(){};
+
+        virtual int svr_init(nf_server_t *);
+
+        virtual int svr_run(nf_server_t *);
+
+        virtual int svr_join(nf_server_t *);
+
+        virtual int svr_listen(nf_server_t *);
+
+        virtual int svr_destroy(nf_server_t *);
+
+        virtual int svr_pause(nf_server_t *);
+
+        virtual int svr_resume(nf_server_t *);
+
+        virtual int svr_set_stragy(nf_server_t *, BaseWork *);
+
+        static int 
+        rapool_init(nf_server_t *);
+
+        static int 
+        rapool_run(nf_server_t *);
+
+        static int 
+        rapool_join(nf_server_t *);
+
+        static int 
+        rapool_destroy(nf_server_t *);
+
+        static void * 
+        rapool_main(void *);
+
+        static void * 
+        rapool_workers(void *);
+
+        static int 
+        rapool_produce(nf_server_t *sev, 
+                       struct sockaddr *addr, 
+                       socklen_t *addrlen, 
+                       int work_reactor);
+
+        static int 
+        rapool_reactor(rapool_t *pool, 
+                       nf_server_pdata_t *data);
+
+        static int 
+        rapool_check_timeout(nf_server_t *sev);
+
+        static int 
+        add_listen_socket(nf_server_t *sev, 
+                          int listenfd);
+
+        static int 
+        rapool_add(nf_server_t *sev, 
+                   int sock, 
+                   struct sockaddr_in * addr);
+
+        static int 
+        rapool_del(nf_server_t *sev, 
+                   int idx, 
+                   int keep_alive, 
+                   bool remove=false);
+
+        static int 
+        rapool_epoll_add_read(nf_server_t *sev, 
+                              int idx, 
+                              int work_reactor);
+
+        static int 
+        rapool_epoll_mod_read(nf_server_t *sev, 
+                              int idx, 
+                              int work_reactor);
+
+        static int 
+        rapool_epoll_del(nf_server_t *sev, 
+                         int idx, 
+                         int id);
+
+        static int 
+        rapool_epoll_mod_write(nf_server_t *sev, 
+                               int idx, 
+                               int work_reactor);
+
+        static int 
+        call_back_timeout(void * param);
+
+        static void 
+        rapool_close_pool_sockets(nf_server_t *, bool);
+
+    protected:
+       rapool_t * ra_pool; 
+
 };
 
 
-/**
- * @brief   init connect pool 
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_init(nf_server_t *);
-
-/**
- * @brief   init thread run
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_run(nf_server_t *);
-
-/**
- * @brief   wait thread end
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_join(nf_server_t *);
-
-/**
- * @brief   destroy connection pool
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_destroy(nf_server_t *);
-
-/**
- * @brief   no use
- * @author  Liu ZhaoRui
-**/
-long long 
-rapool_get_queuenum(nf_server_t *);
-
-/**
- * @brief   listen/Load balance thread
- * @author  Liu ZhaoRui
-**/
-void * 
-rapool_main(void *);
-
-
-/**
- * @brief   reactor thread
- * @author  Liu ZhaoRui
-**/
-void * 
-rapool_workers(void *);
-
-/**
- * @brief   listen function/add accepted 
- *          fd to reactor
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_produce(nf_server_t *sev, 
-               struct sockaddr *addr, 
-               socklen_t *addrlen, 
-               int work_reactor);
-
-/**
- * @brief   reactor work fun 
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_reactor(rapool_t *pool, 
-               nf_server_pdata_t *data);
-
-/**
- * @brief   rapool use timer, no use
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_check_timeout(nf_server_t *sev);
-
-/**
- * @brief   add sock to connection pool
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_add(nf_server_t *sev, 
-           int sock, 
-           struct sockaddr_in * addr);
-
-/**
- * @brief   del sock from connection pool and reactor
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_del(nf_server_t *sev, 
-           int idx, 
-           int keep_alive, 
-           bool remove=false);
-
-/**
- * @brief   add sock to reactor
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_epoll_add_read(nf_server_t *sev, 
-                      int idx, 
-                      int work_reactor);
-
-/**
- * @brief   mod sock reactor
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_epoll_mod_read(nf_server_t *sev, 
-                      int idx, 
-                      int work_reactor);
-
-/**
- * @brief   del sock reacctor
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_epoll_del(nf_server_t *sev, 
-                 int idx, 
-                 int id);
-
-/**
- * @brief   mod write sock reactor 
- * @author  Liu ZhaoRui
-**/
-int 
-rapool_epoll_mod_write(nf_server_t *sev, 
-                       int idx, 
-                       int work_reactor);
-
-/**
- * @brief   定时器使用的，超时后回调函数
- * @author  Liu ZhaoRui
-**/
-int 
-call_back_timeout(void * param);
-
-
-int
-rapool_set_stratgy(nf_server_t *, BaseWork *);
-
-
-#endif  
-
+#endif

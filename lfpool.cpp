@@ -9,18 +9,10 @@
 //         liuzhaorui1@163.com
 //**********************************************************
 
-#include <sys/epoll.h>
-#include <pthread.h>
-#include "nf_server_core.h"
-#include "nf_server_app.h"
-#include "pool_register.h"
+#include "lfpool.h"
 
-typedef struct _lfpool_t 
-{   
-    pthread_mutex_t lock;
-} lfpool_t;
-
-int lfpool_init(nf_server_t * sev)
+int 
+LfServer :: svr_init(nf_server_t * sev)
 {
     if(sev->pool == NULL )
     {
@@ -32,7 +24,8 @@ int lfpool_init(nf_server_t * sev)
     return 0;
 }
 
-static int lfpool_once_op(int epfd, int fd, int timeout)
+int 
+LfServer :: lfpool_once_op(int epfd, int fd, int timeout)
 {
     int stat;
     //清空表 omit no such file error
@@ -55,7 +48,8 @@ static int lfpool_once_op(int epfd, int fd, int timeout)
 }
 
 
-void * lf_main(void * param)
+void * 
+LfServer :: lf_main(void * param)
 {
     
     nf_server_pdata_t *pdata = (nf_server_pdata_t *)param;
@@ -140,9 +134,11 @@ void * lf_main(void * param)
 }
 
 //启动线程池内线程
-int lfpool_run(nf_server_t * sev)
+int 
+LfServer :: svr_run(nf_server_t * sev)
 {
     sev->run_thread_num = 0;
+
     for(size_t i = 0; i < sev->pthread_num; ++i)
     {
         sev->pdata[i].id = i;
@@ -187,7 +183,8 @@ int lfpool_run(nf_server_t * sev)
 
 
 
-int lfpool_join(nf_server_t * sev)
+int 
+LfServer :: svr_join(nf_server_t * sev)
 {
 
     for(int i = 0; i < sev->run_thread_num; i++)
@@ -199,7 +196,8 @@ int lfpool_join(nf_server_t * sev)
     return 0;
 }
 
-int lfpool_destroy(nf_server_t * sev)
+int 
+LfServer :: svr_destroy(nf_server_t * sev)
 {
     lfpool_t * pool = (lfpool_t *)sev->pool;
     if( pool == NULL)
@@ -212,27 +210,38 @@ int lfpool_destroy(nf_server_t * sev)
     return 0;
 }
 
-long long lfpool_get_socknum(nf_server_t *)
+int 
+LfServer :: svr_pause(nf_server_t *)
 {
     return 0;
 }
 
-long long lfpool_get_queuenum(nf_server_t *)
+int 
+LfServer :: svr_resume(nf_server_t *)
 {
     return 0;
 }
 
-int lfpool_pause(nf_server_t *)
+int 
+LfServer :: svr_listen(nf_server_t * sev)
 {
+    if(sev->backlog <= 5)
+        sev->backlog = 2048;
+    int backlog = sev->backlog;
+    if( listen(sev->sev_socket, backlog) < 0)
+    {
+        std::cout << "listen sock: " << strerror(errno) << std::endl;
+        close(sev->sev_socket);
+        return -1;    
+    }
+    Log :: NOTICE("LISTEN SOCKET START OK");
+    //listen 函数为空
+    
     return 0;
 }
 
-int lfpool_resume(nf_server_t *)
-{
-    return 0;
-}
-
-int lfpool_set_stratgy(nf_server_t * sev, BaseWork * sta)
+int  
+LfServer :: svr_set_stragy(nf_server_t * sev, BaseWork * sta)
 {
     if(sta == NULL)
     {

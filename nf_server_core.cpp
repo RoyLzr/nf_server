@@ -1,6 +1,4 @@
 #include "nf_server_core.h"
-#include "pool_register.h"
-
 
 static pthread_key_t pkey;
 static pthread_once_t ponce = PTHREAD_ONCE_INIT;
@@ -398,7 +396,6 @@ int nf_server_bind(nf_server_t * sev)
     //set svr : listen socket 
     const int on = 1;
     struct sockaddr_in addr;
-    int ret;
     
     if(sev->sev_socket < 0)
     {
@@ -424,27 +421,9 @@ int nf_server_bind(nf_server_t * sev)
         return -1;    
     }
     
-    ret = g_pool[sev->server_type].init(sev); 
-    Log :: NOTICE("NF_SVR_CORE : INIT POOL STATUS : %d", ret);
+    //ret = svr_init(sev); 
+    //Log :: NOTICE("NF_SVR_CORE : INIT POOL STATUS : %d", ret);
     return 0;
 }
 
-
-int nf_server_listen(nf_server_t * sev)
-{
-    if(sev->backlog <= 5)
-        sev->backlog = 2048;
-    int backlog = sev->backlog;
-    if( listen(sev->sev_socket, backlog) < 0)
-    {
-        std::cout << "listen sock: " << strerror(errno) << std::endl;
-        close(sev->sev_socket);
-        return -1;    
-    }
-    Log :: NOTICE("LISTEN SOCKET START OK");
-    //listen º¯ÊýÎª¿Õ
-    if( g_pool[sev->server_type].listen == NULL)
-        return 0;
-    return g_pool[sev->server_type].listen(sev);
-}
 

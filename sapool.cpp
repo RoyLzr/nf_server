@@ -17,8 +17,8 @@ enum
 
 #define MAX(a,b) (((a)>(b)) ? (a) : (b))
 
-static int 
-add_listen_socket(nf_server_t *sev, int listenfd)
+int 
+SaServer :: add_listen_socket(nf_server_t *sev, int listenfd)
 {
     sapool_t *pool = (sapool_t *)sev->pool;
     int idx = 0;
@@ -33,7 +33,7 @@ add_listen_socket(nf_server_t *sev, int listenfd)
 }
 
 int 
-sapool_init(nf_server_t *sev)
+SaServer :: svr_init(nf_server_t *sev)
 {
     int qsiz = nf_server_get_qsize(sev);
     int ssiz = nf_server_get_socksize(sev);
@@ -120,7 +120,7 @@ sapool_init(nf_server_t *sev)
 }
 
 long long 
-sapool_get_queuenum(nf_server_t *sev)
+SaServer :: sapool_get_queuenum(nf_server_t *sev)
 {
     if (sev == NULL) 
         return -1;
@@ -133,7 +133,7 @@ sapool_get_queuenum(nf_server_t *sev)
 }
 
 int 
-sapool_run(nf_server_t *sev)
+SaServer :: svr_run(nf_server_t *sev)
 {
     //int i = 0;
     int ret = 0;
@@ -221,13 +221,26 @@ sapool_run(nf_server_t *sev)
 }
 
 int 
-sapool_listen(nf_server_t *sev)
+SaServer :: svr_listen(nf_server_t *sev)
 {
+    if(sev->backlog <= 5)
+        sev->backlog = 2048;
+    int backlog = sev->backlog;
+    if( listen(sev->sev_socket, backlog) < 0)
+    {
+        std::cout << "listen sock: " << strerror(errno) << std::endl;
+        close(sev->sev_socket);
+        return -1;    
+    }
+    Log :: NOTICE("LISTEN SOCKET START OK");
+    //listen 函数为空
+    //return svr_listen(sev);
+
     return add_listen_socket(sev, sev->sev_socket);
 }
 
 int 
-sapool_join(nf_server_t *sev)
+SaServer :: svr_join(nf_server_t *sev)
 {
     sapool_t *pool = (sapool_t *)sev->pool;
     if (sev->run_thread_num >= 0) 
@@ -241,8 +254,8 @@ sapool_join(nf_server_t *sev)
     return 0;
 }
 
-static void 
-sapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
+void 
+SaServer :: sapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
 {
     sapool_t * pool = (sapool_t *) sev->pool;
     //is_listenfd是true时，生产线程调用时，设置is_listenfd=true，先关闭监听sockfd
@@ -282,7 +295,8 @@ sapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
     }
 }
 
-int sapool_destroy(nf_server_t *sev)
+int 
+SaServer :: svr_destroy(nf_server_t *sev)
 {
     sapool_t *pool = (sapool_t *)sev->pool;
     if (pool == NULL) 
@@ -315,7 +329,8 @@ int sapool_destroy(nf_server_t *sev)
     return 0;
 }
 
-int check_socket_queue(nf_server_t *sev)
+int 
+SaServer :: check_socket_queue(nf_server_t *sev)
 {
     sapool_t *pool = (sapool_t *)sev->pool;
     if(pool == NULL)
@@ -341,7 +356,7 @@ int check_socket_queue(nf_server_t *sev)
 }
 
 void * 
-sapool_main(void *param)
+SaServer :: sapool_main(void *param)
 {
     nf_server_pdata_t * pdata = (nf_server_pdata_t *) param;
     nf_server_t * sev = (nf_server_t *) pdata->server;
@@ -370,7 +385,7 @@ sapool_main(void *param)
 }
 
 int 
-sapool_check_timeout(nf_server_t *sev)
+SaServer :: sapool_check_timeout(nf_server_t *sev)
 {
     sapool_t * pool = (sapool_t *) sev->pool;
     time_t curtime = time(NULL);
@@ -418,7 +433,7 @@ sapool_check_timeout(nf_server_t *sev)
 }
 
 int 
-sapool_produce(nf_server_t * sev, struct sockaddr * addr, 
+SaServer :: sapool_produce(nf_server_t * sev, struct sockaddr * addr, 
                    socklen_t * addrlen)
 {
     int ret = 0;
@@ -501,7 +516,7 @@ sapool_produce(nf_server_t * sev, struct sockaddr * addr,
 }
 
 int 
-sapool_add(nf_server_t * sev, int sock, struct sockaddr_in *addr)
+SaServer :: sapool_add(nf_server_t * sev, int sock, struct sockaddr_in *addr)
 {
     sapool_t *pool = (sapool_t *) sev->pool;
     int idx = -1;
@@ -536,7 +551,7 @@ sapool_add(nf_server_t * sev, int sock, struct sockaddr_in *addr)
 }
 
 int 
-sapool_epoll_add(nf_server_t *sev, int idx)
+SaServer :: sapool_epoll_add(nf_server_t *sev, int idx)
 {
     sapool_t *pool = (sapool_t *) sev->pool;
     struct epoll_event ev;
@@ -553,7 +568,7 @@ sapool_epoll_add(nf_server_t *sev, int idx)
 }
 
 int 
-sapool_epoll_del(nf_server_t *sev, int idx)
+SaServer :: sapool_epoll_del(nf_server_t *sev, int idx)
 {
     sapool_t *pool = (sapool_t *) sev->pool;
     struct epoll_event ev;
@@ -570,7 +585,7 @@ sapool_epoll_del(nf_server_t *sev, int idx)
 }
 
 int 
-sapool_del(nf_server_t *sev, int idx, int alive, bool remove)
+SaServer :: sapool_del(nf_server_t *sev, int idx, int alive, bool remove)
 {
     sapool_t * pool = (sapool_t *) sev->pool;
     if (alive == 0) 
@@ -599,7 +614,7 @@ sapool_del(nf_server_t *sev, int idx, int alive, bool remove)
 }
 
 int 
-sapool_put(sapool_t *pool, int idx)
+SaServer :: sapool_put(sapool_t *pool, int idx)
 {
     pthread_mutex_lock(&pool->ready_mutex);
     if (is_full_q(&pool->queue)) 
@@ -616,7 +631,7 @@ sapool_put(sapool_t *pool, int idx)
 }
 
 void * 
-sapool_workers(void * param)
+SaServer :: sapool_workers(void * param)
 {
     nf_server_pdata_t *pdata = (nf_server_pdata_t *) param;
     nf_server_t * sev = (nf_server_t *) pdata->server;
@@ -639,7 +654,7 @@ sapool_workers(void * param)
 }
 
 int 
-sapool_pthread_cond_timewait(sapool_t *pool)
+SaServer :: sapool_pthread_cond_timewait(sapool_t *pool)
 {
     struct timeval now;
     struct timespec timeout;
@@ -651,7 +666,7 @@ sapool_pthread_cond_timewait(sapool_t *pool)
 }
 
 int 
-sapool_get(nf_server_t *sev, int *idx)
+SaServer :: sapool_get(nf_server_t *sev, int *idx)
 {
     sapool_t * pool = (sapool_t *) sev->pool;
     pthread_mutex_lock(&pool->ready_mutex);
@@ -674,7 +689,7 @@ sapool_get(nf_server_t *sev, int *idx)
 }
 
 int 
-sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
+SaServer :: sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
 {
     int idx;
     nf_server_t * sev = (nf_server_t *)pdata->server;
@@ -709,7 +724,7 @@ sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
 }
 
 int 
-sapool_pause(nf_server_t *sev)
+SaServer :: svr_pause(nf_server_t *sev)
 {
     if(sev->status != RUNNING) 
     {
@@ -730,7 +745,8 @@ sapool_pause(nf_server_t *sev)
     return 0;
 }
 
-int sapool_resume(nf_server_t *sev)
+int 
+SaServer :: svr_resume(nf_server_t *sev)
 {
     if(sev->status != PAUSE) 
     {
@@ -749,7 +765,7 @@ int sapool_resume(nf_server_t *sev)
 }
 
 int
-sapool_set_stratgy(nf_server_t * sev, BaseWork * sta)
+SaServer :: svr_set_stragy(nf_server_t * sev, BaseWork * sta)
 {
     if(sta == NULL)
     {
