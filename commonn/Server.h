@@ -13,12 +13,11 @@
 class Server
 {
     protected:
-        Server();
+        Server(){};
     
-        virtual ~Server();
+        virtual ~Server(){};
     
     public: 
-        virtual int load_conf(const std::string &) = 0;
 
         virtual int run() = 0;
         /**

@@ -11,16 +11,18 @@
 
 #include "lfpool.h"
 
+lfpool_t * LfServer :: lf_pool = NULL;
+
 int 
 LfServer :: svr_init()
 {
-    if(sev_data->pool == NULL )
+    if(lf_pool == NULL )
     {
-        sev_data->pool = malloc(sizeof(lfpool_t));
-        if(sev_data->pool == NULL)
+        lf_pool = (lfpool_t *) malloc(sizeof(lfpool_t));
+        if(lf_pool == NULL)
         {   std::cout << "malloc pool error" << std::endl; return -1;}
     }
-    pthread_mutex_init(&((lfpool_t *)sev_data->pool)->lock, NULL);      
+    pthread_mutex_init(&((lfpool_t *) lf_pool)->lock, NULL);      
     return 0;
 }
 
@@ -54,7 +56,7 @@ LfServer :: lf_main(void * param)
     
     nf_server_pdata_t *pdata = (nf_server_pdata_t *)param;
     nf_server_t *sev = (nf_server_t *)pdata->server;
-    lfpool_t *pool = (lfpool_t *)sev->pool;
+    lfpool_t *pool = (lfpool_t *) lf_pool;
     int ret; 
     set_pthread_data(pdata);
     
@@ -205,14 +207,16 @@ LfServer :: svr_join()
 int 
 LfServer :: svr_destroy()
 {
-    lfpool_t * pool = (lfpool_t *)sev_data->pool;
+    lfpool_t * pool = lf_pool;
     if( pool == NULL)
         return 0;
     pthread_mutex_destroy(&pool->lock);    
     printf("destroy mutex ok");
     if ( sev_data->pool != NULL)
         free(sev_data->pool);
-    sev_data->pool = NULL;    
+
+    lf_pool = NULL;  
+  
     return 0;
 }
 

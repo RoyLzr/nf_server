@@ -136,7 +136,7 @@ class SaServer : public NfServer
         sapool_close_pool_sockets(nf_server_t *, bool );
 
     protected:
-        sapool_t * sa_pool;        
+        static sapool_t * sa_pool;        
 };
 
 #endif  

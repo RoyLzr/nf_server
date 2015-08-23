@@ -43,7 +43,7 @@ class LfServer : public NfServer
         static int lfpool_once_op(int, int, int);
 
     protected:
-        lfpool_t * lf_pool;        
+        static lfpool_t * lf_pool;        
 };
 
 #endif

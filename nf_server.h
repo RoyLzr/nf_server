@@ -17,7 +17,7 @@
 #include <iostream>
 #include <string.h>
 
-class NfServer
+class NfServer : public Server
 {
     public:
         NfServer();

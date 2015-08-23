@@ -151,7 +151,7 @@ class RaServer : public NfServer
         rapool_close_pool_sockets(nf_server_t *, bool);
 
     protected:
-       rapool_t * ra_pool; 
+       static rapool_t * ra_pool; 
 
 };
 
