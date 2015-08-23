@@ -38,7 +38,7 @@ int main(int argc, char *argv[])
 
     NfServer * svr = f_svr->create_svr();
      
-    svr->set_work_callback(new SaReadLine()); 
+    svr->set_work_callback(new LfReadLine()); 
     svr->set_handle(default_handle);
      
     if (svr->run() < 0)

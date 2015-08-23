@@ -6,8 +6,8 @@
 static struct NfServer * svr[] = 
 {
     new LfServer(),
-    new RaServer(),
     new SaServer(),
+    new RaServer(),
 };
 
 class Factory
@@ -16,18 +16,17 @@ class Factory
     public:
         Factory(const std::string  & conf)
         {
-            
+            Singleton<ConfigParser>::instance()->parser_file(conf);
+            Singleton<ConfigParser>::instance()->scan();
+            svr_type = (size_t)atoi((Singleton<ConfigParser>::instance()->get("server", "type")).c_str());
         };
         virtual ~Factory(){};
 
     NfServer * create_svr()
     {
-        svr[NFSVR_LFPOOL]->load_conf(conf_path);    
-        int type = svr[NFSVR_LFPOOL]->sev_data->server_type;
-
-        if(svr[NFSVR_LFPOOL]->sev_data->server_type != NFSVR_LFPOOL)
+        (svr[svr_type]->get_server_data())->server_type = svr_type; 
                 
-        return svr[2];
+        return svr[svr_type];
     };
     private:
         int svr_type;
