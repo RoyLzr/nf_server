@@ -30,16 +30,6 @@ nf_server_t * NfServer :: get_server_data()
     return sev_data;
 }
 
-int NfServer :: load_conf(const std::string conf_path)
-{
-    Singleton<ConfigParser>::instance()->parser_file(conf_path);
-    Singleton<ConfigParser>::instance()->scan();
-    //Singleton<ConfigParser>::destroy();
-    sev_data->server_type = (size_t)atoi((Singleton<ConfigParser>::
-                instance()->get("server", "type")).c_str());
-    return true;
-}
-
 int NfServer :: run()
 {
     int ret;
@@ -63,13 +53,13 @@ int NfServer :: run()
         return -1;
     }
 
-    if( (ret = svr_init(sev_data) ) < 0 )
+    if( (ret = svr_init()) < 0 )
     {    
         Log :: ERROR("SVR INIT ERROR"); 
         return -1;
     }
 
-    if( (ret = svr_listen(sev_data) ) < 0 )
+    if( (ret = svr_listen() ) < 0 )
     {    
         Log :: ERROR("SVR LISTEN ERROR"); 
         return -1;
@@ -82,7 +72,7 @@ int NfServer :: run()
     if(sev_data->stratgy == NULL)
         set_work_callback(NULL);
 
-    return svr_run(sev_data); 
+    return svr_run(); 
 }
 
 int NfServer :: stop()
@@ -99,7 +89,7 @@ int NfServer :: join()
         return -1;
     if(!sev_data->need_join)
         return 0;
-    return svr_join(sev_data); 
+    return svr_join(); 
 }
 
 int NfServer :: destroy()
@@ -108,7 +98,7 @@ int NfServer :: destroy()
     if ( sev_data->sev_socket >= 0)
         close(sev_data->sev_socket);
 
-    svr_destroy(sev_data);   
+    svr_destroy();   
     Log :: NOTICE("nf_server.cpp : 97 CLOSE THREAD SUCC \n");
 
     delete sev_data->stratgy;
@@ -156,7 +146,7 @@ int NfServer :: set_work_callback(BaseWork * run)
     if( sev_data == NULL)
         return -1;
     //sev_data->cb_work = run;
-    svr_set_stragy(sev_data, run); 
+    svr_set_stragy( run); 
     return 1;
 }
 

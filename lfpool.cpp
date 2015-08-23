@@ -12,15 +12,15 @@
 #include "lfpool.h"
 
 int 
-LfServer :: svr_init(nf_server_t * sev)
+LfServer :: svr_init()
 {
-    if(sev->pool == NULL )
+    if(sev_data->pool == NULL )
     {
-        sev->pool = malloc(sizeof(lfpool_t));
-        if(sev->pool == NULL)
+        sev_data->pool = malloc(sizeof(lfpool_t));
+        if(sev_data->pool == NULL)
         {   std::cout << "malloc pool error" << std::endl; return -1;}
     }
-    pthread_mutex_init(&((lfpool_t *)sev->pool)->lock, NULL);      
+    pthread_mutex_init(&((lfpool_t *)sev_data->pool)->lock, NULL);      
     return 0;
 }
 
@@ -135,16 +135,16 @@ LfServer :: lf_main(void * param)
 
 //启动线程池内线程
 int 
-LfServer :: svr_run(nf_server_t * sev)
+LfServer :: svr_run()
 {
-    sev->run_thread_num = 0;
+    sev_data->run_thread_num = 0;
 
-    for(size_t i = 0; i < sev->pthread_num; ++i)
+    for(size_t i = 0; i < sev_data->pthread_num; ++i)
     {
-        sev->pdata[i].id = i;
+        sev_data->pdata[i].id = i;
         int ret = 0;
          
-        if(sev->stack_size > 0)
+        if(sev_data->stack_size > 0)
         {
             pthread_attr_t thread_attr;
             if (pthread_attr_init(&thread_attr) != 0)
@@ -153,19 +153,25 @@ LfServer :: svr_run(nf_server_t * sev)
                 return -1;
             }
     
-            if( sev->stack_size > 1024)
+            if( sev_data->stack_size > 1024)
             {
-                if (pthread_attr_setstacksize(&thread_attr, sev->stack_size) != 0)
+                if (pthread_attr_setstacksize(&thread_attr, sev_data->stack_size) != 0)
                 {
                     std::cout << "set stack size error" << std::endl; 
                     return -1;
                 }
-                ret = pthread_create(&sev->pdata[i].pid, &thread_attr, lf_main, &sev->pdata[i]);
+                ret = pthread_create(&sev_data->pdata[i].pid, 
+                                     &thread_attr, 
+                                     lf_main, 
+                                     &sev_data->pdata[i]);
                 pthread_attr_destroy(&thread_attr);
             }
             else
             {
-                ret = pthread_create(&sev->pdata[i].pid, NULL, lf_main, &sev->pdata[i]);
+                ret = pthread_create(&sev_data->pdata[i].pid, 
+                                     NULL, 
+                                     lf_main, 
+                                     &sev_data->pdata[i]);
             }
             if(ret != 0)
             {
@@ -173,7 +179,7 @@ LfServer :: svr_run(nf_server_t * sev)
                 std::cout << strerror(errno) << std::endl;
                 return -1;
             }
-            sev->run_thread_num++;
+            sev_data->run_thread_num++;
         }
         else
         {   std::cout << "stacksize must > 0" << std::endl; return -1; }
@@ -184,54 +190,54 @@ LfServer :: svr_run(nf_server_t * sev)
 
 
 int 
-LfServer :: svr_join(nf_server_t * sev)
+LfServer :: svr_join()
 {
 
-    for(int i = 0; i < sev->run_thread_num; i++)
+    for(int i = 0; i < sev_data->run_thread_num; i++)
     {
         std::cout << "join: "<<i << std::endl;
-        pthread_join(sev->pdata[i].pid, NULL);
-        std::cout << "thread : " << sev->pdata[i].id << "return succ" << std::endl;  
+        pthread_join(sev_data->pdata[i].pid, NULL);
+        std::cout << "thread : " << sev_data->pdata[i].id << "return succ" << std::endl;  
     }
     return 0;
 }
 
 int 
-LfServer :: svr_destroy(nf_server_t * sev)
+LfServer :: svr_destroy()
 {
-    lfpool_t * pool = (lfpool_t *)sev->pool;
+    lfpool_t * pool = (lfpool_t *)sev_data->pool;
     if( pool == NULL)
         return 0;
     pthread_mutex_destroy(&pool->lock);    
     printf("destroy mutex ok");
-    if ( sev->pool != NULL)
-        free(sev->pool);
-    sev->pool = NULL;    
+    if ( sev_data->pool != NULL)
+        free(sev_data->pool);
+    sev_data->pool = NULL;    
     return 0;
 }
 
 int 
-LfServer :: svr_pause(nf_server_t *)
+LfServer :: svr_pause()
 {
     return 0;
 }
 
 int 
-LfServer :: svr_resume(nf_server_t *)
+LfServer :: svr_resume()
 {
     return 0;
 }
 
 int 
-LfServer :: svr_listen(nf_server_t * sev)
+LfServer :: svr_listen()
 {
-    if(sev->backlog <= 5)
-        sev->backlog = 2048;
-    int backlog = sev->backlog;
-    if( listen(sev->sev_socket, backlog) < 0)
+    if(sev_data->backlog <= 5)
+        sev_data->backlog = 2048;
+    int backlog = sev_data->backlog;
+    if( listen(sev_data->sev_socket, backlog) < 0)
     {
         std::cout << "listen sock: " << strerror(errno) << std::endl;
-        close(sev->sev_socket);
+        close(sev_data->sev_socket);
         return -1;    
     }
     Log :: NOTICE("LISTEN SOCKET START OK");
@@ -241,16 +247,16 @@ LfServer :: svr_listen(nf_server_t * sev)
 }
 
 int  
-LfServer :: svr_set_stragy(nf_server_t * sev, BaseWork * sta)
+LfServer :: svr_set_stragy(BaseWork * sta)
 {
     if(sta == NULL)
     {
-        sev->stratgy = new LfReadLine();
+        sev_data->stratgy = new LfReadLine();
         return 0; 
     }
     LfBaseWork * test = dynamic_cast<LfBaseWork *>(sta);
     assert(test != NULL);
-    sev->stratgy = test;
+    sev_data->stratgy = test;
              
     return 0;
 }

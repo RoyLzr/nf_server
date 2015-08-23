@@ -23,8 +23,6 @@ class NfServer
         NfServer();
         virtual ~NfServer();
 
-        virtual int load_conf(const std::string );
-
         virtual int run();
         /**
          * @brief 运行nf服务器  
@@ -81,21 +79,21 @@ class NfServer
          *    
          **/
 
-        virtual int svr_init(nf_server_t *) = 0;
+        virtual int svr_init() = 0;
 
-        virtual int svr_run(nf_server_t *) = 0;
+        virtual int svr_run() = 0;
 
-        virtual int svr_join(nf_server_t *) = 0;
+        virtual int svr_join() = 0;
 
-        virtual int svr_listen(nf_server_t *) = 0;
+        virtual int svr_listen() = 0;
 
-        virtual int svr_destroy(nf_server_t *) = 0;
+        virtual int svr_destroy() = 0;
 
-        virtual int svr_pause(nf_server_t *) = 0;
+        virtual int svr_pause() = 0;
 
-        virtual int svr_resume(nf_server_t *) = 0;
+        virtual int svr_resume() = 0;
 
-        virtual int svr_set_stragy(nf_server_t *, BaseWork *) = 0;
+        virtual int svr_set_stragy(BaseWork *) = 0;
 
         virtual int set_server_startfun(nf_handle_t start);
 

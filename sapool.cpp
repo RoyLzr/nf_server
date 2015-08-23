@@ -33,33 +33,33 @@ SaServer :: add_listen_socket(nf_server_t *sev, int listenfd)
 }
 
 int 
-SaServer :: svr_init(nf_server_t *sev)
+SaServer :: svr_init()
 {
-    int qsiz = nf_server_get_qsize(sev);
-    int ssiz = nf_server_get_socksize(sev);
+    int qsiz = nf_server_get_qsize(sev_data);
+    int ssiz = nf_server_get_socksize(sev_data);
     sapool_t *pool = NULL;
 
     if (qsiz <=1 || ssiz<=0) 
     {
         qsiz = DEFAULT_QUEUE_LEN;
         ssiz = DEFAULT_SOCK_NUM;
-        sev->qsize = qsiz;
-        sev->socksize = ssiz;
+        sev_data->qsize = qsiz;
+        sev_data->socksize = ssiz;
     }
 
-    if (sev->pool == NULL) 
+    if (sev_data->pool == NULL) 
     {
-        sev->pool = malloc(sizeof(sapool_t));
-        if (sev->pool == NULL) 
+        sev_data->pool = malloc(sizeof(sapool_t));
+        if (sev_data->pool == NULL) 
         {
             std :: cout << "malloc sapool error" << std::endl;
             
             return -1;
         }
-        memset(sev->pool, 0, sizeof(sapool_t));
+        memset(sev_data->pool, 0, sizeof(sapool_t));
     }
     
-    pool = (sapool_t *) sev->pool;
+    pool = (sapool_t *) sev_data->pool;
     pthread_mutex_init(&pool->ready_mutex, NULL);
     pthread_cond_init(&pool->ready_cond, NULL);
 
@@ -76,11 +76,11 @@ SaServer :: svr_init(nf_server_t *sev)
     for(int i = 0; i < ssiz; i++)
     {
         pool->sockets[i].rp.rio_ptr = ((char *) malloc(sizeof(char) * 
-                                    sev->thread_usr_buf)); 
+                                    sev_data->thread_usr_buf)); 
         if(pool->sockets[i].rp.rio_ptr == NULL)
             return -1;
-        memset(pool->sockets[i].rp.rio_ptr, 0, sev->thread_usr_buf); 
-        rio_init(&pool->sockets[i].rp, -1, sev->thread_usr_buf); 
+        memset(pool->sockets[i].rp.rio_ptr, 0, sev_data->thread_usr_buf); 
+        rio_init(&pool->sockets[i].rp, -1, sev_data->thread_usr_buf); 
     }
     if (pool->sockets == NULL) 
     {
@@ -109,11 +109,11 @@ SaServer :: svr_init(nf_server_t *sev)
     if (pool->timeout <= 0) 
     {
         //pool->timeout = DEFAULT_TIMEOUT;
-        pool->timeout = sev->timeout;
+        pool->timeout = sev_data->timeout;
     }
     //pool->check_interval = DEFAULT_CHECK_INTERVAL;
-    pool->check_interval = sev->check_interval;
-    pool->run = &sev->run;
+    pool->check_interval = sev_data->check_interval;
+    pool->run = &sev_data->run;
     pool->using_size = 0;
 
     return 0;
@@ -133,11 +133,11 @@ SaServer :: sapool_get_queuenum(nf_server_t *sev)
 }
 
 int 
-SaServer :: svr_run(nf_server_t *sev)
+SaServer :: svr_run()
 {
     //int i = 0;
     int ret = 0;
-    sapool_t *pool = (sapool_t *)sev->pool;
+    sapool_t *pool = (sapool_t *)sev_data->pool;
 
     pthread_attr_t thread_attr;
     struct sched_param param = { 0 };
@@ -183,8 +183,8 @@ SaServer :: svr_run(nf_server_t *sev)
     }
 
     ret = pthread_create(&pool->main, &thread_attr, 
-                         sapool_main, &sev->pdata[0]);
-    sev->pdata[0].pid = pool->main;
+                         sapool_main, &sev_data->pdata[0]);
+    sev_data->pdata[0].pid = pool->main;
 
     if (ret) 
     {
@@ -192,7 +192,7 @@ SaServer :: svr_run(nf_server_t *sev)
         return -1;
     }
 
-    sev->run_thread_num = 0;
+    sev_data->run_thread_num = 0;
     param.sched_priority = WORKER_PRIORITY;
     ret = pthread_attr_setschedparam(&thread_attr, &param);
     if (ret) 
@@ -202,53 +202,53 @@ SaServer :: svr_run(nf_server_t *sev)
     }
 
     //创建逻辑处理子线程
-    for (size_t i=1; i<sev->pthread_num; ++i) 
+    for (size_t i=1; i < sev_data->pthread_num; ++i) 
     {
-        sev->pdata[i].id = i;
-        ret = pthread_create(&sev->pdata[i].pid, &thread_attr, 
-                             sapool_workers, &sev->pdata[i]);
+        sev_data->pdata[i].id = i;
+        ret = pthread_create(&sev_data->pdata[i].pid, &thread_attr, 
+                             sapool_workers, &sev_data->pdata[i]);
         if (ret) 
         {
             std :: cout << "error thread set create work thread" << std :: endl;
             return -1;
         }
-        ++ sev->run_thread_num;
+        ++ sev_data->run_thread_num;
     }
 
-    sev->status = RUNNING;
+    sev_data->status = RUNNING;
     pthread_attr_destroy(&thread_attr);
     return 0;
 }
 
 int 
-SaServer :: svr_listen(nf_server_t *sev)
+SaServer :: svr_listen()
 {
-    if(sev->backlog <= 5)
-        sev->backlog = 2048;
-    int backlog = sev->backlog;
-    if( listen(sev->sev_socket, backlog) < 0)
+    if(sev_data->backlog <= 5)
+        sev_data->backlog = 2048;
+    int backlog = sev_data->backlog;
+    if( listen(sev_data->sev_socket, backlog) < 0)
     {
         std::cout << "listen sock: " << strerror(errno) << std::endl;
-        close(sev->sev_socket);
+        close(sev_data->sev_socket);
         return -1;    
     }
     Log :: NOTICE("LISTEN SOCKET START OK");
     //listen 函数为空
     //return svr_listen(sev);
 
-    return add_listen_socket(sev, sev->sev_socket);
+    return add_listen_socket(sev_data, sev_data->sev_socket);
 }
 
 int 
-SaServer :: svr_join(nf_server_t *sev)
+SaServer :: svr_join()
 {
-    sapool_t *pool = (sapool_t *)sev->pool;
-    if (sev->run_thread_num >= 0) 
+    sapool_t *pool = (sapool_t *)sev_data->pool;
+    if (sev_data->run_thread_num >= 0) 
     {
         pthread_join(pool->main, NULL);
-        for (int i=0; i< sev->run_thread_num; ++i) 
+        for (int i=0; i< sev_data->run_thread_num; ++i) 
         {
-            pthread_join(sev->pdata[i].pid, NULL);
+            pthread_join(sev_data->pdata[i].pid, NULL);
         }
     }
     return 0;
@@ -296,14 +296,14 @@ SaServer :: sapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
 }
 
 int 
-SaServer :: svr_destroy(nf_server_t *sev)
+SaServer :: svr_destroy()
 {
-    sapool_t *pool = (sapool_t *)sev->pool;
+    sapool_t *pool = (sapool_t *)sev_data->pool;
     if (pool == NULL) 
         return 0;
 
     //此时消费线程都已退出，就此关闭所有已连接sockfd
-    sapool_close_pool_sockets(sev, false);
+    sapool_close_pool_sockets(sev_data, false);
 
     pthread_mutex_destroy(&pool->ready_mutex);
     pthread_cond_destroy(&pool->ready_cond);
@@ -324,8 +324,8 @@ SaServer :: svr_destroy(nf_server_t *sev)
         close(pool->epfd);
     }
 
-    free (sev->pool);
-    sev->pool = NULL;
+    free (sev_data->pool);
+    sev_data->pool = NULL;
     return 0;
 }
 
@@ -724,57 +724,57 @@ SaServer :: sapool_consume(sapool_t * pool, nf_server_pdata_t * pdata)
 }
 
 int 
-SaServer :: svr_pause(nf_server_t *sev)
+SaServer :: svr_pause()
 {
-    if(sev->status != RUNNING) 
+    if(sev_data->status != RUNNING) 
     {
         std :: cout << "Because server's status isn't running, sapool_pause Failed!" 
         << std::endl;
         return -1;
     }
 
-    sapool_t * pool = (sapool_t *) sev->pool;
+    sapool_t * pool = (sapool_t *) sev_data->pool;
     int index = 0;
-    if(sapool_epoll_del(sev, index) != 0) 
+    if(sapool_epoll_del(sev_data, index) != 0) 
     {
         return -1;
     }
     pool->sockets[index].status = IDLE;
     pool->sockets[index].sock = -1;
-    sev->status = PAUSE;
+    sev_data->status = PAUSE;
     return 0;
 }
 
 int 
-SaServer :: svr_resume(nf_server_t *sev)
+SaServer :: svr_resume()
 {
-    if(sev->status != PAUSE) 
+    if(sev_data->status != PAUSE) 
     {
         std::cout << "Because server's status isn't PAUSE, sapool_resume Failed!" 
         <<std::endl;
         return -1;
     }
 
-    if(add_listen_socket(sev, sev->sev_socket) != 0) 
+    if(add_listen_socket(sev_data, sev_data->sev_socket) != 0) 
     {
         return -1;
     }
 
-    sev->status = RUNNING;
+    sev_data->status = RUNNING;
     return 0;
 }
 
 int
-SaServer :: svr_set_stragy(nf_server_t * sev, BaseWork * sta)
+SaServer :: svr_set_stragy( BaseWork * sta)
 {
     if(sta == NULL)
     {
-        sev->stratgy = new SaReadLine();
+        sev_data->stratgy = new SaReadLine();
         return 0; 
     }
     SaBaseWork * test = dynamic_cast<SaBaseWork *>(sta);
     assert(test != NULL);
-    sev->stratgy = test;
+    sev_data->stratgy = test;
              
     return 0;
 }

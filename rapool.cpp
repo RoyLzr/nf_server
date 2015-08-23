@@ -32,32 +32,32 @@ RaServer :: add_listen_socket(nf_server_t *sev, int listenfd)
 }
 
 int 
-RaServer :: svr_init(nf_server_t *sev)
+RaServer :: svr_init()
 {
-    int ssiz = nf_server_get_socksize(sev);
+    int ssiz = nf_server_get_socksize(sev_data);
     rapool_t *pool = NULL;
 
     if (ssiz <= 0) 
     {
         ssiz = RA_SOCK_NUM;
-        sev->socksize = ssiz;
+        sev_data->socksize = ssiz;
     }
 
-    if (sev->pool == NULL) 
+    if (sev_data->pool == NULL) 
     {
-        sev->pool = malloc(sizeof(rapool_t));
-        if (sev->pool == NULL) 
+        sev_data->pool = malloc(sizeof(rapool_t));
+        if (sev_data->pool == NULL) 
         {
             Log :: ERROR("RAPOOL.cpp : 50 MALLOC RA-POOL ERROR");
             
             return -1;
         }
-        memset(sev->pool, 0, sizeof(rapool_t));
+        memset(sev_data->pool, 0, sizeof(rapool_t));
     }
 
     Log :: NOTICE("RAPOOL.cpp MALLOC RA-POOL SUCC");
      
-    pool = (rapool_t *) sev->pool;
+    pool = (rapool_t *) sev_data->pool;
 
     //创建socket资源
     pool->size = ssiz;
@@ -102,14 +102,14 @@ RaServer :: svr_init(nf_server_t *sev)
         Log :: ERROR("INIT EPOLL HANDLE IN LISTEN THREAD ERROR");
         return -1;
     }
-    sev->pdata[0].epfd = pool->epfd;
+    sev_data->pdata[0].epfd = pool->epfd;
     Log :: NOTICE("INIT EPOLL HANDLE IN LISTEN THREAD SUCC");
     
     //创建epoll句柄
     //SUB REACTOR
-    for (size_t i=1; i< sev->pthread_num; ++i) 
+    for (size_t i=1; i< sev_data->pthread_num; ++i) 
     {
-        sev->pdata[i].epfd = epoll_create(ssiz);
+        sev_data->pdata[i].epfd = epoll_create(ssiz);
         if (pool->epfd < 0) 
         {
             Log :: ERROR("INIT EPOLL HANDLE IN WORK REACTOR THREAD ERROR,\
@@ -122,15 +122,15 @@ RaServer :: svr_init(nf_server_t *sev)
     pool->timeout = -1;
     if (pool->timeout <= 0) 
     {
-        pool->timeout = sev->timeout;
+        pool->timeout = sev_data->timeout;
     }
-    Log :: NOTICE("DEFAULT EPOLL TIMEOUT %d ", sev->timeout);
+    Log :: NOTICE("DEFAULT EPOLL TIMEOUT %d ", sev_data->timeout);
 
     //pool->check_interval = DEFAULT_CHECK_INTERVAL;
-    pool->check_interval = sev->check_interval;
-    Log :: NOTICE("DEFAULT EPOLL CHECK INTERVAL %d ", sev->check_interval);
+    pool->check_interval = sev_data->check_interval;
+    Log :: NOTICE("DEFAULT EPOLL CHECK INTERVAL %d ", sev_data->check_interval);
 
-    pool->run = &sev->run;
+    pool->run = &sev_data->run;
     pool->using_size = 0;
 
     return 0;
@@ -138,11 +138,11 @@ RaServer :: svr_init(nf_server_t *sev)
 
 
 int 
-RaServer :: svr_run(nf_server_t *sev)
+RaServer :: svr_run()
 {
     //int i = 0;
     int ret = 0;
-    rapool_t *pool = (rapool_t *)sev->pool;
+    rapool_t *pool = (rapool_t *)sev_data->pool;
 
     pthread_attr_t thread_attr;
     struct sched_param param = { 0 };
@@ -176,8 +176,8 @@ RaServer :: svr_run(nf_server_t *sev)
     }
 
     ret = pthread_create(&pool->main, &thread_attr, 
-                         rapool_main, &sev->pdata[0]);
-    sev->pdata[0].pid = pool->main;
+                         rapool_main, &sev_data->pdata[0]);
+    sev_data->pdata[0].pid = pool->main;
 
     Log :: NOTICE("PDATA INDEX : %d IS LISTEN THREAD tid %d ", 0, pool->main);    
 
@@ -187,7 +187,7 @@ RaServer :: svr_run(nf_server_t *sev)
         return -1;
     }
 
-    sev->run_thread_num = 0;
+    sev_data->run_thread_num = 0;
     param.sched_priority = WORKER_PRIORITY;
     ret = pthread_attr_setschedparam(&thread_attr, &param);
     if (ret) 
@@ -197,11 +197,11 @@ RaServer :: svr_run(nf_server_t *sev)
     }
 
     //创建逻辑处理子线程
-    for (size_t i = 1; i < sev->pthread_num; ++i) 
+    for (size_t i = 1; i < sev_data->pthread_num; ++i) 
     {
-        sev->pdata[i].id = i;
-        ret = pthread_create(&sev->pdata[i].pid, &thread_attr, 
-                             rapool_workers, &sev->pdata[i]);
+        sev_data->pdata[i].id = i;
+        ret = pthread_create(&sev_data->pdata[i].pid, &thread_attr, 
+                             rapool_workers, &sev_data->pdata[i]);
         if (ret) 
         {
             Log:: ERROR("CREATE WORK THREAD ERROR ID : %d", i);
@@ -209,42 +209,42 @@ RaServer :: svr_run(nf_server_t *sev)
             return -1;
         }
         Log :: NOTICE("CREATE WORK THREAD SUCC ID : %d", i);
-        ++ sev->run_thread_num;
+        ++ sev_data->run_thread_num;
     }
 
-    Log :: NOTICE("CREATE REACTOR NUM : %d", sev->run_thread_num);
-    sev->status = RUNNING;
+    Log :: NOTICE("CREATE REACTOR NUM : %d", sev_data->run_thread_num);
+    sev_data->status = RUNNING;
     return 0;
 }
 
 int 
-RaServer :: svr_listen(nf_server_t *sev)
+RaServer :: svr_listen()
 {
-    if(sev->backlog <= 5)
-        sev->backlog = 2048;
+    if(sev_data->backlog <= 5)
+        sev_data->backlog = 2048;
 
-    int backlog = sev->backlog;
-    if( listen(sev->sev_socket, backlog) < 0)
+    int backlog = sev_data->backlog;
+    if( listen(sev_data->sev_socket, backlog) < 0)
     {
         std::cout << "listen sock: " << strerror(errno) << std::endl;
-        close(sev->sev_socket);
+        close(sev_data->sev_socket);
         return -1;    
     }
     Log :: NOTICE("LISTEN SOCKET START OK");
     
-    return add_listen_socket(sev, sev->sev_socket);
+    return add_listen_socket(sev_data, sev_data->sev_socket);
 }
 
 int 
-RaServer :: svr_join(nf_server_t *sev)
+RaServer :: svr_join()
 {
-    rapool_t *pool = (rapool_t *)sev->pool;
-    if (sev->run_thread_num >= 0) 
+    rapool_t *pool = (rapool_t *)sev_data->pool;
+    if (sev_data->run_thread_num >= 0) 
     {
         pthread_join(pool->main, NULL);
-        for (int i=0; i< sev->run_thread_num; ++i) 
+        for (int i=0; i< sev_data->run_thread_num; ++i) 
         {
-            pthread_join(sev->pdata[i].pid, NULL);
+            pthread_join(sev_data->pdata[i].pid, NULL);
         }
     }
     return 0;
@@ -287,14 +287,14 @@ RaServer :: rapool_close_pool_sockets(nf_server_t *sev, bool is_listenfd)
 }
 
 int 
-RaServer :: svr_destroy(nf_server_t *sev)
+RaServer :: svr_destroy()
 {
-    rapool_t *pool = (rapool_t *)sev->pool;
+    rapool_t *pool = (rapool_t *)sev_data->pool;
     if (pool == NULL) 
         return 0;
 
     //此时消费线程都已退出，就此关闭所有已连接sockfd
-    rapool_close_pool_sockets(sev, false);
+    rapool_close_pool_sockets(sev_data, false);
 
     if (pool->sockets != NULL) 
     {
@@ -311,8 +311,8 @@ RaServer :: svr_destroy(nf_server_t *sev)
         close(pool->epfd);
     }
 
-    free (sev->pool);
-    sev->pool = NULL;
+    free (sev_data->pool);
+    sev_data->pool = NULL;
     return 0;
 }
 
@@ -601,43 +601,43 @@ RaServer :: rapool_reactor(rapool_t * pool, nf_server_pdata_t * pdata)
 }
 
 int 
-RaServer :: svr_pause(nf_server_t *sev)
+RaServer :: svr_pause()
 {
-    if(sev->status != RUNNING) 
+    if(sev_data->status != RUNNING) 
     {
         std :: cout << "Because server's status isn't running, rapool_pause Failed!" 
         << std::endl;
         return -1;
     }
 
-    rapool_t * pool = (rapool_t *) sev->pool;
+    rapool_t * pool = (rapool_t *) sev_data->pool;
     int index = 0;
-    if(rapool_epoll_del(sev, index, 0) != 0) 
+    if(rapool_epoll_del(sev_data, index, 0) != 0) 
     {
         return -1;
     }
     pool->sockets[index].status = IDLE;
     pool->sockets[index].sock = -1;
-    sev->status = PAUSE;
+    sev_data->status = PAUSE;
     return 0;
 }
 
 int 
-RaServer :: svr_resume(nf_server_t *sev)
+RaServer :: svr_resume()
 {
-    if(sev->status != PAUSE) 
+    if(sev_data->status != PAUSE) 
     {
         std::cout << "Because server's status isn't PAUSE, rapool_resume Failed!" 
         <<std::endl;
         return -1;
     }
 
-    if(add_listen_socket(sev, sev->sev_socket) != 0) 
+    if(add_listen_socket(sev_data, sev_data->sev_socket) != 0) 
     {
         return -1;
     }
 
-    sev->status = RUNNING;
+    sev_data->status = RUNNING;
     return 0;
 }
 
@@ -690,16 +690,16 @@ RaServer :: call_back_timeout(void * param)
 }
 
 int
-RaServer :: svr_set_stragy(nf_server_t * sev, BaseWork * sta)
+RaServer :: svr_set_stragy(BaseWork * sta)
 {
     if(sta == NULL)
     {
-        sev->stratgy = new RaReadLine();
+        sev_data->stratgy = new RaReadLine();
         return 0; 
     }
     RaBaseWork * test = dynamic_cast<RaBaseWork *>(sta);
     assert(test != NULL);
-    sev->stratgy = test;
+    sev_data->stratgy = test;
              
     return 0;
 }

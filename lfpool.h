@@ -22,21 +22,21 @@ class LfServer : public NfServer
 
         virtual ~LfServer(){};
 
-        virtual int svr_init(nf_server_t *);
+        virtual int svr_init();
 
-        virtual int svr_run(nf_server_t *);
+        virtual int svr_run();
 
-        virtual int svr_join(nf_server_t *);
+        virtual int svr_join();
 
-        virtual int svr_listen(nf_server_t *);
+        virtual int svr_listen();
 
-        virtual int svr_destroy(nf_server_t *);
+        virtual int svr_destroy();
 
-        virtual int svr_pause(nf_server_t *);
+        virtual int svr_pause();
 
-        virtual int svr_resume(nf_server_t *);
+        virtual int svr_resume();
 
-        virtual int svr_set_stragy(nf_server_t *, BaseWork *);
+        virtual int svr_set_stragy( BaseWork *);
 
         static void * lf_main(void *);
          
