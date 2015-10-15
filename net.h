@@ -130,7 +130,9 @@ extern int net_ep_create(int);
  *        
  */
 
-extern int net_ep_add(int, int, int);
+extern int net_ep_add(int, int, int, 
+                      void * ptr = NULL, 
+                      int op = EPOLL_CTL_ADD);
 /**
  *  epoll_ctl()的包装函数
  *  @note add 

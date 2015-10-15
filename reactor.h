@@ -4,6 +4,8 @@
 #include "event.h"
 #include "sys/epoll.h"
 #include "pthread.h"
+#include "net.h"
+#include "commonn/asynLog.h"
 
 struct evepoll
 {
@@ -34,15 +36,16 @@ class Reactor
 
     //TODO : multi_thread handle
     //static pthread_mutex_t ev_list_mutex;
-    void add_event(Event * ev)
-    {
-        
-        ev_list.push_back(ev);
-        ev->ev_pos = --ev_list.end();
-        
-        ev->ev_reactor = this;
-        event_count++;
-    }
+    int add_event(Event * ev, 
+                  struct timeval * tv = NULL);
+    
+    int init(int);
+    private:
+        void event_queue_insert(Event *, int );
+        int epoll_add_event(Event *);
+
+
+
 
     private:
         list<Event *> ev_list;

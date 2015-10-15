@@ -706,12 +706,17 @@ net_ep_create(int size)
 }
 
 int 
-net_ep_add(int epfd, int fd, int events)
+net_ep_add(int epfd, 
+           int fd, 
+           int events, 
+           void * ptr,
+           int op)
 {
     struct epoll_event ev;
     ev.data.fd = fd;
+    ev.data.ptr = ptr;
     ev.events = events;
-    return epoll_ctl(epfd, EPOLL_CTL_ADD, fd, &ev);
+    return epoll_ctl(epfd, op, fd, &ev);
 }
 
 int 

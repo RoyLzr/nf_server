@@ -14,7 +14,13 @@ const int nevents = 10;
 int main()
 {
     Reactor testRa;
+    testRa.init(1000);
+    Event * ev = new Event();
+    ev->init(1, EV_READ, test_fun);
+    struct timeval *tv = (struct timeval *)calloc(1, sizeof(timeval));
+    testRa.add_event(ev,tv);
 
+    /*
     for(int i = 0; i < nevents; i++)
     {
         Event * ev = new Event();
@@ -30,7 +36,8 @@ int main()
     {
         (*iter)->excute();
         iter++;
-    }    
+    } 
+    */   
 
     std::cout << "hello" << std::endl;
 }
