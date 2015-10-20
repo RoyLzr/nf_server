@@ -17,6 +17,7 @@ class Event
 {
     public:
     friend class Reactor;
+    friend class IOEvent;
     explicit Event() : ev_fd(0),
                        ev_flags(0),
                        ev_events(0),
@@ -46,6 +47,10 @@ class Event
     {
         return ev_active;
     }
+    inline void set_ev_flags(int flg)
+    {
+        ev_flags = flg;
+    }
     inline int get_ev_events()
     {
         return ev_events;
@@ -58,9 +63,12 @@ class Event
     {
         return ev_pos;
     }
-    void excute()
+    void excute(void * arg = NULL)
     {
-        ev_callback(ev_fd, ev_events, NULL);
+        if(arg == NULL)
+            ev_callback(ev_fd, ev_events, this);
+        else
+            ev_callback(ev_fd, ev_events, arg);
         return;
     }
 
@@ -82,6 +90,46 @@ class Event
         ev_handle ev_callback;
         void *ev_arg;
         
+};
+
+
+class IOEvent
+{
+
+    public:
+        friend class Reactor;
+        friend class IOReactor;
+        explicit IOEvent() : cache(NULL),
+                             c_len(0)
+        {}
+    inline void init(int fd,
+                     int events,
+                     ev_handle handle)
+    {
+        ev.init(fd, events, handle);
+        ev.ev_wrap = this; 
+    }
+    inline Event * get_base_event()
+    {
+        return &ev;
+    }
+    inline void * get_cache()
+    {
+        return cache;
+    }
+    inline int get_cache_len()
+    {
+        return c_len;
+    }
+    inline void set_cache_len(int len)
+    {
+        c_len = len;
+    }
+    
+    private:
+        Event ev;
+        void * cache;
+        int c_len;
 };
 
 
