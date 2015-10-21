@@ -12,14 +12,10 @@ void IO_readcb(int fd,
     
     int flags;
 
-    pthread_mutex_lock(mu);
-    flags = ev->get_ev_flags() & ~EV_ACTIVE;      
-    ev->set_ev_flags(flags);
-    pthread_mutex_unlock(mu);
-    
     const int size = 999;
     char buff[size];
     int n = read(fd, buff, size);
     buff[n] = '\0';
-    std::cout << "out: "<<n<< " : " <<buff << std::endl;    
+    std :: cout << buff << std::endl;
+    rect->set_event_unactive(ev); 
 }

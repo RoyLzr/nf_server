@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
+#include "commonn/asynLog.h"
 #include "util.h"
 
 using std::list;

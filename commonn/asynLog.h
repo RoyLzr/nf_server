@@ -19,6 +19,7 @@
 #include <time.h>
 #include <string>
 #include <stdarg.h>
+#include <pthread.h>
 
 using std::string;
 using std::queue;

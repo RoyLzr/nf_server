@@ -1,6 +1,7 @@
 #include "../event.h"
 #include "../reactor.h"
 #include "../net_svr_cb.h"
+#include <pthread.h>
 
 
 void test_fun(int fd, short events, void * arg)
@@ -18,6 +19,10 @@ const int nevents = 10;
 
 int main()
 {
+    string s = "./svr.log";
+    Log :: init(s.c_str());
+    Log :: set_level(LOG_DEBUG);
+
     IOReactor testRa;
     testRa.init(1000);
     IOEvent * ev = new IOEvent();
@@ -26,6 +31,7 @@ int main()
     struct timeval *tv = (struct timeval *)calloc(1, sizeof(timeval));
     testRa.add_event(ev);
     testRa.start(EV_ONCE);
+
 
     /*
     for(int i = 0; i < nevents; i++)

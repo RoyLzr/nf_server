@@ -715,7 +715,7 @@ net_ep_add(int epfd,
     struct epoll_event ev;
     ev.data.fd = fd;
     ev.data.ptr = ptr;
-    ev.events = events;
+    ev.events = events | EPOLLHUP | EPOLLERR;
     return epoll_ctl(epfd, op, fd, &ev);
 }
 

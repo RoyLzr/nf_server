@@ -27,21 +27,13 @@ class Reactor
                     fds(NULL)
         {
             pthread_mutex_init(&event_mutex, NULL);
-            //pthread_mutex_init(&fd_mutex, NULL);
+            pthread_mutex_init(&list_mutex, NULL);
         }
 
     inline int get_ev_count()
     {
         return event_count;
     }
-    
-    //THIS fun is used for test
-    /*
-    inline list<Event *> get_list()
-    {
-        return ev_list;
-    }
-    */
 
     //TODO : multi_thread handle
     //static pthread_mutex_t ev_list_mutex;
@@ -50,16 +42,22 @@ class Reactor
     
     int init(int);
     int start(int);
+    
+    //fail event is active already 
+    bool set_event_active(Event *);
+        
+    //fail event is unactive already
+    bool set_event_unactive(Event *);
 
-    //pthread_mutex_t fd_mutex;
+    pthread_mutex_t list_mutex;
     pthread_mutex_t event_mutex; 
 
     private:
         void event_queue_insert(Event *, int );
-        int epoll_add_event(Event *);
+        int epoll_add_event(Event *, bool added = true);
         int epoll_dispatch(int, struct timeval *tv);
-
-
+        int epoll_del_event(Event *, bool removed = true);
+        
     private:
         list<Event *> ev_list;
         //TODO: add timer, queu

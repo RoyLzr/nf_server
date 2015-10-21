@@ -1,5 +1,6 @@
 #include "asynLog.h"
 
+
 queue<string> Log :: log_buffer;
 pthread_cond_t Log:: log_cond;
 pthread_mutex_t Log :: log_mutex;
