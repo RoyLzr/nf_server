@@ -1,5 +1,5 @@
-server: net.o reactor.o main.o net_svr_cb.o asynLog.o;
-		g++ -o server net.o reactor.o main.o net_svr_cb.o asynLog.o -lpthread
+server: net.o reactor.o main.o net_svr_cb.o asynLog.o event.o;
+		g++ -o server net.o reactor.o main.o net_svr_cb.o asynLog.o event.o -lpthread
 
 net.o:../net.h ../net.cpp
 		g++ -g -c ../net.cpp
@@ -15,6 +15,9 @@ main.o: ../net.cpp ../reactor.cpp main.cpp
 
 asynLog.o: ../commonn/asynLog.cpp ../commonn/asynLog.h
 		g++ -g -c ../commonn/asynLog.cpp
+
+event.o:../event.h ../event.cpp
+		g++ -g -c ../event.cpp
 
 clean:
 		ls | grep '\.o' |xargs rm -rf 

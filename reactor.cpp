@@ -1,5 +1,28 @@
 #include "reactor.h"
 
+//**********************************************************
+//
+//  Description:
+//  
+//  add event:
+//  read ¶ active/unfinish, add re event fail, write ok
+//  write active/unfinish , add write event fail, read ok
+//
+//  excute event:
+//  excute read, read event excute fail
+//  excute write, write event excute fail
+//
+//  IO-event:
+//  realize fun excute() by del epoll event.
+//  excute read, read/write excute fail
+//  excute write, read/write excute fail
+//
+//  other event:
+//  realize its own virsual fun excute()
+//
+// Author: Liu ZhaoRui
+//         liuzhaorui1@163.com
+//**********************************************************
 
 bool Reactor :: set_event_active(Event * ev)
 {
@@ -50,7 +73,8 @@ void Reactor :: event_queue_insert(Event *ev,
 }
 
 int Reactor :: add_event(Event * ev,
-                         struct timeval * tv)
+                         struct timeval * tv,
+                         bool actived)
 {
      
     Log :: DEBUG("ADD EVENT FD: %d events: %s%s%s reactor: %d",
@@ -74,18 +98,20 @@ int Reactor :: add_event(Event * ev,
     {
        event_queue_insert(ev, EV_INSERTED);
        Log :: NOTICE("EVENT fd:%d added IN LIST", ev->ev_fd); 
-       return epoll_add_event(ev); 
+       
+       return epoll_add_event(ev, actived); 
     }
     Log :: WARN("ADD EVENT fd : %d fail, ALREAD ADDED", ev->ev_fd); 
 
     return 0;
 }  
 
-int Reactor :: epoll_add_event(Event * ev, bool added)
+int Reactor :: epoll_add_event(Event * ev, 
+                               bool actived)
 {
-    struct evepoll * evep;
+    struct evepoll * evep = NULL;
     int fd, events, op;
-    Event * evread, *evwrite;
+    Event * evread = NULL, *evwrite = NULL;
      
     //each fd match read/write event
     //fds store read/write event
@@ -117,46 +143,44 @@ int Reactor :: epoll_add_event(Event * ev, bool added)
     if(ev->ev_events & EV_WRITE)
         events |= EPOLLOUT;
     
-    if(added)
-    { 
-        //unfinish active add fail 
-        pthread_mutex_lock(&event_mutex);
-        if((evread != NULL) &&
-           (evread->ev_flags & (EV_ACTIVE|EV_READUNFIN))
-           && (ev->ev_events & EV_READ))
-        {
-            pthread_mutex_unlock(&event_mutex);
-            Log :: WARN("ADD READ EVENT fail, \
-                         IS ACTIVE|UNFINISH fd : %d",fd); 
-            return -1; 
-        }
-
-        if((evwrite != NULL) &&
-           (evwrite->ev_flags & (EV_ACTIVE|EV_WRITEUNFIN))
-           && (ev->ev_events  & EV_WRITE))
-        {
-            pthread_mutex_unlock(&event_mutex);
-            Log :: WARN("ADD WRITE EVENT fail, \
-                         IS ACTIVE|UNFINISH fd : %d", fd); 
-            return -1; 
-        }
-        
-        if(ev->ev_events & EV_READ)
-            evep->evread = ev;
-        if(ev->ev_events & EV_WRITE)
-            evep->evwrite = ev;
-       
-        event_count++; 
+    //unfinish active add fail 
+    pthread_mutex_lock(&event_mutex);
+    if((evread != NULL) &&
+       (evread->ev_flags & (EV_ACTIVE|EV_READUNFIN))
+       && (ev->ev_events & EV_READ))
+    {
         pthread_mutex_unlock(&event_mutex);
-       //unfinish active add fail 
+        Log :: WARN("ADD READ EVENT fail, \
+                     IS ACTIVE|UNFINISH fd : %d",fd); 
+        return -1; 
     }
 
-    if(net_ep_add(epfd, fd, events, evep, op) ==-1)
+    if((evwrite != NULL) &&
+       (evwrite->ev_flags & (EV_ACTIVE|EV_WRITEUNFIN))
+       && (ev->ev_events  & EV_WRITE))
     {
-        Log :: WARN("EPOLL : %d ADD FD : %d ERROR", epfd, fd);
-        return -1;
+        pthread_mutex_unlock(&event_mutex);
+        Log :: WARN("ADD WRITE EVENT fail, \
+                     IS ACTIVE|UNFINISH fd : %d", fd); 
+        return -1; 
     }
     
+    if(ev->ev_events & EV_READ)
+        evep->evread = ev;
+    if(ev->ev_events & EV_WRITE)
+        evep->evwrite = ev;
+   
+    event_count++; 
+    pthread_mutex_unlock(&event_mutex);
+   //unfinish active add fail 
+    if(actived)
+    {
+        if(net_ep_add(epfd, fd, events, evep, op) ==-1)
+        {
+            Log :: WARN("EPOLL : %d ADD FD : %d ERROR", epfd, fd);
+            return -1;
+        }
+    }
     return 0; 
 }
 
@@ -214,11 +238,11 @@ int Reactor :: start(int status)
 }
 
 
-int Reactor :: epoll_dispatch(int status, 
+int Reactor :: epoll_dispatch(int status,
                               struct timeval * tv)
 {
     int res;
-    struct evepoll * evep;    
+    struct evepoll * evep = NULL;    
 
     res = epoll_wait(epfd, events, nevents, 3000);
     if(res == -1)

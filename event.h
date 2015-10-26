@@ -2,6 +2,7 @@
 #define _EVENT_
 
 #include <list>
+#include "sys/epoll.h"
 #include <iostream>
 #include <stdlib.h>
 #include <stdio.h>
@@ -12,7 +13,16 @@
 using std::list;
 
 class Reactor;
+class ParseBase;
 typedef void (*ev_handle)(int, short, void *);
+struct Buffer
+{
+    void * cache;
+    int allo_len;
+    int used_len;
+};
+
+
 
 class Event
 {
@@ -24,17 +34,19 @@ class Event
                        ev_events(0),
                        ev_active(0),
                        ev_reactor(NULL)
+                       ev_parse(NULL)
     {}
     inline void init(int fd, 
                      int events, 
-                     ev_handle handle)
+                     ev_handle handle,
+                     ParseBase * parse = NULL)
     {
         ev_fd = fd;
         ev_events = events;
         ev_active = 0;
         ev_flags = EV_INIT;
         ev_callback = handle;
-        ev_wrap = NULL;
+        ev_parse = parse;
     }
     inline int get_ev_fd()
     {
@@ -64,14 +76,8 @@ class Event
     {
         return ev_pos;
     }
-    void excute(void * arg = NULL)
-    {
-        if(arg == NULL)
-            ev_callback(ev_fd, ev_events, this);
-        else
-            ev_callback(ev_fd, ev_events, arg);
-        return;
-    }
+
+    virtual void excute(void * arg = NULL);
 
     private:
         Event & operator=(Event & ev)
@@ -79,40 +85,38 @@ class Event
             assert(false);
             return *this;
         }
+
+    protected:
         list<Event *>::iterator ev_pos;
         int ev_fd;
         
         int ev_flags;
         short ev_events;
         int ev_active;
-        void * ev_wrap;
 
         Reactor * ev_reactor;
         ev_handle ev_callback;
         void *ev_arg;
+        ParseBase * ev_parse;
         
 };
 
 
-class IOEvent
+class ReadEvent : public Event
 {
 
     public:
         friend class Reactor;
-        friend class IOReactor;
-        explicit IOEvent() : cache(NULL),
-                             c_len(0)
+        explicit ReadEvent() : cache(NULL)
         {}
+        explicit ReadEvent(void * ca, int len) : cache(ca)
+        {}
+        
     inline void init(int fd,
                      int events,
                      ev_handle handle)
     {
-        ev.init(fd, events, handle);
-        ev.ev_wrap = this; 
-    }
-    inline Event * get_base_event()
-    {
-        return &ev;
+        Event :: init(fd, events, handle);
     }
     inline void * get_cache()
     {
@@ -126,12 +130,46 @@ class IOEvent
     {
         c_len = len;
     }
+
+    virtual void excute(void * arg = NULL);
     
-    private:
-        Event ev;
-        void * cache;
-        int c_len;
+    protected:
+        Buffer * cache;
 };
 
+class WriteEvent : public Event
+{
+
+    public:
+        friend class Reactor;
+        explicit WriteEvent() : cache(NULL)
+        {}
+        explicit WriteEvent(void * ca, int len) : cache(ca)
+        {}
+        
+    inline void init(int fd,
+                     int events,
+                     ev_handle handle)
+    {
+        Event :: init(fd, events, handle);
+    }
+    inline void * get_cache()
+    {
+        return cache;
+    }
+    inline int get_cache_len()
+    {
+        return c_len;
+    }
+    inline void set_cache_len(int len)
+    {
+        c_len = len;
+    }
+
+    virtual void excute(void * arg = NULL);
+    
+    protected:
+        Buffer * cache;
+};
 
 #endif

@@ -34,11 +34,20 @@ class Reactor
     {
         return event_count;
     }
+    
+    inline int get_epfd()
+    {
+        return epfd;
+    }
+    
+    inline evepoll * get_fds()
+    {
+        return fds;
+    }
 
-    //TODO : multi_thread handle
-    //static pthread_mutex_t ev_list_mutex;
     int add_event(Event * ev, 
-                  struct timeval * tv = NULL);
+                  struct timeval * tv = NULL
+                  bool actived = true);
     
     int init(int);
     int start(int);
@@ -54,8 +63,8 @@ class Reactor
 
     private:
         void event_queue_insert(Event *, int );
-        int epoll_add_event(Event *, bool added = true);
-        int epoll_dispatch(int, struct timeval *tv);
+        int epoll_add_event(Event *, bool actived);
+        int epoll_dispatch(int status, struct timeval *tv);
         int epoll_del_event(Event *, bool removed = true);
         
     private:
@@ -74,28 +83,6 @@ class Reactor
         struct evepoll * fds; 
 };
 
-class IOReactor : public Reactor 
-{
-    public:
-    IOReactor() : Reactor()
-    {}
-    
-    int add_event(IOEvent * ioev, 
-                  struct timeval * tv = NULL)
-    {
-        Reactor :: add_event(&(ioev->ev), tv);
-    }
-    
-    int init(int size)
-    {
-        Reactor :: init(size);
-    }
-    int start(int status)
-    {
-        Reactor :: start(status);
-    }
-    
-};
 
 
 #endif

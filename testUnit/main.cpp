@@ -11,7 +11,6 @@ void test_fun(int fd, short events, void * arg)
     char buff[size];
     int n = read(fd, buff, size);
     std::cout << "out: "<< buff << std::endl;    
-
 }
 
 
@@ -23,9 +22,9 @@ int main()
     Log :: init(s.c_str());
     Log :: set_level(LOG_DEBUG);
 
-    IOReactor testRa;
+    Reactor testRa;
     testRa.init(1000);
-    IOEvent * ev = new IOEvent();
+    ReadEvent * ev = new ReadEvent();
     ev->init(1, EV_READ, IO_readcb);
     //ev->init(0, EV_READ, test_fun);
     struct timeval *tv = (struct timeval *)calloc(1, sizeof(timeval));

@@ -50,10 +50,6 @@ IDLE	nf_server_app.cpp	/^    IDLE = 0$/;"	e	enum:__anon12	file:
 IDLE	rapool.cpp	/^    IDLE = 0,$/;"	e	enum:__anon11	file:
 IDLE	sapool.cpp	/^    IDLE = 0,$/;"	e	enum:__anon14	file:
 INIT	nf_server_core.h	/^    INIT    = 0,$/;"	e	enum:__anon7
-IOEvent	event.h	/^        explicit IOEvent() : cache(NULL),$/;"	f	class:IOEvent
-IOEvent	event.h	/^class IOEvent$/;"	c
-IOReactor	reactor.h	/^    IOReactor() : Reactor()$/;"	f	class:IOReactor
-IOReactor	reactor.h	/^class IOReactor : public Reactor $/;"	c
 IO_readcb	net_svr_cb.cpp	/^void IO_readcb(int fd,$/;"	f
 LEVEL	commonn/asynLog.cpp	/^int Log :: LEVEL = LOG_DEBUG;$/;"	m	class:Log	file:
 LEVEL	commonn/asynLog.h	/^    static int LEVEL;$/;"	m	class:Log
@@ -103,6 +99,9 @@ RaServer	rapool.h	/^        RaServer(){};$/;"	f	class:RaServer
 RaServer	rapool.h	/^class RaServer : public NfServer$/;"	c
 Reactor	reactor.h	/^        Reactor() : event_count(0),$/;"	f	class:Reactor
 Reactor	reactor.h	/^class Reactor$/;"	c
+ReadEvent	event.h	/^        explicit ReadEvent() : cache(NULL),$/;"	f	class:ReadEvent
+ReadEvent	event.h	/^        explicit ReadEvent(void * ca, int len) : cache(ca),$/;"	f	class:ReadEvent
+ReadEvent	event.h	/^class ReadEvent : public Event$/;"	c
 SERVER_STATUS_T	nf_server_core.h	/^}SERVER_STATUS_T;$/;"	t	typeref:enum:__anon7
 STATUS	commonn/asynLog.cpp	/^int Log :: STATUS = LOG_INIT;$/;"	m	class:Log	file:
 STATUS	commonn/asynLog.h	/^    static int STATUS;   $/;"	m	class:Log
@@ -123,6 +122,9 @@ Timer	commonn/timer.h	/^class Timer$/;"	c
 WARN	commonn/asynLog.cpp	/^Log :: WARN(const char * fmt, ...)$/;"	f	class:Log
 WORKER_PRIORITY	rapool.h	21;"	d
 WORKER_PRIORITY	sapool.h	27;"	d
+WriteEvent	event.h	/^        explicit WriteEvent() : cache(NULL),$/;"	f	class:WriteEvent
+WriteEvent	event.h	/^        explicit WriteEvent(void * ca, int len) : cache(ca),$/;"	f	class:WriteEvent
+WriteEvent	event.h	/^class WriteEvent : public Event$/;"	c
 _ASYN_LOG_	commonn/asynLog.h	13;"	d
 _CONFIG_PARSER_H	commonn/configParser.h	14;"	d
 _EVENT_	event.h	2;"	d
@@ -154,7 +156,6 @@ _sapool_sock_item_t	sapool.h	/^struct _sapool_sock_item_t$/;"	s
 _sapool_t	sapool.h	/^struct _sapool_t$/;"	s
 _singleton_h	commonn/singleton.h	13;"	d
 add_event	reactor.cpp	/^int Reactor :: add_event(Event * ev,$/;"	f	class:Reactor
-add_event	reactor.h	/^    int add_event(IOEvent * ioev, $/;"	f	class:IOReactor
 add_listen_socket	rapool.cpp	/^RaServer :: add_listen_socket(nf_server_t *sev, int listenfd)$/;"	f	class:RaServer
 add_listen_socket	sapool.cpp	/^SaServer :: add_listen_socket(nf_server_t *sev, int listenfd)$/;"	f	class:SaServer
 add_prefix	commonn/asynLog.cpp	/^add_prefix(char * dest, const string &add)$/;"	f
@@ -166,8 +167,10 @@ array	commonn/queue.h	/^    int *array;$/;"	m	struct:_queue_t
 backlog	nf_server_core.h	/^    size_t backlog;$/;"	m	struct:_nf_server_t
 buffer	commonn/asynLog.cpp	/^char Log :: buffer[LOG_MAXLINE];$/;"	m	class:Log	file:
 buffer	commonn/asynLog.h	/^    static char buffer[LOG_MAXLINE];$/;"	m	class:Log
-c_len	event.h	/^        int c_len;$/;"	m	class:IOEvent
-cache	event.h	/^        void * cache;$/;"	m	class:IOEvent
+c_len	event.h	/^        int c_len;$/;"	m	class:ReadEvent
+c_len	event.h	/^        int c_len;$/;"	m	class:WriteEvent
+cache	event.h	/^        void * cache;$/;"	m	class:ReadEvent
+cache	event.h	/^        void * cache;$/;"	m	class:WriteEvent
 cache	net.h	/^    char * cache;$/;"	m	struct:_rio_t
 cache_len	net.h	/^    int cache_len;$/;"	m	struct:_rio_t
 call_back_timeout	rapool.cpp	/^RaServer :: call_back_timeout(void * param)$/;"	f	class:RaServer
@@ -206,8 +209,7 @@ epfd	rapool.h	/^    int epfd;$/;"	m	struct:_rapool_t
 epfd	reactor.h	/^        int epfd;$/;"	m	class:Reactor
 epfd	sapool.h	/^    int epfd;$/;"	m	struct:_sapool_t
 epoll_add_event	reactor.cpp	/^int Reactor :: epoll_add_event(Event * ev)$/;"	f	class:Reactor
-epoll_dispatch	reactor.cpp	/^int Reactor :: epoll_dispatch(int status, $/;"	f	class:Reactor
-ev	event.h	/^        Event ev;$/;"	m	class:IOEvent
+epoll_dispatch	reactor.cpp	/^int Reactor :: epoll_dispatch(int status,$/;"	f	class:Reactor
 ev_active	event.h	/^        int ev_active;$/;"	m	class:Event
 ev_arg	event.h	/^        void *ev_arg;$/;"	m	class:Event
 ev_callback	event.h	/^        ev_handle ev_callback;$/;"	m	class:Event
@@ -218,7 +220,6 @@ ev_handle	event.h	/^typedef void (*ev_handle)(int, short, void *);$/;"	t
 ev_list	reactor.h	/^        list<Event *> ev_list;$/;"	m	class:Reactor
 ev_pos	event.h	/^        list<Event *>::iterator ev_pos;$/;"	m	class:Event
 ev_reactor	event.h	/^        Reactor * ev_reactor;$/;"	m	class:Event
-ev_wrap	event.h	/^        void * ev_wrap;$/;"	m	class:Event
 event_count	reactor.h	/^        int event_count;$/;"	m	class:Reactor
 event_count_ac	reactor.h	/^        int event_count_ac;$/;"	m	class:Reactor
 event_mutex	reactor.h	/^    pthread_mutex_t event_mutex; $/;"	m	class:Reactor
@@ -227,7 +228,9 @@ events	reactor.h	/^        struct epoll_event *events;$/;"	m	class:Reactor	typer
 evepoll	reactor.h	/^struct evepoll$/;"	s
 evread	reactor.h	/^    Event * evread;$/;"	m	struct:evepoll
 evwrite	reactor.h	/^    Event * evwrite;$/;"	m	struct:evepoll
-excute	event.h	/^    void excute(void * arg = NULL)$/;"	f	class:Event
+excute	event.cpp	/^void Event :: excute(void * arg)$/;"	f	class:Event
+excute	event.cpp	/^void ReadEvent :: excute(void * arg)$/;"	f	class:ReadEvent
+excute	event.cpp	/^void WriteEvent :: excute(void * arg)$/;"	f	class:WriteEvent
 expire_timer_ms	commonn/timer.cpp	/^Timer :: expire_timer_ms()$/;"	f	class:Timer
 fd	nf_server_core.h	/^    int fd;$/;"	m	struct:_nf_server_pdata_t
 fds	reactor.h	/^        struct evepoll * fds; $/;"	m	class:Reactor	typeref:struct:Reactor::evepoll
@@ -240,15 +243,18 @@ free_list_link	commonn/memCache.h	/^        union obj * free_list_link;$/;"	m	un
 front	commonn/queue.h	/^    int front;$/;"	m	struct:_queue_t
 get	commonn/configParser.cpp	/^ConfigParser :: get(const std::string sectionName, const std::string keyName) const$/;"	f	class:ConfigParser
 get	commonn/configParser.cpp	/^Section :: get(const std::string key) const$/;"	f	class:Section
-get_base_event	event.h	/^    inline Event * get_base_event()$/;"	f	class:IOEvent
-get_cache	event.h	/^    inline void * get_cache()$/;"	f	class:IOEvent
-get_cache_len	event.h	/^    inline int get_cache_len()$/;"	f	class:IOEvent
+get_cache	event.h	/^    inline void * get_cache()$/;"	f	class:ReadEvent
+get_cache	event.h	/^    inline void * get_cache()$/;"	f	class:WriteEvent
+get_cache_len	event.h	/^    inline int get_cache_len()$/;"	f	class:ReadEvent
+get_cache_len	event.h	/^    inline int get_cache_len()$/;"	f	class:WriteEvent
+get_epfd	reactor.h	/^    inline int get_epfd()$/;"	f	class:Reactor
 get_ev_active	event.h	/^    inline int get_ev_active()$/;"	f	class:Event
 get_ev_count	reactor.h	/^    inline int get_ev_count()$/;"	f	class:Reactor
 get_ev_events	event.h	/^    inline int get_ev_events()$/;"	f	class:Event
 get_ev_fd	event.h	/^    inline int get_ev_fd()$/;"	f	class:Event
 get_ev_flags	event.h	/^    inline int get_ev_flags()$/;"	f	class:Event
 get_ev_pos	event.h	/^    inline list<Event *>::iterator get_ev_pos()$/;"	f	class:Event
+get_fds	reactor.h	/^    inline evepoll * get_fds()$/;"	f	class:Reactor
 get_file	commonn/asynLog.h	/^    static FILE * get_file()$/;"	f	class:Log
 get_pdata	nf_server_core.cpp	/^get_pdata()$/;"	f
 get_reactor	event.h	/^    inline Reactor * get_reactor()$/;"	f	class:Event
@@ -260,9 +266,9 @@ idx	nf_server_core.h	/^    int idx; \/\/sapool, handle socket index$/;"	m	struct
 init	commonn/asynLog.cpp	/^Log :: init(const char * name)$/;"	f	class:Log
 init	commonn/memCache.cpp	/^Allocate :: init()$/;"	f	class:Allocate
 init	event.h	/^    inline void init(int fd, $/;"	f	class:Event
-init	event.h	/^    inline void init(int fd,$/;"	f	class:IOEvent
+init	event.h	/^    inline void init(int fd,$/;"	f	class:ReadEvent
+init	event.h	/^    inline void init(int fd,$/;"	f	class:WriteEvent
 init	reactor.cpp	/^int Reactor :: init(int files)$/;"	f	class:Reactor
-init	reactor.h	/^    int init(int size)$/;"	f	class:IOReactor
 instance	commonn/singleton.h	/^        static T * instance()$/;"	f	class:Singleton
 is_empty_q	commonn/queue.cpp	/^int is_empty_q(queue_t *q)$/;"	f
 is_full_q	commonn/queue.cpp	/^int is_full_q(queue_t *q)$/;"	f
@@ -274,6 +280,7 @@ lf_pool	lfpool.cpp	/^lfpool_t * LfServer :: lf_pool = NULL;$/;"	m	class:LfServer
 lf_pool	lfpool.h	/^        static lfpool_t * lf_pool;        $/;"	m	class:LfServer
 lfpool_once_op	lfpool.cpp	/^LfServer :: lfpool_once_op(int epfd, int fd, int timeout)$/;"	f	class:LfServer
 lfpool_t	lfpool.h	/^} lfpool_t;$/;"	t	typeref:struct:_lfpool_t
+list_mutex	reactor.h	/^    pthread_mutex_t list_mutex;$/;"	m	class:Reactor
 listen_port	nf_server_core.h	/^    size_t listen_port;$/;"	m	struct:_nf_server_t
 listen_prio	nf_server_core.h	/^    size_t listen_prio; \/\/sapool$/;"	m	struct:_nf_server_t
 lock	commonn/singleton.h	/^        void lock()$/;"	f	class:MutexLock
@@ -434,7 +441,8 @@ server	nf_server_core.h	/^    nf_server_t *server;$/;"	m	struct:_nf_server_pdata
 server_type	nf_server_core.h	/^    size_t server_type;$/;"	m	struct:_nf_server_t
 set	commonn/configParser.h	/^        inline void set(const std::string &key, const std::string &val)$/;"	f	class:Section
 set	commonn/configParser.h	/^    inline void set(const std::string &sectionName, const std::string &keyName, $/;"	f	class:ConfigParser
-set_cache_len	event.h	/^    inline void set_cache_len(int len)$/;"	f	class:IOEvent
+set_cache_len	event.h	/^    inline void set_cache_len(int len)$/;"	f	class:ReadEvent
+set_cache_len	event.h	/^    inline void set_cache_len(int len)$/;"	f	class:WriteEvent
 set_clc_fd	net.cpp	/^set_clc_fd(int fd, int flags)$/;"	f
 set_ev_flags	event.h	/^    inline void set_ev_flags(int flg)$/;"	f	class:Event
 set_event_active	reactor.cpp	/^bool Reactor :: set_event_active(Event * ev)$/;"	f	class:Reactor
@@ -471,7 +479,6 @@ sockets	sapool.h	/^    sapool_sock_item_t * sockets;$/;"	m	struct:_sapool_t
 socksize	nf_server_core.h	/^    size_t socksize;  \/\/sapool$/;"	m	struct:_nf_server_t
 stack_size	nf_server_core.h	/^    size_t stack_size; \/\/线程栈大小$/;"	m	struct:_nf_server_t
 start	reactor.cpp	/^int Reactor :: start(int status)$/;"	f	class:Reactor
-start	reactor.h	/^    int start(int status)$/;"	f	class:IOReactor
 status	nf_server_core.h	/^    SERVER_STATUS_T status;$/;"	m	struct:_nf_server_t
 status	rapool.h	/^    int status;$/;"	m	struct:_rapool_sock_item_t
 status	reactor.h	/^    int status;$/;"	m	struct:evepoll
