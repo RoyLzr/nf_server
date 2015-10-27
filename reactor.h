@@ -44,9 +44,14 @@ class Reactor
     {
         return fds;
     }
+    
+    inline evepoll * get_fds(int idx)
+    {
+        return &fds[idx];
+    }
 
     int add_event(Event * ev, 
-                  struct timeval * tv = NULL
+                  struct timeval * tv = NULL,
                   bool actived = true);
     
     int init(int);

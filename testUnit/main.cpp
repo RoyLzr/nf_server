@@ -1,16 +1,15 @@
 #include "../event.h"
 #include "../reactor.h"
-#include "../net_svr_cb.h"
 #include <pthread.h>
+#include "../commonn/memCache.h"
+#include "../nf_base_work.h"
 
 
 void test_fun(int fd, short events, void * arg)
 {
-    //std::cout << "fd : " << fd << std::endl;
-    const int size = 9999;
-    char buff[size];
-    int n = read(fd, buff, size);
-    std::cout << "out: "<< buff << std::endl;    
+    WriteEvent * w_ev = (WriteEvent *) arg;
+    char * tmp = "12345";
+    w_ev->add_buffer(tmp, 6); 
 }
 
 
@@ -21,14 +20,20 @@ int main()
     string s = "./svr.log";
     Log :: init(s.c_str());
     Log :: set_level(LOG_DEBUG);
+    Allocate :: init();
 
     Reactor testRa;
     testRa.init(1000);
-    ReadEvent * ev = new ReadEvent();
-    ev->init(1, EV_READ, IO_readcb);
+    ReadEvent * r_ev = new ReadEvent(50);
+    WriteEvent * w_ev = new WriteEvent(50);
+
+    r_ev->init(1, test_fun, parseLine);
+    w_ev->init(1, NULL, sendData);
     //ev->init(0, EV_READ, test_fun);
     struct timeval *tv = (struct timeval *)calloc(1, sizeof(timeval));
-    testRa.add_event(ev);
+    testRa.add_event(r_ev);
+    testRa.add_event(w_ev);
+    
     testRa.start(EV_ONCE);
 
 

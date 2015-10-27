@@ -9,20 +9,14 @@
 #include <assert.h>
 #include "commonn/asynLog.h"
 #include "util.h"
+#include "Buffer.h"
+
 
 using std::list;
 
 class Reactor;
-class ParseBase;
 typedef void (*ev_handle)(int, short, void *);
-struct Buffer
-{
-    void * cache;
-    int allo_len;
-    int used_len;
-};
-
-
+typedef int (*parse_handle)(int, void *, void *);
 
 class Event
 {
@@ -33,13 +27,14 @@ class Event
                        ev_flags(0),
                        ev_events(0),
                        ev_active(0),
-                       ev_reactor(NULL)
-                       ev_parse(NULL)
+                       ev_reactor(NULL),
+                       ev_parse(NULL),
+                       ev_callback(NULL)
     {}
     inline void init(int fd, 
                      int events, 
-                     ev_handle handle,
-                     ParseBase * parse = NULL)
+                     ev_handle handle = NULL,
+                     parse_handle parse = NULL)
     {
         ev_fd = fd;
         ev_events = events;
@@ -77,6 +72,10 @@ class Event
         return ev_pos;
     }
 
+    inline ev_handle get_ev_handle()
+    {
+        return ev_callback;
+    }
     virtual void excute(void * arg = NULL);
 
     private:
@@ -84,6 +83,11 @@ class Event
         {
             assert(false);
             return *this;
+        }
+
+        Event(Event & ev)
+        {
+            assert(false);
         }
 
     protected:
@@ -97,7 +101,7 @@ class Event
         Reactor * ev_reactor;
         ev_handle ev_callback;
         void *ev_arg;
-        ParseBase * ev_parse;
+        parse_handle  ev_parse;
         
 };
 
@@ -107,34 +111,38 @@ class ReadEvent : public Event
 
     public:
         friend class Reactor;
-        explicit ReadEvent() : cache(NULL)
+        explicit ReadEvent() : Event()
         {}
-        explicit ReadEvent(void * ca, int len) : cache(ca)
-        {}
+        explicit ReadEvent(int len) : Event()
+        {
+            cache.init(len);
+        }
         
     inline void init(int fd,
-                     int events,
-                     ev_handle handle)
+                     ev_handle handle = NULL,
+                     parse_handle  parse = NULL)
     {
-        Event :: init(fd, events, handle);
+        Event :: init(fd, EV_READ, handle, parse);
     }
-    inline void * get_cache()
+
+    inline Buffer & get_buffer()
     {
         return cache;
     }
-    inline int get_cache_len()
+    
+    inline int get_buf_handle_num()
     {
-        return c_len;
+        return cache.get_handle_num();
     }
-    inline void set_cache_len(int len)
+    inline void * get_buf_handle_cache()
     {
-        c_len = len;
+        return cache.get_handle_cache();
     }
 
     virtual void excute(void * arg = NULL);
     
     protected:
-        Buffer * cache;
+        Buffer cache;
 };
 
 class WriteEvent : public Event
@@ -142,34 +150,42 @@ class WriteEvent : public Event
 
     public:
         friend class Reactor;
-        explicit WriteEvent() : cache(NULL)
+        explicit WriteEvent() : Event()
         {}
-        explicit WriteEvent(void * ca, int len) : cache(ca)
-        {}
+        explicit WriteEvent(int len) : Event()
+        {
+            cache.init(len);
+        }
         
     inline void init(int fd,
-                     int events,
-                     ev_handle handle)
+                     ev_handle handle = NULL,
+                     parse_handle parse = NULL)
     {
-        Event :: init(fd, events, handle);
+        Event :: init(fd, EV_WRITE, handle, parse);
     }
-    inline void * get_cache()
+    inline Buffer & get_buffer()
     {
         return cache;
     }
-    inline int get_cache_len()
+    
+    inline int add_buffer(void * tmp,
+                          int len)
     {
-        return c_len;
+        return cache.add_data(tmp, len);
     }
-    inline void set_cache_len(int len)
+    inline int get_buf_handle_num()
     {
-        c_len = len;
+        return cache.get_handle_num();
+    }
+    inline void * get_buf_handle_cache()
+    {
+        return cache.get_handle_cache();
     }
 
     virtual void excute(void * arg = NULL);
     
     protected:
-        Buffer * cache;
+        Buffer  cache;
 };
 
 #endif

@@ -20,6 +20,9 @@
 
 #define FD_NOSLEEP 0x00
 #define FD_ACTIVE 0x01
+
+#define EPOLL_ACTIVED true
+#define EPOLL_UNACTIVED false
 /*
 struct timeval
 {

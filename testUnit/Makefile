@@ -1,14 +1,17 @@
-server: net.o reactor.o main.o net_svr_cb.o asynLog.o event.o;
-		g++ -o server net.o reactor.o main.o net_svr_cb.o asynLog.o event.o -lpthread
+server: net.o reactor.o main.o nf_base_work.o asynLog.o event.o memCache.o;
+		g++ -o server memCache.o net.o reactor.o main.o nf_base_work.o asynLog.o event.o -lpthread
 
 net.o:../net.h ../net.cpp
 		g++ -g -c ../net.cpp
 
+memCache.o: ../commonn/memCache.h ../commonn/memCache.cpp
+		g++ -g -c ../commonn/memCache.cpp
+
 reactor.o: ../reactor.h ../reactor.cpp
 		g++ -g -c ../reactor.cpp 
 
-net_svr_cb.o: ../reactor.h ../reactor.cpp ../net_svr_cb.h ../net_svr_cb.cpp
-		g++ -g -c ../net_svr_cb.cpp 
+nf_base_work.o: ../reactor.h ../reactor.cpp ../nf_base_work.h ../nf_base_work.cpp
+		g++ -g -c ../nf_base_work.cpp 
 
 main.o: ../net.cpp ../reactor.cpp main.cpp
 		g++ -g -c main.cpp -lpthread

@@ -2,21 +2,12 @@
 #define _PARSE_WORK_
 
 #include "reactor.h"
+#include "Buffer.h"
 
-class ParseBase
-{
-    public:
-        virtual int work(int, 
-                         void *
-                         ) = 0;
-        virtual ~BaseWork(){};
-};
+int parseLine(int, void *, void *);
 
-class ParseLine : public BaseWork
-{
-    public:
-        virtual  ~ParseLine(){};
-};
+int sendData(int, void *, void *);
+
 
 
 #endif
