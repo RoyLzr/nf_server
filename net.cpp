@@ -757,10 +757,10 @@ set_linger(int fd, int val)
 }
 
 int
-find_line(char * req, int end)
+find_line(char * req, int end, char label)
 {
     for(int i = 0; i < end; i++)
-        if(*(req + i) == '\n')
+        if(*(req + i) == label)
             return i;
     return -1;
 }
@@ -769,7 +769,7 @@ void
 move_forward(char * req, int start, int end)
 {
     int j = 0;
-    for(int i = start; i < end; i++)
+    for(int i = start; i <= end; i++)
     {
         *(req + j) = *(req + i);
         j++;

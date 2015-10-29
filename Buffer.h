@@ -2,6 +2,17 @@
 #define _BUFFER_
 
 #include "commonn/memCache.h"
+#include "net.h"
+
+static const bool DELETED = true;
+static const bool UNDELETED = false;
+
+#ifdef WORK
+static const bool FRESHLIMIT = 1024;
+#else
+static const bool FRESHLIMIT = 8;
+#endif
+
 
 class Buffer
 {
@@ -15,35 +26,12 @@ class Buffer
         {
             init(size);
         }
-        void init(int size)
-        {
-            cache = Allocate :: allocate(size);
-            allo_len = size;
-            str_idx = 0;
-            end_idx = -1;
-        }
 
-        void clear()
-        {
-            Allocate :: deallocate(cache, allo_len);
-            cache = NULL;
-            allo_len = 0;
-            str_idx = 0;
-            end_idx = -1;
-        }
+        void init(int size);
+
+        void clear();
         
-        Buffer & operator=(Buffer & bf)
-        {
-            cache = bf.cache;
-            str_idx = bf.str_idx;
-            end_idx = bf.end_idx;
-            allo_len = bf.allo_len;
-            
-            bf.cache = NULL;
-            bf.str_idx = 0;
-            bf.end_idx = -1;
-            bf.allo_len = 0; 
-        }
+        Buffer & operator=(Buffer & bf);
 
         bool isEmpty()
         {
@@ -52,17 +40,9 @@ class Buffer
             return false;
         }
         
-        int add_data(void * tmp,
-                     int len)
-        {
-            if(len > get_rmind_cache())
-            {
-                assert(false);
-            }
-            memcpy((char *)cache + end_idx + 1, (char *)tmp, len);
-            end_idx += len;
-            return len;
-        }
+        int add_data(void * tmp, int len);
+
+        int add_handl_num(int handled);
 
         void * get_cache()
         {
@@ -74,11 +54,12 @@ class Buffer
             return allo_len - end_idx - 1;
         }
 
-        int get_handle_num()
+        int get_unhandle_num()
         {
             return end_idx - str_idx + 1;
         }
-        void * get_handle_cache()
+
+        void * get_unhandle_cache()
         {
             return (char *)cache + str_idx;
         }
@@ -89,10 +70,14 @@ class Buffer
         }
 
     private:
+        
         Buffer(Buffer & bf)
         {
             assert(false);
         }
+
+        int fresh_cache(int len);
+
         void * cache;
         int allo_len;
         int str_idx;

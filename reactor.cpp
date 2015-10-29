@@ -24,6 +24,8 @@
 //         liuzhaorui1@163.com
 //**********************************************************
 
+extern CThreadPool pool;
+
 bool Reactor :: set_event_active(Event * ev)
 {
     pthread_mutex_lock(&event_mutex);
@@ -284,7 +286,7 @@ int Reactor :: epoll_dispatch(int status,
             continue;
         }
 
-        if(active & EPOLLERR)
+        else if(active & EPOLLERR)
         {
             if(!set_event_active(evread))
             {
@@ -304,7 +306,7 @@ int Reactor :: epoll_dispatch(int status,
             //set_event_unactive(evwrite);
             continue;
         }
-        if(active & EPOLLIN )
+        else if(active & EPOLLIN )
         {
             switch(status)
             {
@@ -314,15 +316,14 @@ int Reactor :: epoll_dispatch(int status,
                 case EV_THREAD:
                     if(set_event_active(evread))
                     {
-                        //handle
-                        printf("multi handle");
+                        pool.AddTask(new EventTask(evread));
                     }    
                     break;
             }
             continue;
         }        
 
-        if(active & EPOLLOUT)
+        else if(active & EPOLLOUT)
         {
             switch(status)
             {
@@ -330,10 +331,10 @@ int Reactor :: epoll_dispatch(int status,
                     evwrite->excute();
                     break;
                 case EV_THREAD:
-                    if(set_event_active(evread))
+                    if(set_event_active(evwrite))
                     {
                         //handle
-                        printf("multi handle");
+                        pool.AddTask(new EventTask(evwrite));
                     }    
                     break;
             }

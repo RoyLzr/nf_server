@@ -2,11 +2,12 @@
 #define _PARSE_WORK_
 
 #include "reactor.h"
+#include "event.h"
 #include "Buffer.h"
 
-int parseLine(int, void *, void *);
+int parseLine(int, void *);
 
-int sendData(int, void *, void *);
+int sendData(int, void *);
 
 
 

@@ -7,16 +7,25 @@
 
 void test_fun(int fd, short events, void * arg)
 {
-    WriteEvent * w_ev = (WriteEvent *) arg;
-    char * tmp = "12345";
-    w_ev->add_buffer(tmp, 6); 
+    struct evepoll * eve = (struct evepoll *) arg;
+    WriteEvent * w_ev = (WriteEvent *) eve->evwrite;
+    ReadEvent * r_ev = (ReadEvent *) eve->evread;
+    Buffer & r_buff = r_ev->get_buffer();
+
+    void * src = r_buff.get_unhandle_cache();
+    w_ev->add_buffer(src, r_buff.get_unhandle_num());
+    
+    r_buff.add_handl_num(r_buff.get_unhandle_num());
 }
 
 
 const int nevents = 10;
+CThreadPool pool;
 
 int main()
 {
+    pool.init(4, 1024);
+
     string s = "./svr.log";
     Log :: init(s.c_str());
     Log :: set_level(LOG_DEBUG);
@@ -24,8 +33,8 @@ int main()
 
     Reactor testRa;
     testRa.init(1000);
-    ReadEvent * r_ev = new ReadEvent(50);
-    WriteEvent * w_ev = new WriteEvent(50);
+    ReadEvent * r_ev = new ReadEvent();
+    WriteEvent * w_ev = new WriteEvent();
 
     r_ev->init(1, test_fun, parseLine);
     w_ev->init(1, NULL, sendData);
@@ -34,7 +43,7 @@ int main()
     testRa.add_event(r_ev);
     testRa.add_event(w_ev);
     
-    testRa.start(EV_ONCE);
+    testRa.start(EV_THREAD);
 
 
     /*

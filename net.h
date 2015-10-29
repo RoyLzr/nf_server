@@ -168,7 +168,7 @@ int
 set_linger(int fd, int val);
 
 int 
-find_line(char * req, int end);
+find_line(char * req, int end, char label);
 
 int
 readn(int fd, void *usrbuf, size_t n);

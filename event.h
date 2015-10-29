@@ -10,13 +10,14 @@
 #include "commonn/asynLog.h"
 #include "util.h"
 #include "Buffer.h"
-
+#include "commonn/ThreadPool.h"
 
 using std::list;
 
 class Reactor;
 typedef void (*ev_handle)(int, short, void *);
-typedef int (*parse_handle)(int, void *, void *);
+typedef int (*parse_handle)(int, void *);
+
 
 class Event
 {
@@ -76,7 +77,14 @@ class Event
     {
         return ev_callback;
     }
-    virtual void excute(void * arg = NULL);
+    virtual void excute();
+    
+    static void * ThreadExcute(Event * arg)
+    {
+        assert(arg != NULL);
+
+        arg->excute();
+    }
 
     private:
         Event & operator=(Event & ev)
@@ -130,16 +138,22 @@ class ReadEvent : public Event
         return cache;
     }
     
+    inline int add_buffer(void * tmp,
+                          int len)
+    {
+        return cache.add_data(tmp, len);
+    }
+    
     inline int get_buf_handle_num()
     {
-        return cache.get_handle_num();
+        return cache.get_unhandle_num();
     }
     inline void * get_buf_handle_cache()
     {
-        return cache.get_handle_cache();
+        return cache.get_unhandle_cache();
     }
 
-    virtual void excute(void * arg = NULL);
+    virtual void excute();
     
     protected:
         Buffer cache;
@@ -175,17 +189,31 @@ class WriteEvent : public Event
     }
     inline int get_buf_handle_num()
     {
-        return cache.get_handle_num();
+        return cache.get_unhandle_num();
     }
     inline void * get_buf_handle_cache()
     {
-        return cache.get_handle_cache();
+        return cache.get_unhandle_cache();
     }
 
-    virtual void excute(void * arg = NULL);
+    virtual void excute();
     
     protected:
         Buffer  cache;
 };
+
+class EventTask : public CTask
+{
+    public:
+        EventTask() : ev_task(NULL)
+        {}
+        EventTask(Event * ev) : ev_task(ev)
+        {
+            //idx = ev->get_ev_fd();
+        }
+        virtual void run();
+    private:
+        Event * ev_task; 
+};                  
 
 #endif

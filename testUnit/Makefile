@@ -1,8 +1,14 @@
-server: net.o reactor.o main.o nf_base_work.o asynLog.o event.o memCache.o;
-		g++ -o server memCache.o net.o reactor.o main.o nf_base_work.o asynLog.o event.o -lpthread
+server: ThreadPool.o net.o reactor.o main.o nf_base_work.o asynLog.o event.o memCache.o Buffer.o;
+		g++ -o server ThreadPool.o memCache.o net.o reactor.o main.o nf_base_work.o asynLog.o Buffer.o event.o -lpthread
+
+
+Buffer.o: ../Buffer.h ../Buffer.cpp
+		g++ -g -c ../Buffer.cpp
 
 net.o:../net.h ../net.cpp
 		g++ -g -c ../net.cpp
+ThreadPool.o:../commonn/ThreadPool.h ../commonn/ThreadPool.cpp
+		g++ -g -c ../commonn/ThreadPool.cpp
 
 memCache.o: ../commonn/memCache.h ../commonn/memCache.cpp
 		g++ -g -c ../commonn/memCache.cpp

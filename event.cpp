@@ -1,21 +1,44 @@
 #include "event.h"
 #include "reactor.h"
 
+extern CThreadPool pool;
 
-void Event :: excute(void * arg)
+void Event :: excute()
 {
-    if(arg == NULL)
-        ev_callback(ev_fd, ev_events, this);
-    else
-        ev_callback(ev_fd, ev_events, arg);
+    ev_callback(ev_fd, ev_events, this);
    
     ev_reactor->set_event_unactive(this);
 
     return;
 }
 
+void EventTask :: run()
+{
+    if(ev_task == NULL)
+    {
+        Log :: WARN("This is task is not inited %d", idx);
+    }
 
-void ReadEvent :: excute(void * arg)
+#ifdef WORK
+    CWorkerThread * th;
+#else
+    CWorkerThread * th = get_pthread_data();
+    Log :: DEBUG("[Start] Task ID : %d, handle Thread %d excute", \
+                  idx, th->GetThreadIdx());
+#endif
+
+    ev_task->excute();
+
+#ifdef WORK
+
+#else
+    Log :: DEBUG("[End] Task ID : %d, handle Thread %d excute", \
+                 idx, th->GetThreadIdx());
+#endif
+}
+
+
+void ReadEvent :: excute()
 {
     //this event is already active
     int epfd = ev_reactor->get_epfd();
@@ -39,7 +62,7 @@ void ReadEvent :: excute(void * arg)
     }    
    
     if(ev_parse != NULL)
-        ev_parse(ev_fd, this, tmp);
+        ev_parse(ev_fd, this);
 
     //Read Unfinished, next loop read event
     if(ev_flags & EV_READUNFIN)
@@ -70,7 +93,7 @@ void ReadEvent :: excute(void * arg)
 } 
 
 
-void WriteEvent :: excute(void * arg)
+void WriteEvent :: excute()
 {
     //this event is already active
     int epfd = ev_reactor->get_epfd();
@@ -89,7 +112,7 @@ void WriteEvent :: excute(void * arg)
     Log :: DEBUG("DEL [Epoll] Write event %d SUCC", ev_fd);
     
     if(ev_parse != NULL)
-        ev_parse(ev_fd, this, tmp);
+        ev_parse(ev_fd, this);
 
     //Write Unfinished, next loop read event
     if(ev_flags & EV_WRITEUNFIN)
