@@ -109,3 +109,13 @@ int Buffer :: fresh_cache(int len)
     return 0;
 }
 
+int Buffer :: get_unhandle_data(void * tmp)
+{
+
+    memcpy((char *)tmp, (char *)cache + str_idx, end_idx - str_idx + 1);
+    
+    add_handl_num(end_idx - str_idx + 1);    
+    return end_idx - str_idx + 1;
+}
+
+

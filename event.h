@@ -56,10 +56,22 @@ class Event
     {
         return ev_active;
     }
+
     inline void set_ev_flags(int flg)
     {
         ev_flags = flg;
     }
+    
+    inline void add_ev_flags(int flg)
+    {
+        ev_flags |= flg;
+    }
+    
+    inline void del_ev_flags(int flg)
+    {
+        ev_flags &= ~flg;
+    }
+
     inline int get_ev_events()
     {
         return ev_events;
@@ -77,6 +89,12 @@ class Event
     {
         return ev_callback;
     }
+    
+    inline parse_handle get_parse_handle()
+    {
+        return ev_parse;
+    }
+
     virtual void excute();
     
     static void * ThreadExcute(Event * arg)
@@ -144,11 +162,11 @@ class ReadEvent : public Event
         return cache.add_data(tmp, len);
     }
     
-    inline int get_buf_handle_num()
+    inline int get_buf_unhandle_num()
     {
         return cache.get_unhandle_num();
     }
-    inline void * get_buf_handle_cache()
+    inline void * get_buf_unhandle_cache()
     {
         return cache.get_unhandle_cache();
     }
@@ -187,11 +205,11 @@ class WriteEvent : public Event
     {
         return cache.add_data(tmp, len);
     }
-    inline int get_buf_handle_num()
+    inline int get_buf_unhandle_num()
     {
         return cache.get_unhandle_num();
     }
-    inline void * get_buf_handle_cache()
+    inline void * get_buf_unhandle_cache()
     {
         return cache.get_unhandle_cache();
     }

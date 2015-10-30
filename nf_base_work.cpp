@@ -10,12 +10,15 @@ int parseLine(int fd, void * arg)
     int tmp_len = cth->GetWorkerLen();
     Reactor * rect = ev->get_reactor();
     struct evepoll * eve = rect->get_fds(fd);
+    WriteEvent * w_ev = (WriteEvent *) eve->evwrite;
     Buffer & buff = ev->get_buffer();
     int n;
     char * show;
 
     if(set_fd_noblock(fd) < 0)
         return -1;
+
+    ev->del_ev_flags(EV_READUNFIN);
 
     if ((n = readn(fd, tmp, tmp_len)) < 0 )
     {
@@ -56,19 +59,37 @@ int parseLine(int fd, void * arg)
                    n, buff.get_unhandle_cache());
         #endif
         }
+        parse_handle p_handle = w_ev->get_parse_handle();
+        p_handle(fd, w_ev);
+        
+        if(w_ev->get_buf_unhandle_num() <= 0)
+        {
+            ev->add_ev_flags(EV_READUNFIN);
+        }
     }
 }
 
 int sendData(int fd, void * arg)
 {
     WriteEvent * w_ev = (WriteEvent *) arg;
-    int num = w_ev->get_buf_handle_num();
+    int num = w_ev->get_buf_unhandle_num();
     Buffer & w_buff = w_ev->get_buffer();
     void * src = w_buff.get_unhandle_cache();
 
+    w_ev->del_ev_flags(EV_WRITEUNFIN);
+     
     int n = write(fd, (char *)src, w_buff.get_unhandle_num());
-
     w_buff.add_handl_num(w_buff.get_unhandle_num());
+
+#ifndef WORK
+    Log :: DEBUG("OUtPut write len %d data %s", \
+                  n, (char *)src);
+#endif
+
+    if(w_ev->get_buf_unhandle_num() > 0)
+    {
+        w_ev->add_ev_flags(EV_WRITEUNFIN);
+    }
     
 }
 

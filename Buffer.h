@@ -43,6 +43,8 @@ class Buffer
         int add_data(void * tmp, int len);
 
         int add_handl_num(int handled);
+        
+        int get_unhandle_data(void * tmp);
 
         void * get_cache()
         {

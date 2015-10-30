@@ -1,55 +1,45 @@
-[NOTICE] 10-30 02:12:24  REACTOR INIT SUCC epfd : 4                    files : 1000 
-[DEBUG]  10-30 02:12:24  ADD EVENT FD: 1 events: READ reactor: 4
-[NOTICE] 10-30 02:12:24  EVENT fd:1 added IN LIST
-[DEBUG]  10-30 02:12:24  ADD EVENT FD: 1 events: WRITE reactor: 4
-[NOTICE] 10-30 02:12:24  EVENT fd:1 added IN LIST
-[DEBUG]  10-30 02:12:24  [Start] Task ID : 1804289383, handle Thread 3 excute
-[DEBUG]  10-30 02:12:24  DEL [Epoll] Write event 1 SUCC
-[DEBUG]  10-30 02:12:24  ADD [epoll] Read event 1 SUCC
-[DEBUG]  10-30 02:12:24  [End] Task ID : 1804289383, handle Thread 3 excute
-[DEBUG]  10-30 02:12:30  [Start] Task ID : 846930886, handle Thread 2 excute
-[DEBUG]  10-30 02:12:31  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  10-30 02:12:31  handle Thread 2, [Read Event] len : 13, Data : a!b!c!dd!eee
+[NOTICE] 10-30 15:24:26  REACTOR INIT SUCC epfd : 4                    files : 1000 
+[DEBUG]  10-30 15:24:26  ADD EVENT FD: 1 events: READ reactor: 4
+[NOTICE] 10-30 15:24:26  EVENT fd:1 added IN LIST
+[DEBUG]  10-30 15:24:26  ADD EVENT FD: 1 events: WRITE reactor: 4
+[NOTICE] 10-30 15:24:26  EVENT fd:1 added IN LIST
+[DEBUG]  10-30 15:24:26  [Start] Task ID : 1804289383, handle Thread 3 excute
+[DEBUG]  10-30 15:24:26  DEL [Epoll] Write event 1 SUCC
+[DEBUG]  10-30 15:24:26  OUtPut write len 0 data (null)
+[DEBUG]  10-30 15:24:26  ADD [epoll] Read event 1 SUCC
+[DEBUG]  10-30 15:24:26  [End] Task ID : 1804289383, handle Thread 3 excute
+[DEBUG]  10-30 15:24:27  [Start] Task ID : 846930886, handle Thread 2 excute
+[DEBUG]  10-30 15:24:27  DEL [Epoll] Read event 1 SUCC
+[DEBUG]  10-30 15:24:27  handle Thread 2, [Read Event] len : 2, Data : a
 
-[DEBUG]  10-30 02:12:31  FREE LIST SPACE  size = 64 index = 0 tid = 140162262095616
-[DEBUG]  10-30 02:12:31  FREE LIST SPACE  size = 64 index = 0 tid = 140162262095616
-[DEBUG]  10-30 02:12:31  FREE LIST SPACE  size = 64 index = 0 tid = 140162262095616
-[DEBUG]  10-30 02:12:31  FREE LIST SPACE  size = 64 index = 0 tid = 140162262095616
-[DEBUG]  10-30 02:12:31  FREE LIST SPACE  size = 64 index = 0 tid = 140162262095616
-[DEBUG]  10-30 02:12:31  READ DUMP CACHE 4 bytes VAL : eee
+[DEBUG]  10-30 15:24:27  READ DUMP CACHE 2 bytes VAL : a
  
-[DEBUG]  10-30 02:12:31  ADD [epoll] Write event 1 SUCC
-[DEBUG]  10-30 02:12:31  [End] Task ID : 846930886, handle Thread 2 excute
-[DEBUG]  10-30 02:12:31  [Start] Task ID : 1681692777, handle Thread 1 excute
-[DEBUG]  10-30 02:12:31  DEL [Epoll] Write event 1 SUCC
-[DEBUG]  10-30 02:12:31  FREE LIST SPACE  size = 64 index = 0 tid = 140162270488320
-[DEBUG]  10-30 02:12:31  ADD [epoll] Read event 1 SUCC
-[DEBUG]  10-30 02:12:31  [End] Task ID : 1681692777, handle Thread 1 excute
-[DEBUG]  10-30 02:12:34  [Start] Task ID : 1714636915, handle Thread 3 excute
-[DEBUG]  10-30 02:12:34  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  10-30 02:12:34  handle Thread 3, [Read Event] len : 2, Data : !
+[DEBUG]  10-30 15:24:27  OUtPut write len 0 data (null)
+[DEBUG]  10-30 15:24:27  Read Unfinish, Add [Epoll] Read 1
+[DEBUG]  10-30 15:24:27  ADD [Epoll] Read event 1 SUCC
+[DEBUG]  10-30 15:24:27  [End] Task ID : 846930886, handle Thread 2 excute
+[DEBUG]  10-30 15:24:30  [Start] Task ID : 1681692777, handle Thread 1 excute
+[DEBUG]  10-30 15:24:30  DEL [Epoll] Read event 1 SUCC
+[DEBUG]  10-30 15:24:30  handle Thread 1, [Read Event] len : 2, Data : b
 
-[DEBUG]  10-30 02:12:34  FREE LIST SPACE  size = 64 index = 0 tid = 140162253702912
-[DEBUG]  10-30 02:12:34  FREE LIST SPACE  size = 64 index = 0 tid = 140162253702912
-[DEBUG]  10-30 02:12:34  READ DUMP CACHE 1 bytes VAL : 
+[DEBUG]  10-30 15:24:30  FREE LIST SPACE  size = 64 index = 0 tid = 139766613600000
+[DEBUG]  10-30 15:24:30  READ DUMP CACHE 2 bytes VAL : a
+b
  
-[DEBUG]  10-30 02:12:34  ADD [epoll] Write event 1 SUCC
-[DEBUG]  10-30 02:12:34  [End] Task ID : 1714636915, handle Thread 3 excute
-[DEBUG]  10-30 02:12:34  [Start] Task ID : 1957747793, handle Thread 1 excute
-[DEBUG]  10-30 02:12:34  DEL [Epoll] Write event 1 SUCC
-[DEBUG]  10-30 02:12:34  FREE LIST SPACE  size = 64 index = 0 tid = 140162270488320
-[DEBUG]  10-30 02:12:34  ADD [epoll] Read event 1 SUCC
-[DEBUG]  10-30 02:12:34  [End] Task ID : 1957747793, handle Thread 1 excute
-[DEBUG]  10-30 02:12:36  [Start] Task ID : 424238335, handle Thread 3 excute
-[DEBUG]  10-30 02:12:36  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  10-30 02:12:36  handle Thread 3, [Read Event] len : 2, Data : !
+[DEBUG]  10-30 15:24:30  OUtPut write len 0 data (null)
+[DEBUG]  10-30 15:24:30  Read Unfinish, Add [Epoll] Read 1
+[DEBUG]  10-30 15:24:30  ADD [Epoll] Read event 1 SUCC
+[DEBUG]  10-30 15:24:30  [End] Task ID : 1681692777, handle Thread 1 excute
+[DEBUG]  10-30 15:25:17  [Start] Task ID : 1714636915, handle Thread 3 excute
+[DEBUG]  10-30 15:25:17  DEL [Epoll] Read event 1 SUCC
+[DEBUG]  10-30 15:25:17  handle Thread 3, [Read Event] len : 2, Data : !
 
-[DEBUG]  10-30 02:12:36  FREE LIST SPACE  size = 64 index = 0 tid = 140162253702912
-[DEBUG]  10-30 02:12:36  READ DUMP CACHE 1 bytes VAL : 
+[DEBUG]  10-30 15:25:17  FREE LIST SPACE  size = 64 index = 0 tid = 139766596814592
+[DEBUG]  10-30 15:25:17  FREE LIST SPACE  size = 64 index = 0 tid = 139766596814592
+[DEBUG]  10-30 15:25:17  READ DUMP CACHE 1 bytes VAL : 
  
-[DEBUG]  10-30 02:12:36  ADD [epoll] Write event 1 SUCC
-[DEBUG]  10-30 02:12:36  [End] Task ID : 424238335, handle Thread 3 excute
-[DEBUG]  10-30 02:12:36  [Start] Task ID : 719885386, handle Thread 2 excute
-[DEBUG]  10-30 02:12:36  DEL [Epoll] Write event 1 SUCC
-[DEBUG]  10-30 02:12:36  ADD [epoll] Read event 1 SUCC
-[DEBUG]  10-30 02:12:36  [End] Task ID : 719885386, handle Thread 2 excute
+[DEBUG]  10-30 15:25:17  FREE LIST SPACE  size = 64 index = 0 tid = 139766596814592
+[DEBUG]  10-30 15:25:17  OUtPut write len 5 data à.D
+[DEBUG]  10-30 15:25:17  Read Unfinish, Add [Epoll] Read 1
+[DEBUG]  10-30 15:25:17  ADD [Epoll] Read event 1 SUCC
+[DEBUG]  10-30 15:25:17  [End] Task ID : 1714636915, handle Thread 3 excute

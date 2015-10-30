@@ -45,8 +45,6 @@ void ReadEvent :: excute()
     int res;
     struct evepoll * events = NULL;
     events = ev_reactor->get_fds();
-    
-    void * tmp = malloc(1024);
 
     if((res = net_ep_del(epfd, ev_fd)) < 0)
     {
@@ -86,7 +84,6 @@ void ReadEvent :: excute()
     Log :: DEBUG("ADD [epoll] Write event %d SUCC", ev_fd);
 
     done:
-        free(tmp);
         ev_reactor->set_event_unactive(this);
 
     return;
@@ -101,7 +98,6 @@ void WriteEvent :: excute()
     struct evepoll * events = NULL;
     events = ev_reactor->get_fds();
     
-    void * tmp = malloc(1024);
 
     if((res = net_ep_del(epfd, ev_fd)) < 0)
     {
@@ -136,7 +132,6 @@ void WriteEvent :: excute()
     Log :: DEBUG("ADD [epoll] Read event %d SUCC", ev_fd);
 
     done:
-        free(tmp);
         ev_reactor->set_event_unactive(this);
 
     return;

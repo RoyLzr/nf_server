@@ -12,6 +12,10 @@ void test_fun(int fd, short events, void * arg)
     ReadEvent * r_ev = (ReadEvent *) eve->evread;
     Buffer & r_buff = r_ev->get_buffer();
 
+#ifndef WORK
+    printf("user handle fun\n");
+#endif
+
     void * src = r_buff.get_unhandle_cache();
     w_ev->add_buffer(src, r_buff.get_unhandle_num());
     
@@ -44,26 +48,6 @@ int main()
     testRa.add_event(w_ev);
     
     testRa.start(EV_THREAD);
-
-
-    /*
-    for(int i = 0; i < nevents; i++)
-    {
-        Event * ev = new Event();
-        ev->init(i,1,test_fun);
-        testRa.add_event(ev);
-        std::cout << "test ra" << (ev->get_reactor())->get_ev_count()<< std::endl;
-        (*(ev->get_ev_pos()))->excute();
-    }
-     
-    list<Event *> testList = testRa.get_list();
-    list<Event *> :: iterator iter = testList.begin();
-    while(iter != testList.end())
-    {
-        (*iter)->excute();
-        iter++;
-    } 
-    */   
 
     std::cout << "hello" << std::endl;
 }
