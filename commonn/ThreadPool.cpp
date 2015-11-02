@@ -132,11 +132,13 @@ void CThreadPool::Destory()
         delete [] m_worker_list;
 }
 
-void CThreadPool::AddTask(CTask* pTask)
+int CThreadPool::AddTask(CTask* pTask)
 {
 	/*
 	 * select a random thread to push task
 	 */
+    if(m_worker_size <= 0)
+        return -1;
 	int thread_idx = pTask->idx % m_worker_size;
 	m_worker_list[thread_idx].PushTask(pTask);
 }

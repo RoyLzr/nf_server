@@ -1,5 +1,13 @@
-server: ThreadPool.o net.o reactor.o main.o nf_base_work.o asynLog.o event.o memCache.o Buffer.o;
-		g++ -o server ThreadPool.o memCache.o net.o reactor.o main.o nf_base_work.o asynLog.o Buffer.o event.o -lpthread
+server: configParser.o ThreadPool.o net.o reactor.o main.o nf_base_work.o asynLog.o event.o memCache.o Buffer.o nf_server.o nf_server_core.o;
+		g++ -o server configParser.o  nf_server.o ThreadPool.o memCache.o net.o reactor.o main.o nf_base_work.o asynLog.o Buffer.o event.o nf_server_core.o -lpthread
+
+nf_server_core.o : ../nf_server_core.h ../nf_server_core.cpp
+		g++ -g -c ../nf_server_core.cpp
+nf_server.o : ../nf_server.h ../nf_server.cpp
+		g++ -g -c ../nf_server.cpp
+
+configParser.o : ../commonn/configParser.h ../commonn/configParser.cpp
+		g++ -g -c ../commonn/configParser.cpp
 
 
 Buffer.o: ../Buffer.h ../Buffer.cpp

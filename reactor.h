@@ -14,6 +14,12 @@ struct evepoll
     int status;
 };
 
+struct threadParas
+{
+    int num;
+    int buff_size;
+};
+
 class Reactor
 {
 
@@ -28,6 +34,8 @@ class Reactor
         {
             pthread_mutex_init(&event_mutex, NULL);
             pthread_mutex_init(&list_mutex, NULL);
+            poolPars.num = 0;
+            poolPars.buff_size = 0;
         }
 
     inline int get_ev_count()
@@ -54,7 +62,7 @@ class Reactor
                   struct timeval * tv = NULL,
                   bool actived = true);
     
-    int init(int);
+    int init(int, struct threadParas);
     int start(int);
     
     //fail event is active already 
@@ -66,13 +74,13 @@ class Reactor
     pthread_mutex_t list_mutex;
     pthread_mutex_t event_mutex; 
 
-    private:
+    protected:
         void event_queue_insert(Event *, int );
         int epoll_add_event(Event *, bool actived);
         int epoll_dispatch(int status, struct timeval *tv);
         int epoll_del_event(Event *, bool removed = true);
         
-    private:
+    protected:
         list<Event *> ev_list;
         //TODO: add timer, queu
         
@@ -85,7 +93,9 @@ class Reactor
         struct epoll_event *events;
         int nfile;
         int nevents;
-        struct evepoll * fds; 
+        struct evepoll * fds;
+        struct threadParas poolPars;
+        CThreadPool pool; 
 };
 
 

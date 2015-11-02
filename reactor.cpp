@@ -24,8 +24,6 @@
 //         liuzhaorui1@163.com
 //**********************************************************
 
-extern CThreadPool pool;
-
 bool Reactor :: set_event_active(Event * ev)
 {
     pthread_mutex_lock(&event_mutex);
@@ -186,7 +184,7 @@ int Reactor :: epoll_add_event(Event * ev,
     return 0; 
 }
 
-int Reactor :: init(int files)
+int Reactor :: init(int files, struct threadParas paras)
 {
     nevents = files;
     nfile = files;
@@ -194,7 +192,11 @@ int Reactor :: init(int files)
     {
         Log :: ERROR("REACTOR EPOLL CREATE ERROR"); 
         return -1;
-    } 
+    }
+
+    //Start reactor's threadPool
+    pool.init(paras.num, paras.buff_size);
+
     set_fd_block(epfd);   
 
     events = (struct epoll_event *) malloc(nevents * sizeof(struct epoll_event));

@@ -17,13 +17,15 @@
 #include <iostream>
 #include <string.h>
 
-class NfServer : public Server
+class NfServer
 {
     public:
         NfServer();
         virtual ~NfServer();
+        
+        int init(const string & log_path);
 
-        virtual int run();
+        int run();
         /**
          * @brief ÔËÐÐnf·þÎñÆ÷  
          * @return  int 0 ³É¹¦ -1 Ê§°Ü   
@@ -31,7 +33,7 @@ class NfServer : public Server
          *    
          **/
 
-        virtual int stop();
+        int stop();
         /**
          * @brief Ô stop server
          * @return  int 0 ³É¹¦ -1 Ê§°Ü   
@@ -39,7 +41,7 @@ class NfServer : public Server
          *    
          **/
 
-        virtual int destroy(); 
+        int destroy(); 
         /**
          * @brief Ô destroy server
          * @return  int 0 ³É¹¦ -1 Ê§°Ü   
@@ -47,7 +49,7 @@ class NfServer : public Server
          *    
          **/
 
-        virtual int join();
+        int join();
         /**
          * @brief Ô join server
          * @return  int 0 ³É¹¦ -1 Ê§°Ü   
@@ -55,7 +57,7 @@ class NfServer : public Server
          *    
          **/
 
-        virtual int pause();
+        int pause();
         /**
          * @brief pause server
          * @return  int 0 ³É¹¦ -1 Ê§°Ü   
@@ -63,7 +65,7 @@ class NfServer : public Server
          *    
          **/
 
-        virtual int resume();
+        int resume();
         /**
          * @brief ÖØÆô server
          * @return  int 0 ³É¹¦ -1 Ê§°Ü   
@@ -71,43 +73,38 @@ class NfServer : public Server
          *    
          **/
 
-        virtual int set_work_callback(BaseWork *run);
-        /**
-         * @brief callback º¯Êý
-         * @return  int 0 ³É¹¦ -1 Ê§°Ü   
-         * @author liuzhaorui
-         *    
-         **/
+        int set_read_handle(ev_handle );
 
-        virtual int svr_init() = 0;
+        int set_write_handle(ev_handle );
 
-        virtual int svr_run() = 0;
+        int set_parse_read_handle(parse_handle );
 
-        virtual int svr_join() = 0;
+        int set_parse_write_handle(parse_handle );
+        /* 
+        virtual int svr_init();
 
-        virtual int svr_listen() = 0;
+        virtual int svr_run();
 
-        virtual int svr_destroy() = 0;
+        virtual int svr_join();
 
-        virtual int svr_pause() = 0;
+        virtual int svr_listen();
 
-        virtual int svr_resume() = 0;
+        virtual int svr_destroy();
 
-        virtual int svr_set_stragy(BaseWork *) = 0;
+        virtual int svr_pause();
 
-        virtual int set_server_startfun(nf_handle_t start);
-
-        virtual int set_thread_startfun(nf_handle_t start); 
-
-        virtual int set_thread_endfun(nf_handle_t end); 
+        virtual int svr_resume();
+        */
 
         int set_server_name(const char *);
-
-        virtual int set_handle( nf_handle_t handle ); 
 
         nf_server_t * get_server_data();
 
     protected:
+         
+        nf_server_t * 
+        nf_server_create(const char * sev_name);
+
         nf_server_t *sev_data; //server ºËÐÄÊý¾Ý½á¹¹
 
 };

@@ -60,7 +60,10 @@ void ReadEvent :: excute()
     }    
    
     if(ev_parse != NULL)
+    {
+        del_ev_flags(EV_READUNFIN);
         ev_parse(ev_fd, this);
+    }
 
     //Read Unfinished, next loop read event
     if(ev_flags & EV_READUNFIN)
@@ -108,7 +111,10 @@ void WriteEvent :: excute()
     Log :: DEBUG("DEL [Epoll] Write event %d SUCC", ev_fd);
     
     if(ev_parse != NULL)
+    {   
+        del_ev_flags(EV_READUNFIN);
         ev_parse(ev_fd, this);
+    }
 
     //Write Unfinished, next loop read event
     if(ev_flags & EV_WRITEUNFIN)

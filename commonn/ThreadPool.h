@@ -89,6 +89,7 @@ class CWorkerThread
         void SetBuff(int size)
         {
             m_work_buff = malloc(size);
+            memset(m_work_buff, '\0', size);
             if(m_work_buff != NULL)
                m_work_len = size; 
         }
@@ -111,7 +112,7 @@ class CThreadPool
 	    virtual ~CThreadPool();
 
 	    int init(int worker_size, int buff_size = 0);
-	    void AddTask(CTask* pTask);
+	    int AddTask(CTask* pTask);
         void Stop();
 	    void Destory();
     private:

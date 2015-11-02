@@ -35,88 +35,15 @@ SaServer :: add_listen_socket(nf_server_t *sev, int listenfd)
 int 
 SaServer :: svr_init()
 {
-    int qsiz = nf_server_get_qsize(sev_data);
-    int ssiz = nf_server_get_socksize(sev_data);
-    sapool_t *pool = NULL;
-
-    if (qsiz <=1 || ssiz<=0) 
-    {
-        qsiz = DEFAULT_QUEUE_LEN;
-        ssiz = DEFAULT_SOCK_NUM;
-        sev_data->qsize = qsiz;
-        sev_data->socksize = ssiz;
-    }
-
-    if (sev_data->pool == NULL) 
-    {
-        sev_data->pool = malloc(sizeof(sapool_t));
-        if (sev_data->pool == NULL) 
-        {
-            std :: cout << "malloc sapool error" << std::endl;
-            
-            return -1;
-        }
-        memset(sev_data->pool, 0, sizeof(sapool_t));
-    }
+    ReadEvent * r_ev = new ReadEvent();
+    WriteEvent * w_ev = new WriteEvent();
     
-    pool = (sapool_t *) sev_data->pool;
-    pthread_mutex_init(&pool->ready_mutex, NULL);
-    pthread_cond_init(&pool->ready_cond, NULL);
+    r_ev->init(1, sev->read_handle, sev->read_parse_handle);
+    w_ev->init(1, sev->write_handle, sev->write_parse_handle);
+   
+    sev->svr_reactor->add_event(r_ev);
+    sev->svr_reactor->add_event(w_ev);
 
-    //创建就绪队列
-    if (create_q(&pool->queue, qsiz) != 0) 
-    {
-        std :: cout << "error of create queue" << std :: endl;
-        return -1;
-    }
-
-    //创建socket资源
-    pool->size = ssiz;
-    pool->sockets = (sapool_sock_item_t *) malloc (sizeof(sapool_sock_item_t) * ssiz);
-    for(int i = 0; i < ssiz; i++)
-    {
-        pool->sockets[i].rp.rio_ptr = ((char *) malloc(sizeof(char) * 
-                                    sev_data->thread_usr_buf)); 
-        if(pool->sockets[i].rp.rio_ptr == NULL)
-            return -1;
-        memset(pool->sockets[i].rp.rio_ptr, 0, sev_data->thread_usr_buf); 
-        rio_init(&pool->sockets[i].rp, -1, sev_data->thread_usr_buf); 
-    }
-    if (pool->sockets == NULL) 
-    {
-        std :: cout << "error of create sockets" << std :: endl;
-        return -1;
-    }
-
-    //创建epoll资源
-    pool->ep_events = (struct epoll_event *)malloc(sizeof(struct epoll_event) * ssiz);
-    if (pool->ep_events == NULL) 
-    {
-        std :: cout << "error of create epoll events" << std :: endl;
-        return -1;
-    }
-    memset(pool->ep_events, 0, ssiz * sizeof(struct epoll_event));
-
-    //创建epoll句柄
-    pool->epfd = epoll_create(ssiz);
-    if (pool->epfd < 0) 
-    {
-        std :: cout << "error of create epoll handle" << std :: endl;
-        return -1;
-    }
-
-    pool->timeout = -1;
-    if (pool->timeout <= 0) 
-    {
-        //pool->timeout = DEFAULT_TIMEOUT;
-        pool->timeout = sev_data->timeout;
-    }
-    //pool->check_interval = DEFAULT_CHECK_INTERVAL;
-    pool->check_interval = sev_data->check_interval;
-    pool->run = &sev_data->run;
-    pool->using_size = 0;
-
-    return 0;
 }
 
 long long 

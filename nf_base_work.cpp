@@ -18,8 +18,6 @@ int parseLine(int fd, void * arg)
     if(set_fd_noblock(fd) < 0)
         return -1;
 
-    ev->del_ev_flags(EV_READUNFIN);
-
     if ((n = readn(fd, tmp, tmp_len)) < 0 )
     {
         Log :: WARN("Read Error FD : %d Error %s", \
@@ -75,8 +73,9 @@ int sendData(int fd, void * arg)
     int num = w_ev->get_buf_unhandle_num();
     Buffer & w_buff = w_ev->get_buffer();
     void * src = w_buff.get_unhandle_cache();
-
-    w_ev->del_ev_flags(EV_WRITEUNFIN);
+    
+    ev_handle callback = w_ev->get_ev_handle();
+    callback(0, EV_WRITE, NULL);
      
     int n = write(fd, (char *)src, w_buff.get_unhandle_num());
     w_buff.add_handl_num(w_buff.get_unhandle_num());
