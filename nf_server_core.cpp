@@ -75,29 +75,27 @@ nf_server_get_socksize(nf_server_t * sev)
     else
         return sev->socksize;
 }
+*/
 
+
+
+//1. SO_LINGER 2. TCP_NODELAY 3. DEFER_ACCEPT
 int set_sev_socketopt(nf_server_t *sev, int fd)
 {
     const int on = 1;
     setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
     
-    if( sev->connect_type == NFSVR_SHORT_CONNEC)
-    {
-        struct linger li;
-        memset(&li, 0, sizeof(li)); 
-        li.l_onoff = 1;
-        li.l_linger = 2;
-        setsockopt(fd, SOL_SOCKET, SO_LINGER, (const char*)&li, sizeof(li) );     
-    }
+    struct linger li;
+    memset(&li, 0, sizeof(li)); 
+    li.l_onoff = 1;
+    li.l_linger = 1;
+    setsockopt(fd, SOL_SOCKET, SO_LINGER, (const char*)&li, sizeof(li) );     
     
-    //默认开启TCP_DEFER_ACCCEPT, drop no data connection
+    //默认开启TCP_DEFER_ACCCEPT, don't wait last ack , wait first data
+
     int timeout = sev->connect_to;
     setsockopt(fd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &timeout, sizeof(timeout));
     
-    //默认 设置 accept socket is noblock
-    if ( set_fd_noblock(fd) < 0)
-        return -1;
-
     return 0; 
 }
 
@@ -109,7 +107,7 @@ int nf_server_bind(nf_server_t * sev)
     
     if(sev->sev_socket < 0)
     {
-        if( (sev->sev_socket = socket(PF_INET, SOCK_STREAM, 0) ) < 0 )
+        if((sev->sev_socket = socket(PF_INET, SOCK_STREAM, 0) ) < 0 )
         {
             Log :: ERROR("NF_SVR_CORE : CREATE SOCKET ERROR : %s", strerror(errno));
             return -1; 
@@ -131,9 +129,20 @@ int nf_server_bind(nf_server_t * sev)
         return -1;    
     }
     
-    //ret = svr_init(sev); 
-    //Log :: NOTICE("NF_SVR_CORE : INIT POOL STATUS : %d", ret);
     return 0;
 }
 
-*/
+int nf_server_listen(nf_server_t * sev)
+{
+    int backlog = sev->backlog;
+    if(listen(sev->sev_socket, backlog) < 0)
+    {
+        Log :: ERROR("SET LISTEN SOCKET ERROR");
+        close(sev->sev_socket);
+        return -1;
+    }
+    Log :: NOTICE("SET LISTEN SOCKET SUCC");
+    
+    return 0;
+}
+

@@ -26,48 +26,11 @@
 #define LISTENER_PRIORITY    10
 #define WORKER_PRIORITY        5 
 
-typedef struct _sapool_sock_item_t sapool_sock_item_t;
-typedef struct _sapool_t sapool_t;
-
-struct _sapool_sock_item_t
-{
-    int status;
-    //int epoll_staus;
-    int sock;
-    time_t last_active;
-    struct sockaddr_in addr;
-    
-    rio_t rp;
-};
-
-struct _sapool_t
-{
-    sapool_sock_item_t * sockets;
-    struct epoll_event * ep_events;
-    int size;
-    long long using_size;
-
-    int epfd;
-
-    int timeout;        //epoll的超时时间
-    int check_interval;    //微妙级别支持超时
-    time_t next_check_time;
-
-    int * run;
-    int sev_sock_id;
-
-    queue_t queue;
-    pthread_mutex_t ready_mutex;
-    pthread_cond_t  ready_cond;
-
-    pthread_t main;
-};
-
-
 class SaServer : public NfServer
 {
     public:
-        SaServer(){};
+        SaServer() : NfServer()
+        {};
 
         virtual ~SaServer(){};
 
@@ -75,68 +38,15 @@ class SaServer : public NfServer
 
         virtual int svr_run();
 
-        virtual int svr_join();
-
         virtual int svr_listen();
-
+        
+        /*
         virtual int svr_destroy();
 
         virtual int svr_pause();
 
         virtual int svr_resume();
-
-        virtual int svr_set_stragy(BaseWork *);
-
-        static long long sapool_get_queuenum(nf_server_t *);
-
-        static void * sapool_main(void *);
-        
-        static void * sapool_workers(void *);       
-        
-        static int 
-        sapool_produce(nf_server_t *sev, struct sockaddr *addr, 
-                       socklen_t *addrlen);
-
-        static int 
-        sapool_consume(sapool_t *pool, nf_server_pdata_t *data);
-
-        static int 
-        sapool_check_timeout(nf_server_t *sev);
-
-        static int 
-        sapool_add(nf_server_t *sev, int sock, 
-                   struct sockaddr_in * addr);
-
-        static int 
-        sapool_del(nf_server_t *sev, int idx, 
-                   int keep_alive, bool remove=false);
-
-        static int 
-        sapool_epoll_add(nf_server_t *sev, int idx);
-
-        static int 
-        sapool_epoll_del(nf_server_t *sev, int idx);
-
-        static int 
-        sapool_put(sapool_t *pool, int idx);
-
-        static int 
-        sapool_get(nf_server_t *sev, int *idx);
-
-        static int 
-        sapool_pthread_cond_timewait(sapool_t *pool);
-
-        static int 
-        check_socket_queue(nf_server_t *sev);
-        
-        static int 
-        add_listen_socket(nf_server_t *, int);
-        
-        static void 
-        sapool_close_pool_sockets(nf_server_t *, bool );
-
-    protected:
-        static sapool_t * sa_pool;        
+        */
 };
 
 #endif  

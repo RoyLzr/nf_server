@@ -116,4 +116,10 @@ class NfReactor : public Reactor
         nf_server_pdata_t * pdata;
 }; 
 
+
+int nf_server_bind(nf_server_t * sev);
+int nf_server_listen(nf_server_t * sev);
+
+int set_sev_socketopt(nf_server_t *sev, int fd);
+
 #endif

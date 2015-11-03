@@ -181,6 +181,7 @@ int Reactor :: epoll_add_event(Event * ev,
             return -1;
         }
     }
+
     return 0; 
 }
 
@@ -256,6 +257,7 @@ int Reactor :: epoll_dispatch(int status,
             Log :: WARN("EPOLL DISPATCH LOOP ERROR epfd : %d", epfd);
             return -1;
         }
+        return 0;
     }
     for(int i = 0; i < res; i++)
     {

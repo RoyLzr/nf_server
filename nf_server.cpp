@@ -126,36 +126,29 @@ int NfServer :: run()
     sev->svr_reactor->start(EV_THREAD);
     
     return 0;
-    
+   */ 
 
-    if( (ret = nf_server_bind(sev_data) ) < 0 )
+    if((ret = nf_server_bind(sev_data) ) < 0 )
     {    
         Log :: ERROR("nf_server.cpp : 56 BIND ERROR"); 
         return -1;
     }
-    */
 
+    if((ret = nf_server_listen(sev_data) < 0)
+    {    
+        Log :: ERROR("SVR LISTEN ERROR"); 
+        return -1;
+    }
+    
     if((ret = svr_init()) < 0)
     {    
         Log :: ERROR("SVR INIT ERROR"); 
         return -1;
     }
 
-    if((ret = svr_listen()) < 0)
-    {    
-        Log :: ERROR("SVR LISTEN ERROR"); 
-        return -1;
-    }
-
     sev_data->need_join = 1; 
 
-    Allocate :: init();   
-
-    if(sev_data->stratgy == NULL)
-        set_work_callback(NULL);
-
     return svr_run(); 
-
 }
 
 /*

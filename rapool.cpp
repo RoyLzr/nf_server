@@ -15,6 +15,7 @@ enum
 
 #define MAX(a,b) (((a)>(b)) ? (a) : (b))
 
+/*
 int  
 RaServer :: add_listen_socket(nf_server_t *sev, int listenfd)
 {
@@ -30,6 +31,7 @@ RaServer :: add_listen_socket(nf_server_t *sev, int listenfd)
 
     return rapool_epoll_add_read(sev, idx, work);
 }
+*/
 
 int 
 RaServer :: svr_run()

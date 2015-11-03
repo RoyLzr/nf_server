@@ -17,6 +17,7 @@ enum
 
 #define MAX(a,b) (((a)>(b)) ? (a) : (b))
 
+/*
 int 
 SaServer :: add_listen_socket(nf_server_t *sev, int listenfd)
 {
@@ -31,6 +32,7 @@ SaServer :: add_listen_socket(nf_server_t *sev, int listenfd)
 
     return sapool_epoll_add(sev, idx);
 }
+*/
 
 int 
 SaServer :: svr_init()
@@ -38,134 +40,25 @@ SaServer :: svr_init()
     ReadEvent * r_ev = new ReadEvent();
     WriteEvent * w_ev = new WriteEvent();
     
-    r_ev->init(1, sev->read_handle, sev->read_parse_handle);
-    w_ev->init(1, sev->write_handle, sev->write_parse_handle);
+    r_ev->init(1, sev_data->read_handle, sev_data->read_parse_handle);
+    w_ev->init(1, sev_data->write_handle, sev_data->write_parse_handle);
    
-    sev->svr_reactor->add_event(r_ev);
-    sev->svr_reactor->add_event(w_ev);
+    sev_data->svr_reactor->add_event(r_ev);
+    sev_data->svr_reactor->add_event(w_ev, false);
 
-}
-
-long long 
-SaServer :: sapool_get_queuenum(nf_server_t *sev)
-{
-    if (sev == NULL) 
-        return -1;
-
-    sapool_t * pool = (sapool_t *) sev->pool;
-    if (pool == NULL) 
-        return -1;
-
-    return (long long)pool->queue.size;
 }
 
 int 
 SaServer :: svr_run()
 {
-    //int i = 0;
     int ret = 0;
-    sapool_t *pool = (sapool_t *)sev_data->pool;
-
-    pthread_attr_t thread_attr;
-    struct sched_param param = { 0 };
-    ret = pthread_attr_init(&thread_attr);
-    if (ret) 
-    {
-        std :: cout << "error thread attr init" << std :: endl;
-        return -1;
-    }
-    
-    /*
-    if (sev->stack_size > 0) 
-    {
-        ret = pthread_attr_setstacksize(&thread_attr, sev->stack_size);
-        if (ret) 
-        {
-            std :: cout << "error thread set stacksize" << std :: endl;
-            return -1;
-        }
-    }
-    */
-
-    ret = pthread_attr_setinheritsched(&thread_attr, PTHREAD_EXPLICIT_SCHED);
-    if (ret) 
-    {
-        std :: cout << "error thread set herit sched" << std :: endl;
-        return -1;
-    }
-
-    ret = pthread_attr_setschedpolicy(&thread_attr, SCHED_FIFO);
-    if (ret) 
-    {
-        std :: cout << "error thread set schedpolicy" << std :: endl;
-        return -1;
-    }
-
-    param.sched_priority = LISTENER_PRIORITY;
-    ret = pthread_attr_setschedparam(&thread_attr, &param);
-    if (ret) 
-    {
-        std :: cout << "error thread set listen priority" << std :: endl;
-        return -1;
-    }
-
-    ret = pthread_create(&pool->main, &thread_attr, 
-                         sapool_main, &sev_data->pdata[0]);
-    sev_data->pdata[0].pid = pool->main;
-
-    if (ret) 
-    {
-        std :: cout << "error thread set create main thread" << std :: endl;
-        return -1;
-    }
-
-    sev_data->run_thread_num = 0;
-    param.sched_priority = WORKER_PRIORITY;
-    ret = pthread_attr_setschedparam(&thread_attr, &param);
-    if (ret) 
-    {
-        std :: cout << "error thread set work priority" << std :: endl;
-        return -1;
-    }
-
-    //创建逻辑处理子线程
-    for (size_t i=1; i < sev_data->pthread_num; ++i) 
-    {
-        sev_data->pdata[i].id = i;
-        ret = pthread_create(&sev_data->pdata[i].pid, &thread_attr, 
-                             sapool_workers, &sev_data->pdata[i]);
-        if (ret) 
-        {
-            std :: cout << "error thread set create work thread" << std :: endl;
-            return -1;
-        }
-        ++ sev_data->run_thread_num;
-    }
-
+    sev_data->svr_reactor->start(EV_THREAD); 
     sev_data->status = RUNNING;
-    pthread_attr_destroy(&thread_attr);
     return 0;
 }
 
-int 
-SaServer :: svr_listen()
-{
-    if(sev_data->backlog <= 5)
-        sev_data->backlog = 2048;
-    int backlog = sev_data->backlog;
-    if( listen(sev_data->sev_socket, backlog) < 0)
-    {
-        std::cout << "listen sock: " << strerror(errno) << std::endl;
-        close(sev_data->sev_socket);
-        return -1;    
-    }
-    Log :: NOTICE("LISTEN SOCKET START OK");
-    //listen 函数为空
-    //return svr_listen(sev);
 
-    return add_listen_socket(sev_data, sev_data->sev_socket);
-}
-
+/*
 int 
 SaServer :: svr_join()
 {
@@ -705,4 +598,4 @@ SaServer :: svr_set_stragy( BaseWork * sta)
              
     return 0;
 }
-
+*/

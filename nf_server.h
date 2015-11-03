@@ -80,13 +80,14 @@ class NfServer
         int set_parse_read_handle(parse_handle );
 
         int set_parse_write_handle(parse_handle );
-        /* 
+         
         virtual int svr_init();
 
         virtual int svr_run();
 
         virtual int svr_join();
 
+        /*
         virtual int svr_listen();
 
         virtual int svr_destroy();
