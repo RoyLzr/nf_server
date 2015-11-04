@@ -43,8 +43,12 @@ SaServer :: svr_init()
     r_ev->init(1, sev_data->read_handle, sev_data->read_parse_handle);
     w_ev->init(1, sev_data->write_handle, sev_data->write_parse_handle);
    
-    sev_data->svr_reactor->add_event(r_ev);
-    sev_data->svr_reactor->add_event(w_ev, false);
+    if(sev_data->svr_reactor->add_event(r_ev) < 0 )
+        return -1;
+
+    if(sev_data->svr_reactor->add_event(w_ev, NULL, false)<0)
+      return -1;
+  return 0;
 
 }
 
@@ -52,8 +56,10 @@ int
 SaServer :: svr_run()
 {
     int ret = 0;
-    sev_data->svr_reactor->start(EV_THREAD); 
     sev_data->status = RUNNING;
+    if (sev_data->svr_reactor->start(EV_THREAD) < 0)
+        return -1;
+
     return 0;
 }
 

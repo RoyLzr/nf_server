@@ -4,6 +4,7 @@
 #include "../commonn/memCache.h"
 #include "../nf_base_work.h"
 #include "../nf_server.h"
+#include "../sapool.h"
 
 
 void test_read_fun(int fd, short events, void * arg)
@@ -14,9 +15,8 @@ void test_read_fun(int fd, short events, void * arg)
     Buffer & r_buff = r_ev->get_buffer();
 
 #ifndef WORK
-    printf("user handle fun\n");
+    printf("handle fun \n");
 #endif
-
     void * src = r_buff.get_unhandle_cache();
     w_ev->add_buffer(src, r_buff.get_unhandle_num());
     
@@ -33,7 +33,7 @@ const int nevents = 10;
 int main()
 {
     string s = "./svr.conf";
-    NfServer svr;
+    SaServer svr;
     
     svr.set_read_handle(test_read_fun);
     svr.set_write_handle(test_write_fun);

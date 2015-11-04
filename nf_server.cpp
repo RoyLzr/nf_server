@@ -107,26 +107,13 @@ int NfServer :: run()
 {
 
     nf_server_t * sev = sev_data;
-         
+    int ret;
+
     assert(sev->read_handle != NULL);
     assert(sev->write_handle != NULL);
     assert(sev->read_parse_handle != NULL);
     assert(sev->write_parse_handle != NULL);
     
-    /*
-    ReadEvent * r_ev = new ReadEvent();
-    WriteEvent * w_ev = new WriteEvent();
-    
-    r_ev->init(1, sev->read_handle, sev->read_parse_handle);
-    w_ev->init(1, sev->write_handle, sev->write_parse_handle);
-   
-    sev->svr_reactor->add_event(r_ev);
-    sev->svr_reactor->add_event(w_ev);
-
-    sev->svr_reactor->start(EV_THREAD);
-    
-    return 0;
-   */ 
 
     if((ret = nf_server_bind(sev_data) ) < 0 )
     {    
@@ -134,7 +121,7 @@ int NfServer :: run()
         return -1;
     }
 
-    if((ret = nf_server_listen(sev_data) < 0)
+    if((ret = nf_server_listen(sev_data)) < 0)
     {    
         Log :: ERROR("SVR LISTEN ERROR"); 
         return -1;

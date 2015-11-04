@@ -20,7 +20,6 @@
 
 #include "nf_server_core.h"
 #include "commonn/queue.h"
-#include "nf_server_app.h"
 #include "nf_server.h"
 
 #define LISTENER_PRIORITY    10
@@ -37,8 +36,6 @@ class SaServer : public NfServer
         virtual int svr_init();
 
         virtual int svr_run();
-
-        virtual int svr_listen();
         
         /*
         virtual int svr_destroy();

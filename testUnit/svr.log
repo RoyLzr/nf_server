@@ -1,189 +1,44 @@
-[NOTICE] 11-02 23:50:16  REACTOR INIT SUCC epfd : 4                    files : 5000 
-[NOTICE] 11-02 23:50:16  SVR INIT OK
-[DEBUG]  11-02 23:50:16  ADD EVENT FD: 1 events: READ reactor: 4
-[NOTICE] 11-02 23:50:16  EVENT fd:1 added IN LIST
-[DEBUG]  11-02 23:50:16  ADD EVENT FD: 1 events: WRITE reactor: 4
-[NOTICE] 11-02 23:50:16  EVENT fd:1 added IN LIST
-[DEBUG]  11-02 23:50:16  [Start] Task ID : 1804289383, handle Thread 1 excute
-[DEBUG]  11-02 23:50:16  DEL [Epoll] Write event 1 SUCC
-[DEBUG]  11-02 23:50:16  OUtPut write len 0 data (null)
-[DEBUG]  11-02 23:50:16  ADD [epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:16  [End] Task ID : 1804289383, handle Thread 1 excute
-[DEBUG]  11-02 23:50:16  [Start] Task ID : 846930886, handle Thread 0 excute
-[DEBUG]  11-02 23:50:16  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:16  handle Thread 0, [Read Event] len : 2, Data : a
+[NOTICE] 11-05 00:12:16  REACTOR INIT SUCC epfd : 4                    files : 5000 
+[NOTICE] 11-05 00:12:16  SVR INIT OK
+[NOTICE] 11-05 00:12:16  SET LISTEN SOCKET SUCC
+[DEBUG]  11-05 00:12:16  ADD EVENT FD: 1 events: READ reactor: 4
+[NOTICE] 11-05 00:12:16  EVENT fd:1 added IN LIST
+[DEBUG]  11-05 00:12:16  ADD EVENT FD: 1 events: WRITE reactor: 4
+[NOTICE] 11-05 00:12:16  EVENT fd:1 added IN LIST
+[DEBUG]  11-05 00:12:17  [Start] Task ID : 1804289383, handle Thread 1 excute
+[DEBUG]  11-05 00:12:17  DEL [Epoll] Read event 1 SUCC
+[DEBUG]  11-05 00:12:17  handle Thread 1, [Read Event] len : 2, Data : a
 
-[DEBUG]  11-02 23:50:16  READ DUMP CACHE 2 bytes VAL : a
+[DEBUG]  11-05 00:12:17  READ DUMP CACHE 2 bytes VAL : a
  
-[DEBUG]  11-02 23:50:16  OUtPut write len 0 data (null)
-[DEBUG]  11-02 23:50:16  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:16  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:16  [End] Task ID : 846930886, handle Thread 0 excute
-[DEBUG]  11-02 23:50:17  [Start] Task ID : 1681692777, handle Thread 1 excute
-[DEBUG]  11-02 23:50:17  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:17  handle Thread 1, [Read Event] len : 2, Data : b
+[DEBUG]  11-05 00:12:17  Read Unfinish, Add [Epoll] Read 1
+[DEBUG]  11-05 00:12:17  ADD [Epoll] Read event 1 SUCC
+[DEBUG]  11-05 00:12:17  [End] Task ID : 1804289383, handle Thread 1 excute
+[DEBUG]  11-05 00:12:17  [Start] Task ID : 846930886, handle Thread 0 excute
+[DEBUG]  11-05 00:12:17  DEL [Epoll] Read event 1 SUCC
+[DEBUG]  11-05 00:12:17  handle Thread 0, [Read Event] len : 2, Data : !
 
-[DEBUG]  11-02 23:50:17  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:17  READ DUMP CACHE 2 bytes VAL : a
-b
+[DEBUG]  11-05 00:12:17  FREE LIST SPACE  size = 64 index = 0 tid = 140665613182720
+[DEBUG]  11-05 00:12:17  FREE LIST SPACE  size = 64 index = 0 tid = 140665613182720
+[DEBUG]  11-05 00:12:17  READ DUMP CACHE 1 bytes VAL : 
  
-[DEBUG]  11-02 23:50:17  OUtPut write len 0 data (null)
-[DEBUG]  11-02 23:50:17  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:17  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:17  [End] Task ID : 1681692777, handle Thread 1 excute
-[DEBUG]  11-02 23:50:19  [Start] Task ID : 1714636915, handle Thread 1 excute
-[DEBUG]  11-02 23:50:19  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:19  handle Thread 1, [Read Event] len : 2, Data : !
-
-[DEBUG]  11-02 23:50:19  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:19  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:19  READ DUMP CACHE 1 bytes VAL : 
- 
-[DEBUG]  11-02 23:50:19  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:19  OUtPut write len 5 data †çx
-[DEBUG]  11-02 23:50:19  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:19  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:19  [End] Task ID : 1714636915, handle Thread 1 excute
-[DEBUG]  11-02 23:50:21  [Start] Task ID : 1957747793, handle Thread 1 excute
-[DEBUG]  11-02 23:50:21  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:21  handle Thread 1, [Read Event] len : 3, Data : c!
-
-[DEBUG]  11-02 23:50:21  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:21  READ DUMP CACHE 1 bytes VAL : 
- 
-[DEBUG]  11-02 23:50:21  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:21  OUtPut write len 3 data †çx
-[DEBUG]  11-02 23:50:21  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:21  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:21  [End] Task ID : 1957747793, handle Thread 1 excute
-[DEBUG]  11-02 23:50:23  [Start] Task ID : 424238335, handle Thread 1 excute
-[DEBUG]  11-02 23:50:23  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:23  handle Thread 1, [Read Event] len : 2, Data : !
-
-[DEBUG]  11-02 23:50:23  READ DUMP CACHE 1 bytes VAL : 
- 
-[DEBUG]  11-02 23:50:23  OUtPut write len 2 data 
+[DEBUG]  11-05 00:12:17  OUtPut write len 3 data a
 !
-[DEBUG]  11-02 23:50:23  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:23  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:23  [End] Task ID : 424238335, handle Thread 1 excute
-[DEBUG]  11-02 23:50:24  [Start] Task ID : 719885386, handle Thread 0 excute
-[DEBUG]  11-02 23:50:24  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:24  handle Thread 0, [Read Event] len : 2, Data : !
+[DEBUG]  11-05 00:12:17  FREE LIST SPACE  size = 64 index = 0 tid = 140665613182720
+[DEBUG]  11-05 00:12:17  Read Unfinish, Add [Epoll] Read 1
+[DEBUG]  11-05 00:12:17  ADD [Epoll] Read event 1 SUCC
+[DEBUG]  11-05 00:12:17  [End] Task ID : 846930886, handle Thread 0 excute
+[DEBUG]  11-05 00:12:19  [Start] Task ID : 1681692777, handle Thread 1 excute
+[DEBUG]  11-05 00:12:19  DEL [Epoll] Read event 1 SUCC
+[DEBUG]  11-05 00:12:19  handle Thread 1, [Read Event] len : 3, Data : !!
 
-[DEBUG]  11-02 23:50:24  READ DUMP CACHE 1 bytes VAL : 
+[DEBUG]  11-05 00:12:19  FREE LIST SPACE  size = 64 index = 0 tid = 140665604790016
+[DEBUG]  11-05 00:12:19  FREE LIST SPACE  size = 64 index = 0 tid = 140665604790016
+[DEBUG]  11-05 00:12:19  READ DUMP CACHE 1 bytes VAL : 
  
-[DEBUG]  11-02 23:50:24  OUtPut write len 2 data 
-!
-[DEBUG]  11-02 23:50:24  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:24  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:24  [End] Task ID : 719885386, handle Thread 0 excute
-[DEBUG]  11-02 23:50:25  [Start] Task ID : 1649760492, handle Thread 0 excute
-[DEBUG]  11-02 23:50:25  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:25  handle Thread 0, [Read Event] len : 2, Data : !
-
-[DEBUG]  11-02 23:50:25  READ DUMP CACHE 1 bytes VAL : 
- 
-[DEBUG]  11-02 23:50:25  OUtPut write len 2 data 
-!
-[DEBUG]  11-02 23:50:25  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:25  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:25  [End] Task ID : 1649760492, handle Thread 0 excute
-[DEBUG]  11-02 23:50:25  [Start] Task ID : 596516649, handle Thread 1 excute
-[DEBUG]  11-02 23:50:25  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:25  handle Thread 1, [Read Event] len : 2, Data : !
-
-[DEBUG]  11-02 23:50:25  READ DUMP CACHE 1 bytes VAL : 
- 
-[DEBUG]  11-02 23:50:25  OUtPut write len 2 data 
-!
-[DEBUG]  11-02 23:50:25  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:25  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:25  [End] Task ID : 596516649, handle Thread 1 excute
-[DEBUG]  11-02 23:50:26  [Start] Task ID : 1189641421, handle Thread 1 excute
-[DEBUG]  11-02 23:50:26  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:26  handle Thread 1, [Read Event] len : 2, Data : !
-
-[DEBUG]  11-02 23:50:26  READ DUMP CACHE 1 bytes VAL : 
- 
-[DEBUG]  11-02 23:50:26  OUtPut write len 2 data 
-!
-[DEBUG]  11-02 23:50:26  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:26  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:26  [End] Task ID : 1189641421, handle Thread 1 excute
-[DEBUG]  11-02 23:50:26  [Start] Task ID : 1025202362, handle Thread 0 excute
-[DEBUG]  11-02 23:50:26  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:26  handle Thread 0, [Read Event] len : 2, Data : !
-
-[DEBUG]  11-02 23:50:26  READ DUMP CACHE 1 bytes VAL : 
- 
-[DEBUG]  11-02 23:50:26  OUtPut write len 2 data 
-!
-[DEBUG]  11-02 23:50:26  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:26  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:26  [End] Task ID : 1025202362, handle Thread 0 excute
-[DEBUG]  11-02 23:50:27  [Start] Task ID : 1350490027, handle Thread 1 excute
-[DEBUG]  11-02 23:50:27  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:27  handle Thread 1, [Read Event] len : 2, Data : 1
-
-[DEBUG]  11-02 23:50:27  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:27  READ DUMP CACHE 2 bytes VAL : 
-1
- 
-[DEBUG]  11-02 23:50:27  OUtPut write len 0 data 
-!
-[DEBUG]  11-02 23:50:27  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:27  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:27  [End] Task ID : 1350490027, handle Thread 1 excute
-[DEBUG]  11-02 23:50:28  [Start] Task ID : 783368690, handle Thread 0 excute
-[DEBUG]  11-02 23:50:28  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:28  handle Thread 0, [Read Event] len : 2, Data : !
-
-[DEBUG]  11-02 23:50:28  FREE LIST SPACE  size = 64 index = 0 tid = 139772727682816
-[DEBUG]  11-02 23:50:28  FREE LIST SPACE  size = 64 index = 0 tid = 139772727682816
-[DEBUG]  11-02 23:50:28  READ DUMP CACHE 1 bytes VAL : 
- 
-[DEBUG]  11-02 23:50:28  FREE LIST SPACE  size = 64 index = 0 tid = 139772727682816
-[DEBUG]  11-02 23:50:28  OUtPut write len 4 data  çx
-[DEBUG]  11-02 23:50:28  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:28  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:28  [End] Task ID : 783368690, handle Thread 0 excute
-[DEBUG]  11-02 23:50:29  [Start] Task ID : 1102520059, handle Thread 1 excute
-[DEBUG]  11-02 23:50:29  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:29  handle Thread 1, [Read Event] len : 3, Data : !!
-
-[DEBUG]  11-02 23:50:29  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:29  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:29  READ DUMP CACHE 1 bytes VAL : 
- 
-[DEBUG]  11-02 23:50:29  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:29  OUtPut write len 3 data †çx
-[DEBUG]  11-02 23:50:29  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:29  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:29  [End] Task ID : 1102520059, handle Thread 1 excute
-[DEBUG]  11-02 23:50:31  [Start] Task ID : 2044897763, handle Thread 1 excute
-[DEBUG]  11-02 23:50:31  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:31  handle Thread 1, [Read Event] len : 5, Data : !!!!
-
-[DEBUG]  11-02 23:50:31  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:31  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:31  READ DUMP CACHE 1 bytes VAL : 
- 
-[DEBUG]  11-02 23:50:31  FREE LIST SPACE  size = 64 index = 0 tid = 139772719290112
-[DEBUG]  11-02 23:50:31  OUtPut write len 5 data †çx
-[DEBUG]  11-02 23:50:31  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:31  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:31  [End] Task ID : 2044897763, handle Thread 1 excute
-[DEBUG]  11-02 23:50:36  [Start] Task ID : 1967513926, handle Thread 0 excute
-[DEBUG]  11-02 23:50:36  DEL [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:36  handle Thread 0, [Read Event] len : 5, Data : !!!!
-
-[DEBUG]  11-02 23:50:36  FREE LIST SPACE  size = 64 index = 0 tid = 139772727682816
-[DEBUG]  11-02 23:50:36  FREE LIST SPACE  size = 64 index = 0 tid = 139772727682816
-[DEBUG]  11-02 23:50:36  READ DUMP CACHE 1 bytes VAL : 
- 
-[DEBUG]  11-02 23:50:36  FREE LIST SPACE  size = 64 index = 0 tid = 139772727682816
-[DEBUG]  11-02 23:50:36  OUtPut write len 5 data †çx
-[DEBUG]  11-02 23:50:36  Read Unfinish, Add [Epoll] Read 1
-[DEBUG]  11-02 23:50:36  ADD [Epoll] Read event 1 SUCC
-[DEBUG]  11-02 23:50:36  [End] Task ID : 1967513926, handle Thread 0 excute
+[DEBUG]  11-05 00:12:19  OUtPut write len 3 data 
+!!
+[DEBUG]  11-05 00:12:19  FREE LIST SPACE  size = 64 index = 0 tid = 140665604790016
+[DEBUG]  11-05 00:12:19  Read Unfinish, Add [Epoll] Read 1
+[DEBUG]  11-05 00:12:19  ADD [Epoll] Read event 1 SUCC
+[DEBUG]  11-05 00:12:19  [End] Task ID : 1681692777, handle Thread 1 excute
