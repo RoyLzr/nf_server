@@ -37,8 +37,8 @@ int main()
     
     svr.set_read_handle(test_read_fun);
     svr.set_write_handle(test_write_fun);
-    svr.set_parse_read_handle(parseLine);
-    svr.set_parse_write_handle(sendData);
+    svr.set_parse_read_handle(parseLine());
+    svr.set_parse_write_handle(writeData());
 
     svr.init("./svr.conf");
     svr.run();

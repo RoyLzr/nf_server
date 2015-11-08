@@ -38,6 +38,7 @@
 #include "commonn/timer.h"
 #include <stdarg.h>
 #include <assert.h>
+#include "util.h"
 
 typedef struct _rio_t
 {

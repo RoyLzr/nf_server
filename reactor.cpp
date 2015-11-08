@@ -185,7 +185,8 @@ int Reactor :: epoll_add_event(Event * ev,
     return 0; 
 }
 
-int Reactor :: init(int files, struct threadParas paras)
+int Reactor :: init(int files, 
+                    struct threadParas paras)
 {
     nevents = files;
     nfile = files;

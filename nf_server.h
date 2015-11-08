@@ -77,13 +77,9 @@ class NfServer
 
         int set_write_handle(ev_handle );
 
-        int set_parse_read_handle(parse_handle );
+        int set_parse_read_handle(ParseFun *);
 
-        int set_parse_write_handle(parse_handle );
-         
-        virtual int svr_init() = 0;
-
-        virtual int svr_run() = 0;
+        int set_parse_write_handle(ParseFun *);
 
         /*
         virtual int svr_listen();
@@ -100,6 +96,10 @@ class NfServer
         nf_server_t * get_server_data();
 
     protected:
+        
+        virtual int svr_init() = 0;
+
+        virtual int svr_run() = 0;
          
         nf_server_t * 
         nf_server_create(const char * sev_name);

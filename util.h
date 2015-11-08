@@ -2,6 +2,8 @@
 #define _UTIL_
 
 
+#define WORK 0x00
+
 #define EV_TIMEOUT 0x01
 #define EV_READ 0x02
 #define EV_WRITE 0x04

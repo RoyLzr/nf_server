@@ -86,9 +86,9 @@ struct _nf_server_t
     int sev_socket; 
    
     ev_handle read_handle;
-    parse_handle read_parse_handle;
+    ParseFun * read_parse_handle;
     ev_handle write_handle;
-    parse_handle write_parse_handle;
+    ParseFun * write_parse_handle;
        
     NfReactor * svr_reactor;
 
@@ -100,7 +100,7 @@ class NfReactor : public Reactor
     public:
         NfReactor() : Reactor()
         {} 
-        int init(int, nf_server_t *);
+        int nf_init(int, nf_server_t *);
         nf_server_t * get_server()
         {
             return svr;
@@ -118,6 +118,7 @@ class NfReactor : public Reactor
 
 
 int nf_server_bind(nf_server_t * sev);
+
 int nf_server_listen(nf_server_t * sev);
 
 int set_sev_socketopt(nf_server_t *sev, int fd);

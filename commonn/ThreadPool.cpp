@@ -99,6 +99,9 @@ CThreadPool::~CThreadPool()
 
 int CThreadPool::init(int worker_size, int buff_size)
 {
+    if(worker_size <= 0)
+        return 0;
+
     m_worker_size = worker_size;
 	m_worker_list = new CWorkerThread [m_worker_size];
 	if (!m_worker_list) 

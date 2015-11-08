@@ -95,6 +95,7 @@ int Buffer :: fresh_cache(int len)
     } 
 
     memcpy((char *)tmp, (char *)cache, end_idx + 1);
+
 #ifndef WORK
     char * origin = (char *) cache;
     origin[end_idx+1] = '\0';

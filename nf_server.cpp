@@ -80,7 +80,7 @@ int NfServer :: init(const std::string & logPath)
 
     for(size_t i = 0; i < (sev->reactor_num); i++)
     { 
-       if( (ret = sev->svr_reactor[i].init(sev->socksize, sev)) < 0 )
+       if( (ret = sev->svr_reactor[i].nf_init(sev->socksize, sev)) < 0 )
             return -1;
     }
     Log :: NOTICE("SVR INIT OK");
@@ -223,7 +223,7 @@ int NfServer :: set_write_handle(ev_handle write_handle)
     return 1;
 }
 
-int NfServer :: set_parse_write_handle(parse_handle write_handle)
+int NfServer :: set_parse_write_handle(ParseFun * write_handle)
 {
     if( sev_data == NULL)
         return -1;
@@ -231,7 +231,7 @@ int NfServer :: set_parse_write_handle(parse_handle write_handle)
     return 1;
 }
 
-int NfServer :: set_parse_read_handle(parse_handle read_handle)
+int NfServer :: set_parse_read_handle(ParseFun * read_handle)
 {
     if( sev_data == NULL)
         return -1;

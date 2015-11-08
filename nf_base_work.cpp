@@ -2,7 +2,8 @@
 
 static const char tstLabel = '!';
 
-int parseLine(int fd, void * arg)
+int NonBlockReadLine :: work(int fd, 
+                             void * arg)
 {
     
     ReadEvent * ev = (ReadEvent *) arg;
@@ -31,10 +32,11 @@ int parseLine(int fd, void * arg)
     if(set_fd_noblock(fd) < 0)
         return -1;
 
-    if ((n = readn(fd, tmp, tmp_len)) < 0 )
+    if ((n = readn(fd, tmp, tmp_len)) <= 0)
     {
-        Log :: WARN("Read Error FD : %d Error %s", \
-                    fd, strerror(errno));
+        Log :: WARN("Read Error FD : %d Error %s code: %d", \
+                    fd, strerror(errno), n);
+        return -1;
     }
     tmp[n] = '\0';
     if(cth != NULL)
@@ -76,8 +78,8 @@ int parseLine(int fd, void * arg)
         
         if(w_ev->get_buf_unhandle_num() > 0)
         {
-            parse_handle p_handle = w_ev->get_parse_handle();
-            p_handle(fd, w_ev);
+            NonBlockFun * w_handle = w_ev->get_parse_handle();
+            w_handle->work(fd, w_ev);
         }
         
         if(w_ev->get_buf_unhandle_num() <= 0)
@@ -87,7 +89,7 @@ int parseLine(int fd, void * arg)
     }
 }
 
-int sendData(int fd, void * arg)
+int NonBlockWrite :: work(int fd, void * arg) 
 {
     WriteEvent * w_ev = (WriteEvent *) arg;
     int num = w_ev->get_buf_unhandle_num();
@@ -97,7 +99,14 @@ int sendData(int fd, void * arg)
     ev_handle callback = w_ev->get_ev_handle();
     callback(0, EV_WRITE, NULL);
     int len = w_buff.get_unhandle_num(); 
-    int n = write(fd, (char *)src, w_buff.get_unhandle_num());
+    int n = 0;
+    
+    if (n = sendn(fd, (char *)src, w_buff.get_unhandle_num()) <=0 )
+    {
+        Log :: WARN("Write Error FD : %d Error %s code: %d", \
+                    fd, strerror(errno), n);
+        return -1;
+    }
 
 #ifndef WORK
     if(len > 0)
@@ -115,4 +124,19 @@ int sendData(int fd, void * arg)
         w_ev->add_ev_flags(EV_WRITEUNFIN);
     }
 }
+
+
+NonBlockReadLine * parseLine()
+{
+    static NonBlockReadLine * r_fun = new NonBlockReadLine();
+    return r_fun;
+}
+
+
+NonBlockWrite * writeData()
+{
+    static NonBlockWrite * w_fun = new NonBlockWrite();
+    return w_fun;
+}
+
 

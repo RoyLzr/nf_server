@@ -60,7 +60,9 @@ Log :: write_log(void *)
         pthread_mutex_unlock(&log_mutex);
         
         fprintf(fp, "%s\n", (content).c_str());
+    #ifndef WORK
         fflush(fp);
+    #endif
     }
     fflush(fp); 
     return NULL;

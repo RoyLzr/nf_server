@@ -1,7 +1,7 @@
 #include "nf_server_core.h"
 
 
-int NfReactor :: init(int ssize, nf_server_t * svr)
+int NfReactor :: nf_init(int ssize, nf_server_t * svr)
 {
     this->svr = svr;
     nf_server_pdata_t * pdata = (nf_server_pdata_t *) malloc (sizeof(nf_server_pdata_t) * svr->thread_num); 
@@ -135,6 +135,10 @@ int nf_server_bind(nf_server_t * sev)
 int nf_server_listen(nf_server_t * sev)
 {
     int backlog = sev->backlog;
+
+    if(backlog <= 0)
+        backlog = 5;
+
     if(listen(sev->sev_socket, backlog) < 0)
     {
         Log :: ERROR("SET LISTEN SOCKET ERROR");

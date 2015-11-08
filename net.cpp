@@ -64,7 +64,9 @@ readn(int fd, void *usrbuf, size_t n)
     {
         nread = read(fd, buf, nleft);
         if(nread == 0)
-            break;
+        {
+            return 0;
+        }
         else if(nread < 0)
         {
             if(errno == EAGAIN)
@@ -216,7 +218,7 @@ readn_to_ms(int fd, void *ptr, size_t nbytes, int msecs)
             errno = ETIMEDOUT;
         }
         
-        if (ret > 0 && nread + ret != (ssize_t) nbytes) 
+        if (ret > 0 && nread + ret < (ssize_t) nbytes) 
         {
             gettimeofday(&last, NULL);
             //判断是不是真的超时了
@@ -232,19 +234,24 @@ readn_to_ms(int fd, void *ptr, size_t nbytes, int msecs)
             {
                 //被中断了？继续读
                 nread += ret;
+                msecs -= timeuse;
             }
         }  
         else if (ret < 0) 
         {
             nread = -1;
+        }
+        else if (ret == 0)
+        {
+            ret = -1;
+            nread= 0;
         } 
         else 
         {
             nread += ret;
-            msecs -= timeuse;
         }
       //没写完，继续
-    } while (ret > 0 && nbytes != (size_t)nread);
+    } while (ret > 0 && nbytes > (size_t)nread);
 
     if (sockflag & O_NONBLOCK) 
     {
@@ -255,113 +262,6 @@ readn_to_ms(int fd, void *ptr, size_t nbytes, int msecs)
         return -1;
 
     return nread;
-}
-
-ssize_t 
-rio_readn_to_ms(rio_t *rp, void *usrbuf, size_t n, int msecs)
-{
-    int nleft = n;
-    int nread = 0;
-    int sockflag;
-    char * buf = (char *)usrbuf;
-
-    if((sockflag = fcntl(rp->rio_fd, F_GETFL, 0)) < 0)
-        return -1;
-    set_fd_noblock(rp->rio_fd);
-    
-    struct timeval tv;
-    tv.tv_sec = msecs/1000;
-    tv.tv_usec = (msecs % 1000) * 1000; 
- 
-    while(nleft > 0)
-    {
-        nread = rio_read(rp, buf, nleft);
-        if(nread == 0)
-            break;
-        else if(nread < 0)
-        {
-            if(errno == EAGAIN)
-            {
-               fd_set rset;
-               FD_ZERO(&rset);
-               FD_SET(rp->rio_fd, &rset);
-               if(select(rp->rio_fd + 1, &rset, NULL, NULL, &tv) <= 0)
-               {
-                    errno = ETIMEDOUT;
-                    n = nleft - 1;
-                    break;
-               }   
-               else
-                   continue; 
-            }
-            if(errno != EINTR)
-                return -1;
-            nread = 0;
-        }
-        nleft -= nread;
-        buf += nread;
-    }
-    if(fcntl(rp->rio_fd, F_SETFL, sockflag) < 0)
-        return -1;
-
-    return n - nleft;
-}
-
-ssize_t
-rio_readline_to_ms(rio_t *rp, void *usrbuf, size_t maxlen, int msecs)
-{
-    char c, *buf = (char *)usrbuf;
-    int i;
-    int nread;
-    int sockflag;
-    
-    struct timeval tv;
-    tv.tv_sec = msecs/1000;
-    tv.tv_usec = (msecs % 1000) * 1000;  
-    
-    int len = maxlen;
-    if((sockflag = fcntl(rp->rio_fd, F_GETFL, 0)) < 0)
-        return -1;
-    set_fd_noblock(rp->rio_fd);
-
-    for(i = 1; i < len; i++)
-    {
-        nread = rio_read(rp, &c, 1);
-        if(nread == 0)
-        {
-            return 0;
-        }
-        else if(nread < 0)
-        {
-            if(errno == EAGAIN)
-            { 
-               fd_set rset;
-               FD_ZERO(&rset);
-               FD_SET(rp->rio_fd, &rset);
-               if(select(rp->rio_fd + 1, &rset, NULL, NULL, &tv) <= 0)
-               {
-                    errno = ETIMEDOUT;
-                    i = - i;
-                    break;
-               }   
-               else
-                   continue; 
-            }
-            else
-                return -1;
-        }
-        else
-        {
-            *buf = c;
-            buf++;
-            if(c == '\n')
-                break;
-        }     
-    }
-    *buf = '\0';
-    if(fcntl(rp->rio_fd, F_SETFL, sockflag) < 0)
-        return -1;
-    return i;
 }
 
 ssize_t
@@ -386,8 +286,6 @@ sendn(int fd, void *usrbuf, size_t n)
             }
             return -1;
         }
-        else if(nwrite == 0)
-            break;
         buf += nwrite;
         nleft -= nwrite;
     }
@@ -456,6 +354,12 @@ sendn_to_ms(int fd, const void *ptr, size_t nbytes, int msecs)
             ret = send(fd, (char*)ptr + nwrite, nbytes-(size_t)nwrite, MSG_WAITALL); 
         } while (ret < 0 && EINTR == errno);
 
+        if (ret < 0 && EAGAIN==errno) 
+        {
+            //没数据，超时了
+            errno = ETIMEDOUT;
+        }
+
         if (ret > 0 && nwrite + ret < (ssize_t)nbytes) 
         {
             //判断是否真是超时
@@ -474,7 +378,7 @@ sendn_to_ms(int fd, const void *ptr, size_t nbytes, int msecs)
                 msecs -= timeuse;
                 nwrite += ret;
             }
-        } 
+        }
         else if (ret < 0) 
         {
             nwrite = -1;
@@ -483,7 +387,7 @@ sendn_to_ms(int fd, const void *ptr, size_t nbytes, int msecs)
         {
             nwrite += ret;
         }
-    } while (ret > 0 && nbytes != (size_t)nwrite);
+    } while (ret > 0 && nbytes > (size_t)nwrite);
     
     if (fcntl(fd, F_SETFL, sockflag) < 0)
         return  -1;

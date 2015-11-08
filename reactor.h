@@ -63,6 +63,7 @@ class Reactor
                   bool actived = true);
     
     int init(int, struct threadParas);
+
     int start(int);
     
     //fail event is active already 

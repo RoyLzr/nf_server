@@ -39,9 +39,11 @@ SaServer :: svr_init()
 {
     ReadEvent * r_ev = new ReadEvent();
     WriteEvent * w_ev = new WriteEvent();
+    if(r_ev == NULL || w_ev == NULL)
+        return -1;
     
-    r_ev->init(1, sev_data->read_handle, sev_data->read_parse_handle);
-    w_ev->init(1, sev_data->write_handle, sev_data->write_parse_handle);
+    r_ev->rd_init(1, sev_data->read_handle, sev_data->read_parse_handle);
+    w_ev->wt_init(1, sev_data->write_handle, sev_data->write_parse_handle);
    
     if(sev_data->svr_reactor->add_event(r_ev) < 0 )
         return -1;

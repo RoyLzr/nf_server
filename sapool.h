@@ -15,6 +15,7 @@
 // Author: Liu ZhaoRui
 //         liuzhaorui1@163.com
 //**********************************************************
+
 #ifndef  __SAPOOL_H_
 #define  __SAPOOL_H_
 
@@ -32,6 +33,8 @@ class SaServer : public NfServer
         {};
 
         virtual ~SaServer(){};
+    
+    protected:
 
         virtual int svr_init();
 
@@ -44,6 +47,30 @@ class SaServer : public NfServer
 
         virtual int svr_resume();
         */
+};
+
+class SaListenEvent : public Event
+{
+    public:
+        nf_server_t  * get_sev()
+        {
+            return sev;
+        }
+
+    explicit SaListenEvent() : Event()
+    {} 
+
+    inline void init(nf_server_t * sev)
+    {
+        ev_fd = sev->sev_socket;
+        ev_events = EV_READ;
+        ev_active = 0;
+        ev_flags = EV_INIT;
+        ev_callback = NULL;
+    }
+
+    private:
+        nf_server_t * sev;
 };
 
 #endif  

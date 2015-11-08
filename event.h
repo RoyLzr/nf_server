@@ -15,6 +15,9 @@
 using std::list;
 
 class Reactor;
+class ParseFun;
+class NonBlockFun;
+
 typedef void (*ev_handle)(int, short, void *);
 typedef int (*parse_handle)(int, void *);
 
@@ -29,29 +32,32 @@ class Event
                        ev_events(0),
                        ev_active(0),
                        ev_reactor(NULL),
-                       ev_parse(NULL),
                        ev_callback(NULL)
     {}
+
+    virtual ~Event(){};
+
     inline void init(int fd, 
                      int events, 
-                     ev_handle handle = NULL,
-                     parse_handle parse = NULL)
+                     ev_handle handle = NULL)
     {
         ev_fd = fd;
         ev_events = events;
         ev_active = 0;
         ev_flags = EV_INIT;
         ev_callback = handle;
-        ev_parse = parse;
     }
+
     inline int get_ev_fd()
     {
        return ev_fd;
     }
+
     inline int get_ev_flags()
     {
         return ev_flags;
     }
+
     inline int get_ev_active()
     {
         return ev_active;
@@ -89,13 +95,8 @@ class Event
     {
         return ev_callback;
     }
-    
-    inline parse_handle get_parse_handle()
-    {
-        return ev_parse;
-    }
 
-    virtual void excute();
+    void excute();
     
     static void * ThreadExcute(Event * arg)
     {
@@ -117,6 +118,8 @@ class Event
         }
 
     protected:
+        virtual int excute_fun();
+
         list<Event *>::iterator ev_pos;
         int ev_fd;
         
@@ -127,7 +130,6 @@ class Event
         Reactor * ev_reactor;
         ev_handle ev_callback;
         void *ev_arg;
-        parse_handle  ev_parse;
         
 };
 
@@ -137,19 +139,18 @@ class ReadEvent : public Event
 
     public:
         friend class Reactor;
-        explicit ReadEvent() : Event()
+        explicit ReadEvent() : Event(),
+                               ev_parse(NULL)
         {}
-        explicit ReadEvent(int len) : Event()
+        explicit ReadEvent(int len) : Event(),
+                                      ev_parse(NULL)
         {
             cache.init(len);
         }
         
-    inline void init(int fd,
-                     ev_handle handle = NULL,
-                     parse_handle  parse = NULL)
-    {
-        Event :: init(fd, EV_READ, handle, parse);
-    }
+    void rd_init(int fd,
+                 ev_handle handle = NULL,
+                 ParseFun * parse = NULL);
 
     inline Buffer & get_buffer()
     {
@@ -171,10 +172,12 @@ class ReadEvent : public Event
         return cache.get_unhandle_cache();
     }
 
-    virtual void excute();
     
     protected:
+        virtual int excute_fun();
         Buffer cache;
+        NonBlockFun * ev_parse;
+        
 };
 
 class WriteEvent : public Event
@@ -182,19 +185,19 @@ class WriteEvent : public Event
 
     public:
         friend class Reactor;
-        explicit WriteEvent() : Event()
+        explicit WriteEvent() : Event(),
+                                ev_parse(NULL)
         {}
-        explicit WriteEvent(int len) : Event()
+        explicit WriteEvent(int len) : Event(),
+                                       ev_parse(NULL)
         {
             cache.init(len);
         }
         
-    inline void init(int fd,
-                     ev_handle handle = NULL,
-                     parse_handle parse = NULL)
-    {
-        Event :: init(fd, EV_WRITE, handle, parse);
-    }
+    void wt_init(int fd,
+                 ev_handle handle = NULL,
+                 ParseFun * parse = NULL);
+
     inline Buffer & get_buffer()
     {
         return cache;
@@ -213,11 +216,15 @@ class WriteEvent : public Event
     {
         return cache.get_unhandle_cache();
     }
+    inline NonBlockFun * get_parse_handle()
+    {
+        return ev_parse;
+    }
 
-    virtual void excute();
-    
     protected:
+        virtual int excute_fun();
         Buffer  cache;
+        NonBlockFun * ev_parse;
 };
 
 class EventTask : public CTask
