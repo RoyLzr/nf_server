@@ -18,8 +18,9 @@ class Reactor;
 class ParseFun;
 class NonBlockFun;
 
-typedef void (*ev_handle)(int, short, void *);
+typedef int (*ev_handle)(int, short, void *);
 typedef int (*parse_handle)(int, void *);
+typedef struct _nf_server_t nf_server_t;
 
 
 class Event
@@ -129,7 +130,6 @@ class Event
 
         Reactor * ev_reactor;
         ev_handle ev_callback;
-        void *ev_arg;
         
 };
 
@@ -148,9 +148,9 @@ class ReadEvent : public Event
             cache.init(len);
         }
         
-    void rd_init(int fd,
-                 ev_handle handle = NULL,
-                 ParseFun * parse = NULL);
+    void init(int fd,
+              ev_handle handle = NULL,
+              ParseFun * parse = NULL);
 
     inline Buffer & get_buffer()
     {
@@ -194,9 +194,9 @@ class WriteEvent : public Event
             cache.init(len);
         }
         
-    void wt_init(int fd,
-                 ev_handle handle = NULL,
-                 ParseFun * parse = NULL);
+    void init(int fd,
+              ev_handle handle = NULL,
+              ParseFun * parse = NULL);
 
     inline Buffer & get_buffer()
     {
@@ -240,5 +240,20 @@ class EventTask : public CTask
     private:
         Event * ev_task; 
 };                  
+
+class ListenEvent : public Event
+{
+    public:
+        friend class Reactor;
+        explicit ListenEvent() : Event(),
+                                 sev(NULL)
+        {}
+        void init(nf_server_t * );
+    
+    protected:
+        virtual int excute_fun();
+        nf_server_t * sev;
+};
+
 
 #endif

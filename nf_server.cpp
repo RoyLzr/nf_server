@@ -77,12 +77,12 @@ int NfServer :: init(const std::string & logPath)
 
     if(sev->svr_reactor == NULL)
         return -1;
+    
+    assert(sev->reactor_num > 0);
 
-    for(size_t i = 0; i < (sev->reactor_num); i++)
-    { 
-       if( (ret = sev->svr_reactor[i].nf_init(sev->socksize, sev)) < 0 )
-            return -1;
-    }
+    if( (ret = sev->svr_reactor[0].init(sev->socksize, sev)) < 0 )
+        return -1;
+
     Log :: NOTICE("SVR INIT OK");
     return 0;
 }

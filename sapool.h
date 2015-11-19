@@ -49,29 +49,5 @@ class SaServer : public NfServer
         */
 };
 
-class SaListenEvent : public Event
-{
-    public:
-        nf_server_t  * get_sev()
-        {
-            return sev;
-        }
-
-    explicit SaListenEvent() : Event()
-    {} 
-
-    inline void init(nf_server_t * sev)
-    {
-        ev_fd = sev->sev_socket;
-        ev_events = EV_READ;
-        ev_active = 0;
-        ev_flags = EV_INIT;
-        ev_callback = NULL;
-    }
-
-    private:
-        nf_server_t * sev;
-};
-
 #endif  
 

@@ -30,6 +30,7 @@ class Reactor
                     nfile(0),
                     nevents(0),
                     events(NULL),
+                    status(0),
                     fds(NULL)
         {
             pthread_mutex_init(&event_mutex, NULL);
@@ -62,9 +63,15 @@ class Reactor
                   struct timeval * tv = NULL,
                   bool actived = true);
     
+    int del_event(Event * ev);
+    
+    int pause_event(Event * ev) const;
+    
+    int resume_event(Event * ev) const;
+
     int init(int, struct threadParas);
 
-    int start(int);
+    int start();
     
     //fail event is active already 
     bool set_event_active(Event *);
@@ -77,9 +84,15 @@ class Reactor
 
     protected:
         void event_queue_insert(Event *, int );
-        int epoll_add_event(Event *, bool actived);
-        int epoll_dispatch(int status, struct timeval *tv);
-        int epoll_del_event(Event *, bool removed = true);
+        void event_queue_remove(Event *, int );
+        
+        virtual int epoll_add_event(Event *);
+        virtual int epoll_del_event(Event *);
+        
+        int epoll_active_event(Event *) const;
+        int epoll_unactive_event(Event *) const;
+
+        int epoll_dispatch(struct timeval *tv);
         
     protected:
         list<Event *> ev_list;
@@ -94,6 +107,7 @@ class Reactor
         struct epoll_event *events;
         int nfile;
         int nevents;
+        int status;
         struct evepoll * fds;
         struct threadParas poolPars;
         CThreadPool pool; 

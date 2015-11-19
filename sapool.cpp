@@ -37,21 +37,18 @@ SaServer :: add_listen_socket(nf_server_t *sev, int listenfd)
 int 
 SaServer :: svr_init()
 {
-    ReadEvent * r_ev = new ReadEvent();
-    WriteEvent * w_ev = new WriteEvent();
-    if(r_ev == NULL || w_ev == NULL)
+    ListenEvent * lis_ev = new ListenEvent();
+    if(lis_ev == NULL)
         return -1;
     
-    r_ev->rd_init(1, sev_data->read_handle, sev_data->read_parse_handle);
-    w_ev->wt_init(1, sev_data->write_handle, sev_data->write_parse_handle);
-   
-    if(sev_data->svr_reactor->add_event(r_ev) < 0 )
+    lis_ev->init(sev_data);
+    
+    nf_server_t * svr = sev_data; 
+
+    if(svr->svr_reactor->add_event(lis_ev) < 0)
         return -1;
 
-    if(sev_data->svr_reactor->add_event(w_ev, NULL, false)<0)
-      return -1;
   return 0;
-
 }
 
 int 
@@ -59,7 +56,7 @@ SaServer :: svr_run()
 {
     int ret = 0;
     sev_data->status = RUNNING;
-    if (sev_data->svr_reactor->start(EV_THREAD) < 0)
+    if (sev_data->svr_reactor->start() < 0)
         return -1;
 
     return 0;

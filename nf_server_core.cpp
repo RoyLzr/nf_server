@@ -1,27 +1,28 @@
 #include "nf_server_core.h"
 
 
-int NfReactor :: nf_init(int ssize, nf_server_t * svr)
+int NfReactor :: init(int ssize, nf_server_t * svr)
 {
     this->svr = svr;
-    nf_server_pdata_t * pdata = (nf_server_pdata_t *) malloc (sizeof(nf_server_pdata_t) * svr->thread_num); 
-    memset(pdata, 0, sizeof(nf_server_pdata_t)*svr->thread_num);
+    cli_data = (nf_server_cli_t *) malloc (sizeof(nf_server_cli_t) * ssize); 
+    memset(cli_data, 0, sizeof(nf_server_cli_t) * ssize);
     
-    if(pdata == NULL)
+    if(cli_data == NULL)
     {
-        Log :: WARN("INIT svr pdata Error");
+        Log :: WARN("INIT svr client data Error");
         return -1;
     }
     
-    for(int i = 0; i < svr->thread_num; i++)
-    {
-        pdata[i].reactor = this;
-    }
     struct threadParas paras;
     paras.num = svr->thread_num;
     paras.buff_size = svr->thread_usr_buf; 
 
     return Reactor :: init(ssize, paras);
+}
+
+int NfReactor :: set_cli_data(int pos, nf_server_cli_t * addr)
+{
+    cli_data[pos] = *addr; 
 }
 
 /*

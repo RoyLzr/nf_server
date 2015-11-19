@@ -1,6 +1,6 @@
 #include "nf_base_work.h"
 
-static const char tstLabel = '!';
+static const char tstLabel = '\n';
 
 int NonBlockReadLine :: work(int fd, 
                              void * arg)
@@ -8,12 +8,14 @@ int NonBlockReadLine :: work(int fd,
     
     ReadEvent * ev = (ReadEvent *) arg;
     CWorkerThread *cth = get_pthread_data();
-    char * tmp;
-    int tmp_len;
+    char * tmp = NULL;
+    int tmp_len = 0;
+    int ret = 0;
+
 
     if(cth == NULL) 
     {
-        tmp = (char *) malloc(sizeof(1024));
+        tmp = (char *) malloc(1024);
         tmp_len = 1024;
     }
     else
@@ -32,7 +34,7 @@ int NonBlockReadLine :: work(int fd,
     if(set_fd_noblock(fd) < 0)
         return -1;
 
-    if ((n = readn(fd, tmp, tmp_len)) <= 0)
+    if ((n = readn(fd, tmp, tmp_len)) < 0)
     {
         Log :: WARN("Read Error FD : %d Error %s code: %d", \
                     fd, strerror(errno), n);
@@ -58,7 +60,10 @@ int NonBlockReadLine :: work(int fd,
                         i, tmp);
             #endif
                 buff.add_data(tmp, i + 1);
-                call_back(fd, EV_READ, eve);
+                
+                if((ret = call_back(fd, EV_READ, eve)) < 0)
+                    return ret;
+                
                 tmp += (i + 1);
                 n -= (i + 1);
                 i = -1;  
@@ -95,9 +100,12 @@ int NonBlockWrite :: work(int fd, void * arg)
     int num = w_ev->get_buf_unhandle_num();
     Buffer & w_buff = w_ev->get_buffer();
     void * src = w_buff.get_unhandle_cache();
-    
+    int ret = 0;
+
     ev_handle callback = w_ev->get_ev_handle();
-    callback(0, EV_WRITE, NULL);
+    if((ret = callback(0, EV_WRITE, NULL)) < 0)
+        return ret;
+
     int len = w_buff.get_unhandle_num(); 
     int n = 0;
     

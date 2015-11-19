@@ -47,13 +47,7 @@ enum
 class NfReactor;
 
 typedef struct _nf_server_t nf_server_t;
-typedef struct _nf_server_pdata_t nf_server_pdata_t;
-
-struct _nf_server_pdata_t
-{
-    struct sockaddr_in client_addr;
-    NfReactor * reactor;
-};
+typedef struct sockaddr_in nf_server_cli_t;
 
 struct _nf_server_t
 {
@@ -100,22 +94,22 @@ class NfReactor : public Reactor
     public:
         NfReactor() : Reactor()
         {} 
-        int nf_init(int, nf_server_t *);
+        int init(int, nf_server_t *);
         nf_server_t * get_server()
         {
             return svr;
         }
         
-        nf_server_pdata_t * get_pdata()
+        nf_server_cli_t * get_cli_data()
         {
-            return pdata;
+            return cli_data;
         }
+        int set_cli_data(int, nf_server_cli_t *);
 
     protected:
         nf_server_t * svr;
-        nf_server_pdata_t * pdata;
+        nf_server_cli_t * cli_data;
 }; 
-
 
 int nf_server_bind(nf_server_t * sev);
 

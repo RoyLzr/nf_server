@@ -7,7 +7,7 @@
 #include "../sapool.h"
 
 
-void test_read_fun(int fd, short events, void * arg)
+int test_read_fun(int fd, short events, void * arg)
 {
     struct evepoll * eve = (struct evepoll *) arg;
     WriteEvent * w_ev = (WriteEvent *) eve->evwrite;
@@ -23,7 +23,7 @@ void test_read_fun(int fd, short events, void * arg)
     r_buff.add_handl_num(r_buff.get_unhandle_num());
 }
 
-void test_write_fun(int fd, short events, void * arg)
+int test_write_fun(int fd, short events, void * arg)
 {
     printf("write handle fun\n");
 }

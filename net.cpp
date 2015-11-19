@@ -65,7 +65,7 @@ readn(int fd, void *usrbuf, size_t n)
         nread = read(fd, buf, nleft);
         if(nread == 0)
         {
-            return 0;
+            return -1;
         }
         else if(nread < 0)
         {
