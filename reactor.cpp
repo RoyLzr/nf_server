@@ -201,7 +201,7 @@ int Reactor :: epoll_active_event(Event * ev) const
         return -1;
     }
 
-    if(ev->ev_flags & EV_ACTIVE)
+    if(ev->ev_flags & EV_EPOLL_ACTIVE)
         return 0;
 
     evep = &fds[fd];

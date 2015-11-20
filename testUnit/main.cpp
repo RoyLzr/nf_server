@@ -25,7 +25,10 @@ int test_read_fun(int fd, short events, void * arg)
 
 int test_write_fun(int fd, short events, void * arg)
 {
+#ifndef WORK
     printf("write handle fun\n");
+#endif
+    return 0;
 }
 
 const int nevents = 10;

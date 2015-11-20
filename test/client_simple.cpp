@@ -34,7 +34,7 @@ void * work(void * arg)
     char ip[] = "127.0.0.1";
     set_tcp_sockaddr(ip, 1025, &server_address);
 
-    for(int i = 0; i < 1; i++)
+    for(int i = 0; i < 10000000 ; i++)
     {
         int fd = socket(AF_INET, SOCK_STREAM, 0);
         set_linger(fd, 0);
@@ -48,12 +48,12 @@ void * work(void * arg)
             continue;
         }
         std :: cout << i << std::endl;
-        buf[size] = '\0';
+        //buf[size] = '\0';
 
         //std :: cout << buf << std :: endl;
         int j = 0;
         //for(j = 0; j < 1; j++)
-        while(true)
+        while(j < 1)
         {
             int tes = 2;
               
@@ -68,9 +68,10 @@ void * work(void * arg)
             std :: cout << "recv once succ : " << j++ << std :: endl;
             //break; 
             //std::cout <<  readbuf  << " : " << n << std::endl;
+            j++;
         }
         readbuf[n] = '\0';
-        //close(fd);        
+        close(fd);        
     }
     //sleep(65535);
 }

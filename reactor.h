@@ -20,7 +20,7 @@ struct threadParas
     int buff_size;
 };
 
-class Reactor
+class Reactor : private Uncopyable
 {
 
     public:

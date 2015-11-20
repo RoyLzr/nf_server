@@ -8,20 +8,21 @@ int NonBlockReadLine :: work(int fd,
     
     ReadEvent * ev = (ReadEvent *) arg;
     CWorkerThread *cth = get_pthread_data();
+    char data[1024];
     char * tmp = NULL;
     int tmp_len = 0;
     int ret = 0;
 
 
-    if(cth == NULL) 
-    {
-        tmp = (char *) malloc(1024);
-        tmp_len = 1024;
-    }
-    else
+    if(cth != NULL)
     {
         tmp = (char *) cth->GetWorkerBuff();
         tmp_len = cth->GetWorkerLen();
+    }
+    else
+    {
+        tmp = data;
+        tmp_len = 1024;
     }
 
     Reactor * rect = ev->get_reactor();
@@ -69,15 +70,21 @@ int NonBlockReadLine :: work(int fd,
                 i = -1;  
             }
         }
+      #ifndef WORK 
+        if(n == 1024)
+        {
+            printf("1024 NO data client Error\n");
+        }
+     #endif
 
         if(n > 0)
         {
             buff.add_data(tmp, n);
-            Log :: DEBUG("READ DUMP CACHE %d bytes VAL : %s ", \
-                         n, buff.get_unhandle_cache());
+            Log :: DEBUG("READ DUMP CACHE %d bytes", \
+                         n);
         #ifndef WORK
-            printf("READ DUMP CACHE %d bytes VAL : %s ", \
-                   n, buff.get_unhandle_cache());
+            printf("READ DUMP CACHE %d bytes", \
+                   n);
         #endif
         }
         
@@ -91,6 +98,7 @@ int NonBlockReadLine :: work(int fd,
         {
             ev->add_ev_flags(EV_READUNFIN);
         }
+        
     }
 }
 
@@ -119,9 +127,8 @@ int NonBlockWrite :: work(int fd, void * arg)
 #ifndef WORK
     if(len > 0)
     {
-        *((char *)src + len) = '\0';
-        Log :: DEBUG("OUtPut write len %d data %s", \
-                      n, (char *)src);
+        Log :: DEBUG("OUtPut write len %d", \
+                      n);
     }
 #endif
 

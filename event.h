@@ -23,7 +23,7 @@ typedef int (*parse_handle)(int, void *);
 typedef struct _nf_server_t nf_server_t;
 
 
-class Event
+class Event : private Uncopyable
 {
     public:
     friend class Reactor;
@@ -105,18 +105,6 @@ class Event
 
         arg->excute();
     }
-
-    private:
-        Event & operator=(Event & ev)
-        {
-            assert(false);
-            return *this;
-        }
-
-        Event(Event & ev)
-        {
-            assert(false);
-        }
 
     protected:
         virtual int excute_fun();

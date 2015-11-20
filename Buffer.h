@@ -27,12 +27,14 @@ class Buffer
         {
             init(size);
         }
+        explicit Buffer(const Buffer &);
 
         void init(int size);
 
         void clear();
         
-        Buffer & operator=(Buffer & bf);
+        Buffer & operator=(const Buffer & bf);
+        
 
         bool isEmpty()
         {
@@ -47,22 +49,22 @@ class Buffer
         
         int get_unhandle_data(void * tmp);
 
-        void * get_cache()
+        void * get_cache() const
         {
             return cache;
         }
 
-        int get_rmind_cache()
+        inline int get_rmind_cache() const
         {
             return allo_len - end_idx - 1;
         }
 
-        int get_unhandle_num()
+        inline int get_unhandle_num() const
         {
             return end_idx - str_idx + 1;
         }
 
-        void * get_unhandle_cache()
+        inline void * get_unhandle_cache() const
         {
             return (char *)cache + str_idx;
         }
@@ -71,14 +73,11 @@ class Buffer
         {
             clear();
         }
-
-    private:
         
-        Buffer(Buffer & bf)
-        {
-            assert(false);
-        }
+        void swap(Buffer &rhs);
 
+    protected:
+        
         int fresh_cache(int len);
 
         void * cache;

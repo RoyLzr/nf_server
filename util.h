@@ -1,7 +1,7 @@
 #ifndef _UTIL_
 #define _UTIL_
 
-//#define WORK 0x00
+#define WORK 0x00
 
 
 //ev_events
@@ -38,5 +38,15 @@ struct timeval
 }
 */
 
+class Uncopyable
+{
+    protected:
+        Uncopyable() {}
+        ~Uncopyable() {}
+
+    private:
+        Uncopyable(const Uncopyable &);
+        Uncopyable & operator=(const Uncopyable &);
+};
 
 #endif
