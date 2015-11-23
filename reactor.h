@@ -74,10 +74,35 @@ class Reactor : private Uncopyable
     int start();
     
     //fail event is active already 
-    bool set_event_active(Event *);
+    inline bool set_event_active(Event * ev)
+    {
+        if(ev == NULL)
+            return false;
+    
+        if(ev->ev_flags & EV_ACTIVE)
+            return false;
+    
+        ev->ev_flags |= EV_ACTIVE;
+        return true;
+
+    }
         
     //fail event is unactive already
-    bool set_event_unactive(Event *);
+    inline bool set_event_unactive(Event * ev)
+    {
+        if(ev == NULL)
+            return false;
+
+        if(!(ev->ev_flags & EV_ACTIVE))
+            return false;
+    
+        ev->ev_flags &= ~EV_ACTIVE;
+        return true;
+    }
+
+    bool set_io_event_active(Event *);
+    
+    bool set_io_event_unactive(Event *);
 
     pthread_mutex_t list_mutex;
     pthread_mutex_t event_mutex; 

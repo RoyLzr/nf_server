@@ -78,6 +78,7 @@ void Event :: excute()
 
     if(ret < 0)
     {
+         
         ev_reactor->set_event_unactive(this);
         
         Log :: NOTICE("one event will be closed");

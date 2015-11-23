@@ -37,31 +37,73 @@
 //         liuzhaorui1@163.com
 //**********************************************************
 
-bool Reactor :: set_event_active(Event * ev)
+bool Reactor :: set_io_event_active(Event * ev)
 {
-    pthread_mutex_lock(&event_mutex);
-    if(ev->ev_flags & EV_ACTIVE)
-    {
-        pthread_mutex_unlock(&event_mutex);
+    Event * evread = NULL, * evwrite = NULL; 
+    struct evepoll * evep = NULL;
+    int fd = 0;
+
+    if(ev == NULL)
         return false;
+
+    fd = ev->ev_fd; 
+    evep = &fds[fd];
+    evread = evep->evread;
+    evwrite = evep->evwrite;
+    
+    if(evread == NULL || evwrite == NULL)
+    {
+        if(ev->ev_flags & EV_ACTIVE)
+            return false;
+        else
+        {
+            ev->ev_flags |= EV_ACTIVE;
+            return true;
+        }
     }
-    ev->ev_flags |= EV_ACTIVE;
-    pthread_mutex_unlock(&event_mutex);
+    
+    if((evread->ev_flags & EV_ACTIVE) || \
+       (evwrite->ev_flags & EV_ACTIVE))
+        return false;
+    else
+    {
+        evread->ev_flags |= EV_ACTIVE;
+        evwrite->ev_flags |= EV_ACTIVE;
+    }
     return true;
 }
 
-bool Reactor :: set_event_unactive(Event * ev)
+bool Reactor :: set_io_event_unactive(Event * ev)
 {
-    pthread_mutex_lock(&event_mutex);
-    if(!(ev->ev_flags & EV_ACTIVE))
-    {
-        pthread_mutex_unlock(&event_mutex);
+    Event * evread = NULL, * evwrite = NULL; 
+    struct evepoll * evep = NULL;
+    int fd = 0;
+
+    if(ev == NULL)
         return false;
+
+    fd = ev->ev_fd; 
+    evep = &fds[fd];
+    evread = evep->evread;
+    evwrite = evep->evwrite;
+    
+    if(evread == NULL || evwrite == NULL)
+    {
+        if(!(ev->ev_flags & EV_ACTIVE))
+            return false;
+        else
+        {
+            ev->ev_flags &= ~EV_ACTIVE;
+            return true;
+        }
     }
-    ev->ev_flags &= ~EV_ACTIVE;
-    pthread_mutex_unlock(&event_mutex);
+    
+    evread->ev_flags &= ~EV_ACTIVE;
+    evwrite->ev_flags &= ~EV_ACTIVE;
+
     return true;
 }
+
 
 void Reactor :: event_queue_insert(Event *ev,
                                   int status)
@@ -123,6 +165,18 @@ int Reactor :: add_event(Event * ev,
     int ret = 0;
     if(ev == NULL)
        return 0;
+    
+    if(status & RA_THREAD)
+    {
+        pthread_mutex_lock(&event_mutex);
+        if(!set_io_event_active(ev))
+        {
+            Log :: WARN("Add fail, Event is ACtive, FD %d", ev->ev_fd);
+            pthread_mutex_unlock(&event_mutex);
+            return -1;
+        } 
+        pthread_mutex_unlock(&event_mutex);
+    } 
 
     Log :: DEBUG("ADD EVENT FD: %d events: %s%s%s reactor: %d",
                  ev->ev_fd,
@@ -132,15 +186,6 @@ int Reactor :: add_event(Event * ev,
                  epfd);
       
     assert((ev->ev_flags & EV_INIT));
-    
-    if(status & RA_THREAD)
-    {
-        if(!set_event_active(ev))
-        {
-            Log :: WARN("Add fail, Event is ACtive, FD %d", ev->ev_fd);
-            return -1;
-        } 
-    } 
 
     if(tv != NULL)
     {
@@ -177,12 +222,13 @@ int Reactor :: add_event(Event * ev,
 
     Log :: WARN("ADD EVENT fd : %d fail, ALREAD ADDED", ev->ev_fd);
 done:
-    if((status & RA_THREAD) & (!set_event_unactive(ev)))
+    pthread_mutex_lock(&event_mutex);
+    if((status & RA_THREAD) & (!set_io_event_unactive(ev)))
     {
         Log :: WARN("Add fail, set Event UnaCtive Error,\
                 status broken FD %d", ev->ev_fd);
     }
-
+    pthread_mutex_unlock(&event_mutex);
     return -1;
 }  
 
@@ -205,9 +251,11 @@ int Reactor :: epoll_active_event(Event * ev) const
         return 0;
 
     evep = &fds[fd];
+    op = EPOLL_CTL_ADD;
+    
+    //pthread_mutex_lock(&event_mutex);
     evread = evep->evread;
     evwrite = evep->evwrite;
-    op = EPOLL_CTL_ADD;
 
     //set add event 
     if(evread != NULL && (evread->ev_flags & EV_EPOLL_ACTIVE))
@@ -220,6 +268,8 @@ int Reactor :: epoll_active_event(Event * ev) const
         events |= EPOLLOUT;
         op = EPOLL_CTL_MOD;
     }
+    //pthread_mutex_unlock(&event_mutex);
+
     if(ev->ev_events & EV_READ)
         events |= EPOLLIN;
     if(ev->ev_events & EV_WRITE)
@@ -227,9 +277,13 @@ int Reactor :: epoll_active_event(Event * ev) const
     
     if(net_ep_add(epfd, fd, events, evep, op) < 0)
     {
+        //if(errno == 9)
+        //    goto done;
         Log :: WARN("EPOLL : %d ADD FD : %d ERROR", epfd, fd);
         return -1;
     }
+
+done:
     ev->ev_flags |= EV_EPOLL_ACTIVE;
 
     return 0;
@@ -281,9 +335,14 @@ int Reactor :: epoll_unactive_event(Event * ev) const
    
     if(net_ep_add(epfd, fd, events, evep, op) < 0)
     {
+        //if(errno == 9)
+        //    goto done;
         Log :: WARN("EPOLL : %d DEL FD : %d ERROR %s", epfd, fd, strerror(errno));
+
         return -1;
     }
+
+done:
     ev->ev_flags &= ~EV_EPOLL_ACTIVE;
 
     return 0;
@@ -418,29 +477,104 @@ int Reactor :: epoll_dispatch(struct timeval * tv)
     }
     for(int i = 0; i < res; i++)
     {
-        int active = events[i].events;
         Event * evread = NULL, * evwrite = NULL;
-        
+        int active = events[i].events;
         evep = (struct evepoll *) events[i].data.ptr;
+        int fd = 0;
+        fd = events[i].data.fd;
+       
         evread = evep->evread;
-        evwrite = evep->evwrite;
-        int fd = evread->ev_fd;        
+        evwrite = evep->evwrite; 
 
         if(active & EPOLLHUP)
         {
-            del_event(evread);
-            del_event(evwrite);
+            pthread_mutex_lock(&event_mutex);
+            
+            evread = evep->evread;
+            evwrite = evep->evwrite;
+            
+            if(evread != NULL && evwrite != NULL)
+            {
+                if(!(evread->ev_flags & EV_ACTIVE) &&\
+                   !(evwrite->ev_flags & EV_ACTIVE))
+                {
+                    pthread_mutex_unlock(&event_mutex);
+                    del_event(evread);
+                    del_event(evwrite);
+                    goto ENDHUP;
+                }
+            }
+            else if(evread == NULL && evwrite != NULL)
+            {
+                if(!(evwrite->ev_flags & EV_ACTIVE))
+                {
+                    pthread_mutex_unlock(&event_mutex);
+                    del_event(evwrite);
+                    goto ENDHUP;
+                }
+            }
+            else if(evread != NULL && evwrite == NULL)
+            {
+                if(!(evread->ev_flags & EV_ACTIVE))
+                {
+                    pthread_mutex_unlock(&event_mutex);
+                    del_event(evread);
+                    goto ENDHUP;
+                }
+            }
+
+            pthread_mutex_unlock(&event_mutex);
+        ENDHUP:
             continue;
         }
 
         else if(active & EPOLLERR)
         {
-            del_event(evread);
-            del_event(evwrite);
+            pthread_mutex_lock(&event_mutex);
+            
+            evread = evep->evread;
+            evwrite = evep->evwrite;
+            
+            if(evread != NULL && evwrite != NULL)
+            {
+                if(!(evread->ev_flags & EV_ACTIVE) &&\
+                   !(evwrite->ev_flags & EV_ACTIVE))
+                {
+                    pthread_mutex_unlock(&event_mutex);
+                    del_event(evread);
+                    del_event(evwrite);
+                    goto ENDERR;
+                }
+            }
+            else if(evread == NULL && evwrite != NULL)
+            {
+                if(!(evwrite->ev_flags & EV_ACTIVE))
+                {
+                    pthread_mutex_unlock(&event_mutex);
+                    del_event(evwrite);
+                    goto ENDERR;
+                }
+            }
+            else if(evread != NULL && evwrite == NULL)
+            {
+                if(!(evread->ev_flags & EV_ACTIVE))
+                {
+                    pthread_mutex_unlock(&event_mutex);
+                    del_event(evread);
+                    goto ENDERR;
+                }
+            }
+
+            pthread_mutex_unlock(&event_mutex);
+        ENDERR:
             continue;
         }
+            
         else if(active & EPOLLIN )
         {
+            if(evep->evread == NULL)
+                continue;
+
             if(evread->ev_events & EV_LISTEN)
             {
                 evread->excute();
@@ -452,10 +586,14 @@ int Reactor :: epoll_dispatch(struct timeval * tv)
                     evread->excute();
                     break;
                 case RA_THREAD:
+                    pthread_mutex_lock(&event_mutex);
                     if(set_event_active(evread))
                     {
+                        pthread_mutex_unlock(&event_mutex);
                         pool.AddTask(new EventTask(evread));
-                    }    
+                    }
+                    else    
+                        pthread_mutex_unlock(&event_mutex);
                     break;
             }
             continue;
@@ -463,17 +601,25 @@ int Reactor :: epoll_dispatch(struct timeval * tv)
 
         else if(active & EPOLLOUT)
         {
+            if(evep->evwrite == NULL)
+                continue;
+
             switch(status)
             {
                 case RA_ONCE:
                     evwrite->excute();
                     break;
                 case RA_THREAD:
+                    pthread_mutex_lock(&event_mutex);
                     if(set_event_active(evwrite))
                     {
                         //handle
+                        pthread_mutex_unlock(&event_mutex);
                         pool.AddTask(new EventTask(evwrite));
-                    }    
+                    }
+                    else
+                        pthread_mutex_unlock(&event_mutex);
+                        
                     break;
             }
             continue;
@@ -487,6 +633,23 @@ int Reactor :: del_event(Event * ev)
 {
     if(ev == NULL)
         return 0;
+    
+    if(status & RA_THREAD)
+    {
+        pthread_mutex_lock(&event_mutex);
+        if(!set_io_event_active(ev))
+        {
+            Log :: WARN("DEL fail, Event is ACtive, FD %d \
+                    events : %s%s", 
+                    ev->ev_fd,
+                    ev->ev_events&EV_READ ? "READ":"",
+                    ev->ev_events&EV_WRITE ? "WRITE":""
+                    );
+            pthread_mutex_unlock(&event_mutex);
+            return -1;
+        } 
+        pthread_mutex_unlock(&event_mutex);
+    } 
 
     int ret = 0;
     int fd = ev->ev_fd;
@@ -497,16 +660,8 @@ int Reactor :: del_event(Event * ev)
                  ev->ev_events&EV_WRITE ?"WRITE":"",
                  ev->ev_events&EV_TIMEOUT?"TIME":"",
                  epfd);
+   
     assert(this == ev->ev_reactor);
-    
-    if(status & RA_THREAD)
-    {
-        if(!set_event_active(ev))
-        {
-            Log :: WARN("DEL fail, Event is ACtive, FD %d", ev->ev_fd);
-            return -1;
-        } 
-    } 
     
     if(ev->ev_flags & EV_INSERTED)
     {
@@ -529,13 +684,15 @@ done:
     Log ::WARN("DEL EVENT FAIL FD : %d", fd);
     if(status & RA_THREAD)
     {
-        if(!set_event_unactive(ev))
+        pthread_mutex_lock(&event_mutex);
+        if(!set_io_event_unactive(ev))
         {
             Log :: WARN("Del fail, set Event UnaCtive Error,\
                     status broken FD %d", ev->ev_fd);
         }
-        return -1; 
+        pthread_mutex_unlock(&event_mutex);
     }
+    return -1; 
 }
 
 int Reactor :: epoll_del_event(Event * ev)
@@ -559,27 +716,29 @@ int Reactor :: epoll_del_event(Event * ev)
     
     if(ev->ev_events & EV_READ)
     {
+        //pthread_mutex_lock(&event_mutex);
         if(evread != NULL)
             delete ev;
         evep->evread = NULL;
+        event_count--;
+        //pthread_mutex_unlock(&event_mutex);
         ev = NULL;
         goto done;
     }
 
     if(ev->ev_events & EV_WRITE)
     {
+        //pthread_mutex_lock(&event_mutex);
         if(evwrite != NULL)
             delete ev;
         evep->evwrite = NULL;
+        event_count--;
+        //pthread_mutex_unlock(&event_mutex);
         ev = NULL;
     }
 
 done:
-    close(fd);
-    
-    pthread_mutex_lock(&event_mutex);
-    event_count--; 
-    pthread_mutex_unlock(&event_mutex);
+    //close(fd);
 
     return 0; 
 }

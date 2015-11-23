@@ -65,7 +65,6 @@ int Buffer :: add_data(void * tmp,
 
     memcpy((char *)cache + end_idx + 1, (char *)tmp, len);
     end_idx += len;
-    tt[end_idx + 1] = '\0';
     return len;
 }
 
