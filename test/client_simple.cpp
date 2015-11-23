@@ -57,10 +57,10 @@ void * work(void * arg)
         {
             int tes = 2;
               
-            if (send(fd, buf, 10, 0) <= 0)
-                std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
+            //if (send(fd, buf, 10, 0) <= 0)
+            //    std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
             //sleep(1);
-            if (send(fd, buf+10, size-10, 0) <= 0)
+            if (send(fd, buf, size, 0) <= 0)
                 std::cout <<  "send error"  << ": " << strerror(errno) << std::endl;
             
             if((n = recv(fd, readbuf, size, MSG_WAITALL)) <= 0)

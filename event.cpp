@@ -78,10 +78,10 @@ void Event :: excute()
 
     if(ret < 0)
     {
-         
+        pthread_mutex_lock(&(ev_reactor->event_mutex)); 
         ev_reactor->set_event_unactive(this);
+        pthread_mutex_unlock(&(ev_reactor->event_mutex)); 
         
-        Log :: NOTICE("one event will be closed");
         ev_reactor->del_event(this);
 
         return;
@@ -89,7 +89,9 @@ void Event :: excute()
     if(ev_events & EV_LISTEN || !(ev_flags & EV_ACTIVE))
         return;
 
+    pthread_mutex_lock(&(ev_reactor->event_mutex)); 
     ev_reactor->set_event_unactive(this);
+    pthread_mutex_unlock(&(ev_reactor->event_mutex)); 
 
     return;
 }
