@@ -18,19 +18,25 @@ class IEQueue
 
         virtual bool full() const = 0;
 
+        //push operator
         virtual size_t pushs_ms(IEvent **ev, size_t items, int msec) = 0;
         
         virtual size_t push_ms(IEvent *ev, int msec) = 0;
 
-        virtual size_t push(IEvent **ev, size_t items);
+        virtual size_t pushs(IEvent **ev, size_t items) = 0;
         
-        virtual size_t pops_ms(IEvent **ev, size_t items, int msec);
+        virtual size_t push(IEvent *ev) = 0;
         
-        virtual size_t pops(IEvent **ev, size_t items);
+        //pop operator
+        virtual size_t pops_ms(IEvent **ev, size_t items, int msec) = 0;
         
-        virtual size_t pop(IEvent **ev, size_t items);
+        virtual size_t pops(IEvent **ev, size_t items) = 0;
+        
+        virtual IEvent * pop() = 0;
+        
+        virtual IEvent * pop_ms(int msec) = 0;
 
-        virtual ~IEQueue() {}
+        virtual ~IEQueue() {};
 };
 
 #endif

@@ -1,0 +1,29 @@
+first empty : 0
+pop num : 0 empty
+used 0 
+pop num : 0 empty
+used 0 
+pop num : 1 value 0
+used 0 
+pop num : 0 empty
+used 0 
+pop num : 0 empty
+used 0 
+pop num : 1 value 1
+used 1 
+pop num : 0 empty
+used 1 
+pop num : 0 empty
+used 1 
+pop num : 0 empty
+used 1 
+pop num : 1 value 2
+used 3 
+pop num : 0 empty
+used 3 
+pop num : 0 empty
+used 3 
+pop num : 0 empty
+used 3 
+pop num : 0 empty
+used 3 

@@ -53,7 +53,7 @@ class IEvent : public IRef
 
         virtual timeval * timeout() = 0;
         
-        virtual void setTimeout(int msec);
+        virtual void setTimeout(int msec) = 0;
 
         virtual int type() = 0;
         
@@ -81,9 +81,9 @@ class IEvent : public IRef
 
         IEvent() {}
 
-        virtual ~IEvent() {}
+        virtual ~IEvent();
 
-        virtual bool isError();
+        virtual bool isError() = 0;
 };
 
 
