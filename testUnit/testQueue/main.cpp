@@ -1,7 +1,9 @@
 #include "../../NfUnit/eventqueue.h"
 #include "../../interface/ievent.h"
+#include "../../commonn/ThreadManager.h"
 #include "stdio.h"
 #include "stdlib.h"
+#include <unistd.h>
 
 class TestEvent : public IEvent
 {
@@ -67,6 +69,31 @@ class TestEvent : public IEvent
 
 };
 
+ELQueue _lockQueue;
+
+void * produce(void * param)
+{
+    while(true)
+    {
+        IEvent * push[6];
+        for(int i = 0; i < 6; i++)
+            push[i] = new TestEvent(i+1);
+        int cnt = _lockQueue.pushs( &push[0], 6);
+        printf("push %d\n", cnt);
+    }
+}
+
+void * consume(void * param)
+{
+    while(true)
+    {
+        IEvent * pop[3];
+        size_t _size  = _lockQueue.size();
+        int cnt = _lockQueue.pops(&pop[0], 3);
+        printf("pop : %d size : %d\n", cnt, _size); 
+    }
+}
+
 int main()
 {
     EQueue *q = new EQueue();
@@ -129,6 +156,15 @@ int main()
 
     cnt = q->pops(&test2_pop[0], 1);
     printf("pop %d\n", cnt); 
+    
+    printf("=======================================\n");
+    
+    ThreadManager _produce;
+    ThreadManager _consume;
+    _produce.run(1, produce, NULL); 
+    _consume.run(3, consume, NULL); 
+    
+    sleep(10000);        
     return 0;
 }
 
