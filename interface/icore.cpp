@@ -28,8 +28,3 @@ IEvent * IEQueue :: pop()
     return this->pop_ms(0);
 }
 
-IEvent :: ~IEvent() {}
-    
-
-
-

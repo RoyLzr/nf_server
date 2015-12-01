@@ -15,21 +15,22 @@ class IReactor
             RUNNING,
             PAUSE,
         };
+
     public:
-        IReactor(){};
+        IReactor() {};
         virtual ~IReactor() {};
     
     public:
-        virtual int load(Section) = 0;
+        virtual int load(const Section &) = 0;
         
         virtual void setThread(int) = 0;
         
         virtual void setMaxEvents(int) = 0;
     public:
         
-        virtual int run();
+        virtual int run() = 0;
         
-        virtual int stop();
+        virtual int stop() = 0;
         
         virtual int stopUntilEmpty() = 0;
 

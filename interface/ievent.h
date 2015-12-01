@@ -81,7 +81,7 @@ class IEvent : public IRef
 
         IEvent() {}
 
-        virtual ~IEvent();
+        virtual ~IEvent() {};
 
         virtual bool isError() = 0;
 };

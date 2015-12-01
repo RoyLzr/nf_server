@@ -1,5 +1,6 @@
 #ifndef _IREF_H_
 #define _IREF_H_
+#include <atomic>
 
 class IRef
 {
@@ -19,7 +20,7 @@ class IRef
         virtual ~IRef(){}  
 
      protected:
-        int cnt;
+        std::atomic<int> cnt;
 };
 
 
