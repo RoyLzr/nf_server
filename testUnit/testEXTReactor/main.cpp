@@ -87,7 +87,7 @@ class TestEvent : public IEvent
 
 int main()
 {
-    IEQueue * _queue = new ELQueue();
+    IEQueue * _queue = new BlockEQueue();
     EXTReactor * ext = new EXTReactor();
     ext->setQueue(_queue);
     ext->run();

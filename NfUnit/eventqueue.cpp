@@ -118,3 +118,92 @@ void EQueue::erase(IEvent * ev)
     used--;
 }
 
+BlockEQueue::BlockEQueue() :_cond(_lock) {}
+
+BlockEQueue::~BlockEQueue()
+{
+    while(_queue.size() > 0)
+    {
+        IEvent * ev = _queue.pop();
+        ev->release();
+    }
+}
+
+IEvent * BlockEQueue::pop()
+{
+    AutoMLock l(_lock);
+    while(_queue.empty()) 
+    {
+    #ifndef WORK
+            printf("Block Queue is empty\n");
+    #endif        
+        if(_cond.wait(NULL) !=0 )
+        {
+            return NULL;
+        }
+    }
+    if(_cond.waits() > 0 && !_queue.full())
+        _cond.signal();
+    return _queue.pop();   
+}
+
+size_t BlockEQueue::push(IEvent *ev)
+{
+    AutoMLock l(_lock);
+    while(full())
+    {
+#ifndef WORK
+        printf("Block Queue is full :%d\n", _queue.size());
+#endif   
+        if(_cond.wait(NULL) !=0 )
+        {
+            return 0;
+        }
+    }
+    if(_cond.waits() == 1)
+        _cond.signal();
+    else if(_cond.waits() > 1)
+        _cond.signalAll();
+
+    return _queue.push(ev);
+}
+
+size_t BlockEQueue::pushs(IEvent **ev, size_t items)
+{
+    AutoMLock l(_lock);
+    while(_queue.full())
+    {
+#ifndef WORK
+        printf("Block Queue is full : %d\n", _queue.size());
+#endif   
+        if(_cond.wait(NULL) !=0 )
+        {
+            return 0;
+        }
+    }
+    if(_cond.waits() == 1)
+        _cond.signal();
+    else if(_cond.waits() > 1)
+        _cond.signalAll();
+    return _queue.pushs(ev, items);
+}
+
+
+size_t BlockEQueue::pops(IEvent **ev, size_t items)
+{
+    AutoMLock l(_lock);
+    while(_queue.empty()) 
+    {
+    #ifndef WORK
+            printf("Block Queue is empty\n");
+    #endif        
+        if(_cond.wait(NULL) !=0 )
+        {
+            return 0;
+        }
+    }
+    if(_cond.waits() > 0 && !_queue.full())
+        _cond.signal();
+    return _queue.pops(ev, items);   
+}
+

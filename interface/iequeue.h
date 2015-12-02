@@ -2,9 +2,10 @@
 #ifndef  _IEQUEUE_H_
 #define  _IEQUEUE_H_
 
+#include "../util.h"
 
 class IEvent;
-class IEQueue
+class IEQueue : public Uncopyable
 {
     public:
 
