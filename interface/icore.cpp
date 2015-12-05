@@ -28,3 +28,20 @@ IEvent * IEQueue :: pop()
     return this->pop_ms(0);
 }
 
+int IReactor::extEvent(IEvent * ev)
+{
+    ev->EventCallback();
+    if(ev->status() & IEvent::CANCELED)
+    {
+        delete ev;
+        goto done;
+    }
+
+    if(ev->isReUsed() && ev->reactor())
+        (ev->reactor())->post(ev);
+    else
+        delete ev;
+done:
+    return 0;
+}
+

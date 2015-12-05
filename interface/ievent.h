@@ -49,6 +49,8 @@ class IEvent : public IRef
 
         virtual void EventCallback() = 0;
         
+        virtual bool isReUsed() = 0;
+        
         virtual void setCallback(work_handle cb, void *p) = 0;
 
         virtual timeval * timeout() = 0;

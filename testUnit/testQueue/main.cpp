@@ -59,6 +59,8 @@ class TestEvent : public IEvent
           void setPrevious(IEvent * node) {previousNode = node;}
 //==================================================//
           bool isError() {return true;}
+
+          bool isReUsed() {return true;}
           
           int label;
           ~TestEvent() {}

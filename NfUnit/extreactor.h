@@ -41,7 +41,7 @@ class EXTReactor : public IReactor
 		
 		virtual IReactor * getExtReactor();
 		
-        virtual IReactor * setExtReactor();
+        virtual IReactor * setExtReactor(IReactor *);
         
         virtual int setQueue(IEQueue *);
 

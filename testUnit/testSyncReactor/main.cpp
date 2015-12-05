@@ -2,6 +2,7 @@
 #include "../../NfUnit/extreactor.h"
 #include "../../interface/ievent.h"
 #include "../../commonn/ThreadManager.h"
+#include "../../NfUnit/syncReactor.h"
 #include "stdio.h"
 #include "stdlib.h"
 #include <unistd.h>
@@ -11,9 +12,9 @@ class TestEvent : public IEvent
     public:
           TestEvent() {};
           TestEvent(int num) : label(num)  {};
-          int handle() { return 0;}
+          int handle() { return _fd;}
         
-          void setHandle(int) {return;}
+          void setHandle(int hand) { _fd = hand;}
 
           IReactor *reactor() {return _rect;}
         
@@ -30,17 +31,17 @@ class TestEvent : public IEvent
         
           void setTimeout(int msec) {return;}
 
-          int type()  {return 0;}
+          int type()  {return _type;}
         
-          void setType(int) { return;}
+          void setType(int type) {_type = type;}
 
-          int status() {return 0;}
+          int status() {return _status;}
         
-          void setStatus(int) {return;}
+          void setStatus(int status) {_status = status;}
         
-          int result() {return 0;}
+          int result() {return _result;}
         
-          void setResult(int) {return;}
+          void setResult(int res) {_result = res;}
         
           void derived() {return;}
         
@@ -78,7 +79,7 @@ class TestEvent : public IEvent
 //==================================================//
           bool isError() {return true;}
             
-          bool isReUsed() {return true;}         
+          bool isReUsed() {return false;}         
           int label;
           ~TestEvent() {printf("clear\n");}
 
@@ -86,23 +87,32 @@ class TestEvent : public IEvent
         IEvent * nextNode;
         IEvent * previousNode;
         IReactor * _rect;
+        int _type;
+        int _status;
+        int _result;
+        int _fd;
 };
 
 
 int main()
 {
-    IEQueue * _queue = new BlockEQueue();
-    EXTReactor * ext = new EXTReactor();
-    ext->setQueue(_queue);
-    ext->run();
-    int i = 0;
-    sleep(1);
-    while(true)
-    {
-        IEvent * ev = new TestEvent(i);
-        i++;
-        ext->post(ev);    
-    } 
+    Log :: init("./svr.log");
+    Log :: set_level(0);
+    IEQueue * queue = new BlockEQueue();
+    SyncReactor * net = new SyncReactor();
+    EXTReactor  * ext = new  EXTReactor();
+    ext->setQueue(queue);
+    net->setExtReactor(ext);
+
+    IEvent * ev = new TestEvent(0);
+    ev->setResult(IEvent::IOREADABLE);
+    ev->setType(IEvent::NET);
+    ev->setStatus(IEvent::INIT);
+    ev->setHandle(1);
+
+    net->post(ev);   
+    net->run();
+
     return 0;    
 }
 

@@ -28,7 +28,7 @@ IReactor * EXTReactor::getExtReactor()
 	return NULL;
 }
 
-IReactor * EXTReactor::setExtReactor() 
+IReactor * EXTReactor::setExtReactor(IReactor *) 
 {
 	return NULL;
 }
@@ -95,8 +95,7 @@ void EXTReactor::extfun()
     ev = _queue->pop();
     if (NULL != ev) 
     {
-		SmartPtr<IEvent> sev(ev);
-		ev->EventCallback();
+		extEvent(ev);
     }
 #ifndef WORK
     if(ev == NULL)
@@ -134,26 +133,25 @@ int EXTReactor::post(IEvent *ev)
         return -1; 
     }
 
-	if(ev->type() != IEvent::CPU)
+	if(ev->type() != IEvent::CPU && ev->type() != IEvent::NET)
     {
         Log :: ERROR("call EXTReactor post error, ev type is not CPU");
         return -1; 
     }
-
-	ev->setReactor(this);
-	ev->setStatus(IEvent::READY);
+    if(ev->reactor() == NULL)
+	    ev->setReactor(this);
+	
+    ev->setStatus(IEvent::READY);
     
     assert(_queue != NULL);
     
     //only care about internal ref,
     //this is ref for queue    
-    ev->addRef();
 	int ret = _queue->push(ev);
 	if (ret == 1) 
     {
 		return 0;
 	}
-	ev->release();
 	return -1;
 }
 

@@ -41,10 +41,12 @@ class IReactor
         virtual int post(IEvent *) = 0;
 
         virtual int cancel(IEvent *) = 0;
+        
+        virtual int extEvent(IEvent *);
 
         virtual IReactor * getExtReactor() = 0;
         
-        virtual IReactor * setExtReactor() = 0;
+        virtual IReactor * setExtReactor(IReactor *) = 0;
 };
 
 #endif
