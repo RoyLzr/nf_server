@@ -1,6 +1,8 @@
-test:eventqueue.o icore.o syncReactor.o main.o ThreadManager.o extreactor.o configParser.o asynLog.o
-	g++ -o test syncReactor.o eventqueue.o icore.o main.o ThreadManager.o extreactor.o configParser.o asynLog.o -lpthread
+test:eventqueue.o baseEvent.o icore.o syncReactor.o main.o ThreadManager.o extreactor.o configParser.o asynLog.o 
+	g++ -o test baseEvent.o syncReactor.o eventqueue.o icore.o main.o ThreadManager.o extreactor.o configParser.o asynLog.o -lpthread
 
+baseEvent.o: ../../NfUnit/baseEvent.cpp
+	g++ -std=c++11 -g -c ../../NfUnit/baseEvent.cpp
 configParser.o: ../../commonn/configParser.cpp
 	g++  -std=c++11 -g -c ../../commonn/configParser.cpp
 asynLog.o: ../../commonn/asynLog.cpp

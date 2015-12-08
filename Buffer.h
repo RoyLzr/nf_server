@@ -9,7 +9,7 @@ static const bool DELETED = true;
 static const bool UNDELETED = false;
 
 #ifdef WORK
-static const bool FRESHLIMIT = 1024;
+static const bool FRESHLIMIT = 4096;
 #else
 static const bool FRESHLIMIT = 8;
 #endif
@@ -34,7 +34,6 @@ class Buffer
         void clear();
         
         Buffer & operator=(const Buffer & bf);
-        
 
         bool isEmpty()
         {
@@ -46,17 +45,25 @@ class Buffer
         int add_data(void * tmp, int len);
 
         int add_handl_num(int handled);
-        
-        int get_unhandle_data(void * tmp);
+
+        inline void add_unhandle_num(int size) const
+        {
+            end_idx += size;
+        }
 
         void * get_cache() const
         {
             return cache;
         }
 
-        inline int get_rmind_cache() const
+        inline void * get_empty_cache() const
         {
-            return allo_len - end_idx - 1;
+            return (char *)cache + allo_len - end_idx - 1;
+        }
+
+        inline int get_empty_size() const
+        {
+            return allo_len - end_idx -1;
         }
 
         inline int get_unhandle_num() const

@@ -3,10 +3,8 @@
 void Buffer :: init(int size)
 {
     cache = Allocate :: allocate(size + 1);
-    
     if(cache == NULL)
         throw "Init Buffer Error";
-
     allo_len = size;
     str_idx = 0;
     end_idx = -1;
@@ -53,15 +51,10 @@ Buffer & Buffer :: operator=(const Buffer & rhs)
 int Buffer :: add_data(void * tmp,
                        int len)
 {
-    if(cache == NULL || len > get_rmind_cache())
-    {
-        if(cache == NULL)
-            init(len);
-        else
-            fresh_cache(len);
-    }
-
-    char * tt = (char *) cache;
+    if(cache == NULL)
+        init(len);
+    if(len > get_empty_size())
+        fresh_cache(len);
 
     memcpy((char *)cache + end_idx + 1, (char *)tmp, len);
     end_idx += len;
@@ -111,12 +104,10 @@ int Buffer :: add_handl_num(int handled)
     return str_idx;
 }
 
-
 int Buffer :: fresh_cache(int len)
 {
     int new_len = allo_len*2 > (end_idx + len) ? 2*allo_len : (end_idx + len);
     char * tmp = (char *) Allocate :: allocate(new_len + 1);
-    char * tt = (char *) cache;
 
     memcpy((char *)tmp, (char *)cache, end_idx + 1);
 
@@ -134,13 +125,5 @@ int Buffer :: fresh_cache(int len)
     return 0;
 }
 
-int Buffer :: get_unhandle_data(void * tmp)
-{
-
-    memcpy((char *)tmp, (char *)cache + str_idx, end_idx - str_idx + 1);
-    
-    add_handl_num(end_idx - str_idx + 1);    
-    return end_idx - str_idx + 1;
-}
 
 

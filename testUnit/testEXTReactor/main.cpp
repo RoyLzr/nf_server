@@ -42,7 +42,7 @@ class TestEvent : public IEvent
         
           void setResult(int) {return;}
         
-          void derived() {return;}
+          int derived() {return 0;}
         
           void setDerived(int) {return;}
         

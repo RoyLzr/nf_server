@@ -10,6 +10,7 @@ class IReactor;
 class IEvent : public IRef
 {
     public:
+        //status
         enum 
         {
             INIT,
@@ -18,7 +19,7 @@ class IEvent : public IRef
             DONE,
             CANCELED,
         };
-
+        //result
         enum 
         {
             TIMEOUT     =      0x01,
@@ -28,7 +29,7 @@ class IEvent : public IRef
             CLOSESOCK   =      0x10,
             ERROR       =      0x20,
         };
-
+        //type
         enum
         {
             CPU,
@@ -51,6 +52,8 @@ class IEvent : public IRef
         
         virtual bool isReUsed() = 0;
         
+        virtual void setReUsed(bool) = 0;
+        
         virtual void setCallback(work_handle cb, void *p) = 0;
 
         virtual timeval * timeout() = 0;
@@ -69,7 +72,7 @@ class IEvent : public IRef
         
         virtual void setResult(int) = 0;
         
-        virtual void derived() = 0;
+        virtual int derived() = 0;
         
         virtual void setDerived(int) = 0;
 

@@ -30,7 +30,7 @@ enum
     LOG_NOTICE,
     LOG_WARN, 
     LOG_ERROR,
-    LOG_MAXLINE = 6000
+    LOG_MAXLINE = 1024
 };
 
 enum
@@ -88,7 +88,7 @@ class Log
     static pthread_mutex_t log_mutex;
     static pthread_cond_t  log_cond;
     static int init(const char *);
-    static string str_prefix[4];
+    static const string str_prefix[4];
 };
 
 

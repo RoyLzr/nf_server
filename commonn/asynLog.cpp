@@ -8,10 +8,10 @@ char Log :: buffer[LOG_MAXLINE];
 int Log :: STATUS = LOG_INIT;
 FILE * Log :: fp; 
 int Log :: LEVEL = LOG_DEBUG;
-string Log :: str_prefix[4] = {"[DEBUG]  ", 
-                               "[NOTICE] ",
-                               "[WARN]   ", 
-                               "[ERROR]  "};
+const string Log :: str_prefix[4] = {"[DEBUG]   ", 
+                                     "[NOTICE]  ",
+                                     "[WARN]    ", 
+                                     "[ERROR]   "};
 
 
 int 
@@ -42,7 +42,6 @@ Log :: init(const char * name)
 void *
 Log :: write_log(void *)
 {
-    string content;
     while(STATUS == LOG_RUN)
     {
         pthread_mutex_lock(&log_mutex);
@@ -54,11 +53,10 @@ Log :: write_log(void *)
         if(STATUS != LOG_RUN)
             return NULL;
         
-        content = log_buffer.front();
+        string content(log_buffer.front());
         log_buffer.pop();
  
         pthread_mutex_unlock(&log_mutex);
-        
         fprintf(fp, "%s\n", (content).c_str());
     //#ifndef WORK
         fflush(fp);
@@ -154,34 +152,30 @@ ctime(char * t_time, size_t n)
 void
 Log :: produce_log(int event, const char * fmt, va_list args)
 {
-    int offset = 0;
-    char now[20];
-    char s[LOG_MAXLINE];
-    //char * tmp = s;
+    string s(LOG_MAXLINE, '\0');
     switch(event)
     {
         case LOG_DEBUG:
-            offset = add_prefix(s, str_prefix[LOG_DEBUG]);
+            add_prefix(&s[0], str_prefix[LOG_DEBUG]);
             break;
         case LOG_NOTICE:
-            offset = add_prefix(s, str_prefix[LOG_NOTICE]);
+            add_prefix(&s[0], str_prefix[LOG_NOTICE]);
             break;
         case LOG_WARN:
-            offset = add_prefix(s, str_prefix[LOG_WARN]);
+            add_prefix(&s[0], str_prefix[LOG_WARN]);
             break;
         case LOG_ERROR:
-            offset = add_prefix(s, str_prefix[LOG_ERROR]);
+            add_prefix(&s[0], str_prefix[LOG_ERROR]);
             break;
     }
-    
-    ctime(now, sizeof(now));
-    offset += snprintf(&s[offset], LOG_MAXLINE - offset, "%s  ", now);
 
-    vsprintf(&s[offset], fmt, args);
-    
-    string res(s);
+    ctime(&s[9], 20);
+    s[23] = ' '; 
+    s[24] = ' '; 
+    vsprintf(&s[25], fmt, args);
+
     pthread_mutex_lock(&log_mutex);
-    log_buffer.push(res);
+    log_buffer.push(s);
     if(log_buffer.size() == 1)
         pthread_cond_signal(&log_cond);
     pthread_mutex_unlock(&log_mutex);

@@ -171,17 +171,18 @@ int SyncReactor::epollDispatch()
             events |= IEvent::IOWRITEABLE;
         
         ev->setResult(events);
+        if(events & IEvent::CLOSESOCK)
+        {
+            delete ev;
+            continue;
+        }
         
         ret = epoll_ctl(_epfd, EPOLL_CTL_DEL, ev->handle(), NULL);
         if(ret < 0)
         {
             Log::WARN("del event fd from epoll error, %d : %s", ev->handle(), strerror(errno));
         }
-        if(events & IEvent::CLOSESOCK)
-        {
-            delete ev;
-            continue;
-        }
+
         if(_extReactor != NULL)
             _extReactor->post(ev);
         else
