@@ -37,7 +37,7 @@ void * work(void * arg)
     for(int i = 0; i < 10000000 ; i++)
     {
         int fd = socket(AF_INET, SOCK_STREAM, 0);
-        set_linger(fd, 0);
+        //set_linger(fd, 0);
         int size = createData(buf, i);
 
         std::cout << "begin " << i << std::endl; 

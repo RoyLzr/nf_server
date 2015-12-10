@@ -165,15 +165,23 @@ int SyncReactor::epollDispatch()
             Log::WARN("EPOLLHUP | EPOLLERR event happen in %d", _epev[i].data.fd);
             events = events | IEvent::CLOSESOCK;
         }
+
         if(_epev[i].events & EPOLLIN)
             events |= IEvent::IOREADABLE;
         if(_epev[i].events & EPOLLOUT)
             events |= IEvent::IOWRITEABLE;
-        
+        if(ev->result() & IEvent::ACCEPT) 
+            events |= IEvent::ACCEPT;
+
         ev->setResult(events);
         if(events & IEvent::CLOSESOCK)
         {
             delete ev;
+            continue;
+        }
+        if(events & IEvent::ACCEPT)
+        {
+            extEvent(ev);
             continue;
         }
         
@@ -269,9 +277,5 @@ int SyncReactor::epollAdd(IEvent * ev)
     }
     return ret;
 }
-
-
-
-
 
 

@@ -39,7 +39,11 @@ int IReactor::extEvent(IEvent * ev)
         goto done;
     }
     else if(ev->status() == IEvent::RUNNING)
+    {
+        if(ev->result() & IEvent::ACCEPT)
+            goto done;
         (ev->reactor())->post(ev);
+    }
     else if((ev->status() == IEvent::DONE) &&
             (ev->isReUsed()))
         (ev->reactor())->post(ev);

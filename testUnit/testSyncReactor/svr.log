@@ -1,0 +1,7 @@
+[DEBUG]  12-11 00:13:26  Post event in syncReactor ev 1
+[WARN]   12-11 00:13:26  syncReactor::post reactor is not runing, store in _queue
+[NOTICE] 12-11 00:13:26  EXTReactor begin running
+[NOTICE] 12-11 00:13:26  SYNC Reactor extReactor begin running
+[DEBUG]  12-11 00:13:26  Post event in syncReactor ev 1
+[DEBUG]  12-11 00:13:26  wait done 1
+[DEBUG]  12-11 00:13:29  wait done 0

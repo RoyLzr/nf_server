@@ -78,7 +78,7 @@ int SockEventBase::registerAccept(int fd)
 
 	this->setHandle(fd);
 	this->setType(IEvent::NET);
-	this->setResult(IEvent::IOREADABLE);
+	this->setResult(IEvent::IOREADABLE | IEvent::ACCEPT);
 	_sockType = ACCEPT;
 
 	return 0;

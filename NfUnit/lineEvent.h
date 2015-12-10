@@ -13,7 +13,8 @@ class LineEvent : public SockEventBase
         LineEvent() : _read_done_callback(0),
                       _write_done_callback(0),
                       _read_buff_flag(-1),
-                      _write_buff_flag(-1)
+                      _write_buff_flag(-1),
+                      _len(0)
         {}   
 
 
@@ -38,11 +39,25 @@ class LineEvent : public SockEventBase
         inline int get_read_buff_flag()
         {
             return _read_buff_flag;
-        }       
+        }
+        struct sockaddr_in * get_sockaddr()
+        {
+            return &_addr;
+        }
+
+        void set_sockAddr(struct sockaddr_in addr) 
+        {
+           _addr = addr; 
+        }
+        void set_sockLen(int len)  
+        {
+           _len = len; 
+        }
+        
     protected:
 
         virtual void read_callback();
-        virtual void accept_callback() {return;}
+        virtual void accept_callback();
         virtual void write_callback();
         virtual void tcpconnect_callback() {return;}
         virtual void read_done_callback();
@@ -57,6 +72,9 @@ class LineEvent : public SockEventBase
         Buffer       _writeBuffer;
         int          _read_buff_flag;
         int          _write_buff_flag;
+
+        struct sockaddr_in   _addr;
+        socklen_t            _len;
 };
 
 #endif

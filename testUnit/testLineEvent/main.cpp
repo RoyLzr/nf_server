@@ -27,6 +27,11 @@ int main()
 {
     Log :: init("./svr.log");
     Log :: set_level(0);
+    int listenfd = net_tcplisten(1025, 20);
+    if(listenfd < 0)
+        printf("listen fd error");
+    if(set_fd_noblock(1) < 0)
+        printf("set fd noblock error\n");
 
     IEQueue * queue = new BlockEQueue();
     SyncReactor * net = new SyncReactor();
@@ -35,13 +40,10 @@ int main()
     net->setExtReactor(ext);
     
     LineEvent * ev = new LineEvent();
-    
-    if(set_fd_noblock(1) < 0)
-        printf("set fd noblock error\n");
-
-    ev->registerRead(1, 1024);
-    ev->setReUsed(false);
+    ev->registerAccept(listenfd);
+    ev->setReUsed(true);
     ev->set_read_done_callback(user_read_done_callback);
+    ev->set_write_done_callback(0);
 
     net->post(ev);   
     net->run();

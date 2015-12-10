@@ -1,0 +1,224 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.8	//
+ACCEPT	baseEvent.h	/^        ACCEPT,$/;"	e	enum:SockEventBase::__anon1
+AutoMLock	eventqueue.h	/^        typedef AutoLock<MLock> AutoMLock;$/;"	t	class:BlockEQueue
+AutoMLock	eventqueue.h	/^        typedef AutoLock<MLock> AutoMLock;$/;"	t	class:ELQueue
+AutoMLock	syncReactor.h	/^        typedef AutoLock<MLock> AutoMLock;$/;"	t	class:SyncReactor
+BASE	baseEvent.h	/^        BASE,$/;"	e	enum:SockEventBase::__anon1
+BlockEQueue	eventqueue.cpp	/^BlockEQueue::BlockEQueue() :_cond(_lock) {}$/;"	f	class:BlockEQueue
+BlockEQueue	eventqueue.h	/^class BlockEQueue : public IEQueue$/;"	c
+ELQueue	eventqueue.h	/^        ELQueue() {}$/;"	f	class:ELQueue
+ELQueue	eventqueue.h	/^class ELQueue : public IEQueue $/;"	c
+EQueue	eventqueue.h	/^        EQueue() : begin(0), $/;"	f	class:EQueue
+EQueue	eventqueue.h	/^class EQueue : public IEQueue$/;"	c
+EXTReactor	extreactor.cpp	/^EXTReactor::EXTReactor() : _queue(0), $/;"	f	class:EXTReactor
+EXTReactor	extreactor.h	/^class EXTReactor : public IReactor$/;"	c
+EventBase	baseEvent.cpp	/^EventBase::EventBase() : _fd(-1), $/;"	f	class:EventBase
+EventBase	baseEvent.h	/^class EventBase : public IEvent$/;"	c
+EventCallback	baseEvent.cpp	/^void SockEventBase::EventCallback()$/;"	f	class:SockEventBase
+EventCallback	baseEvent.h	/^        virtual void EventCallback() { _cb(this, _cbp); }$/;"	f	class:EventBase
+LINE_READ_CALLBACK_T	lineEvent.h	/^        typedef void (* LINE_READ_CALLBACK_T)(LineEvent *);$/;"	t	class:LineEvent
+LINE_WRITE_CALLBACK_T	lineEvent.h	/^        typedef void (* LINE_WRITE_CALLBACK_T)(LineEvent *);$/;"	t	class:LineEvent
+LineEvent	lineEvent.h	/^        LineEvent() : _read_done_callback(0),$/;"	f	class:LineEvent
+LineEvent	lineEvent.h	/^class LineEvent : public SockEventBase $/;"	c
+READ	baseEvent.h	/^        READ,$/;"	e	enum:SockEventBase::__anon1
+SockEventBase	baseEvent.cpp	/^SockEventBase::SockEventBase() : _sockType(BASE)$/;"	f	class:SockEventBase
+SockEventBase	baseEvent.h	/^class SockEventBase : public EventBase$/;"	c
+SyncReactor	syncReactor.cpp	/^SyncReactor::SyncReactor() : _run(false),$/;"	f	class:SyncReactor
+SyncReactor	syncReactor.h	/^class SyncReactor : public IReactor$/;"	c
+TCALLBACK	extreactor.cpp	/^void * EXTReactor::TCALLBACK(void *p)$/;"	f	class:EXTReactor
+TCPCONNECT	baseEvent.h	/^        TCPCONNECT,$/;"	e	enum:SockEventBase::__anon1
+WRITE	baseEvent.h	/^        WRITE,$/;"	e	enum:SockEventBase::__anon1
+_EQUEUE_H_	eventqueue.h	2;"	d
+_EVENTBASE_H_	baseEvent.h	2;"	d
+_EXTREACTOR_H_	extreactor.h	2;"	d
+_LIENEVENT_H_	lineEvent.h	2;"	d
+__SYNCREACTOR_H_	syncReactor.h	2;"	d
+_addr	lineEvent.h	/^        struct sockaddr_in   _addr;$/;"	m	class:LineEvent	typeref:struct:LineEvent::sockaddr_in
+_cb	baseEvent.h	/^        work_handle _cb;$/;"	m	class:EventBase
+_cbp	baseEvent.h	/^        void * _cbp;$/;"	m	class:EventBase
+_check_timer	syncReactor.h	/^        int _check_timer;$/;"	m	class:SyncReactor
+_cnt	baseEvent.h	/^        int _cnt;$/;"	m	class:SockEventBase
+_cnt	baseEvent.h	/^        std::atomic<int> _cnt;$/;"	m	class:EventBase
+_cond	eventqueue.h	/^        MCondition _cond;$/;"	m	class:BlockEQueue
+_devided	baseEvent.h	/^        int _devided;$/;"	m	class:EventBase
+_emptystop	extreactor.h	/^		bool _emptystop;$/;"	m	class:EXTReactor
+_emptystop	syncReactor.h	/^        bool _emptystop;$/;"	m	class:SyncReactor
+_epev	syncReactor.h	/^        struct epoll_event * _epev;$/;"	m	class:SyncReactor	typeref:struct:SyncReactor::epoll_event
+_epfd	syncReactor.h	/^        int  _epfd;$/;"	m	class:SyncReactor
+_events	baseEvent.h	/^        int _events;$/;"	m	class:EventBase
+_events	syncReactor.h	/^        std::atomic<int>  _events;$/;"	m	class:SyncReactor
+_extReactor	syncReactor.h	/^        IReactor * _extReactor;$/;"	m	class:SyncReactor
+_fd	baseEvent.h	/^        int _fd;$/;"	m	class:EventBase
+_len	lineEvent.h	/^        socklen_t            _len;$/;"	m	class:LineEvent
+_lock	eventqueue.h	/^        MLock  _lock;$/;"	m	class:ELQueue
+_lock	eventqueue.h	/^        MLock _lock;$/;"	m	class:BlockEQueue
+_lock	extreactor.h	/^		MLock _lock;$/;"	m	class:EXTReactor
+_lock	syncReactor.h	/^        MLock _lock;$/;"	m	class:SyncReactor
+_maxEvents	syncReactor.h	/^        int  _maxEvents;$/;"	m	class:SyncReactor
+_maxevs	extreactor.h	/^		int _maxevs;$/;"	m	class:EXTReactor
+_next	baseEvent.h	/^        IEvent *_next;$/;"	m	class:EventBase
+_pre	baseEvent.h	/^        IEvent *_pre;$/;"	m	class:EventBase
+_queue	eventqueue.h	/^        EQueue _queue;$/;"	m	class:BlockEQueue
+_queue	eventqueue.h	/^        EQueue _queue;$/;"	m	class:ELQueue
+_queue	extreactor.h	/^		IEQueue *_queue;$/;"	m	class:EXTReactor
+_queue	syncReactor.h	/^        ELQueue _queue;$/;"	m	class:SyncReactor
+_reactor	baseEvent.h	/^        IReactor *_reactor;$/;"	m	class:EventBase
+_readBuffer	lineEvent.h	/^        Buffer       _readBuffer;$/;"	m	class:LineEvent
+_read_buff_flag	lineEvent.h	/^        int          _read_buff_flag;$/;"	m	class:LineEvent
+_read_done_callback	lineEvent.h	/^        LINE_READ_CALLBACK_T   _read_done_callback;$/;"	m	class:LineEvent
+_reused	baseEvent.h	/^        bool _reused;$/;"	m	class:EventBase
+_run	extreactor.h	/^		bool _run;$/;"	m	class:EXTReactor
+_run	syncReactor.h	/^        bool _run;$/;"	m	class:SyncReactor
+_sockType	baseEvent.h	/^        int _sockType;$/;"	m	class:SockEventBase
+_status	baseEvent.h	/^        int _status;$/;"	m	class:EventBase
+_status	extreactor.h	/^		int _status;$/;"	m	class:EXTReactor
+_status	syncReactor.h	/^        int  _status;$/;"	m	class:SyncReactor
+_threadma	extreactor.h	/^		ThreadManager _threadma;$/;"	m	class:EXTReactor
+_threadsnum	extreactor.h	/^		int _threadsnum;$/;"	m	class:EXTReactor
+_to	baseEvent.h	/^        int _to;$/;"	m	class:EventBase
+_type	baseEvent.h	/^        int _type;$/;"	m	class:EventBase
+_writeBuffer	lineEvent.h	/^        Buffer       _writeBuffer;$/;"	m	class:LineEvent
+_write_buff_flag	lineEvent.h	/^        int          _write_buff_flag;$/;"	m	class:LineEvent
+_write_done_callback	lineEvent.h	/^        LINE_WRITE_CALLBACK_T  _write_done_callback;$/;"	m	class:LineEvent
+accept_callback	lineEvent.cpp	/^void LineEvent::accept_callback()$/;"	f	class:LineEvent
+addRef	baseEvent.h	/^        virtual int addRef() {  return ++_cnt; }$/;"	f	class:EventBase
+begin	eventqueue.h	/^        IEvent * begin;$/;"	m	class:EQueue
+callback	extreactor.cpp	/^void EXTReactor::callback()$/;"	f	class:EXTReactor
+callback	syncReactor.cpp	/^int SyncReactor::callback()$/;"	f	class:SyncReactor
+cancel	extreactor.cpp	/^int EXTReactor::cancel(IEvent *ev)$/;"	f	class:EXTReactor
+cancel	syncReactor.cpp	/^int SyncReactor::cancel(IEvent *ev)$/;"	f	class:SyncReactor
+cap	eventqueue.h	/^        int cap;$/;"	m	class:EQueue
+clear	baseEvent.cpp	/^int SockEventBase::clear()$/;"	f	class:SockEventBase
+clear	eventqueue.h	/^        void clear() $/;"	f	class:BlockEQueue
+clear	eventqueue.h	/^        void clear() $/;"	f	class:ELQueue
+clear	eventqueue.h	/^        void clear() $/;"	f	class:EQueue
+create	syncReactor.cpp	/^int SyncReactor::create()$/;"	f	class:SyncReactor
+delRef	baseEvent.h	/^        virtual int delRef() { return  --_cnt; }$/;"	f	class:EventBase
+derived	baseEvent.h	/^        virtual int derived() { return _devided;}$/;"	f	class:EventBase
+destroy	syncReactor.cpp	/^void SyncReactor::destroy()$/;"	f	class:SyncReactor
+empty	eventqueue.h	/^        bool empty() const { return _queue.empty();}$/;"	f	class:BlockEQueue
+empty	eventqueue.h	/^        bool empty() const { return _queue.empty();}$/;"	f	class:ELQueue
+empty	eventqueue.h	/^        bool empty() const { return begin == 0;}$/;"	f	class:EQueue
+end	eventqueue.h	/^        IEvent * end;$/;"	m	class:EQueue
+epollAdd	syncReactor.cpp	/^int SyncReactor::epollAdd(IEvent * ev)$/;"	f	class:SyncReactor
+epollDispatch	syncReactor.cpp	/^int SyncReactor::epollDispatch()$/;"	f	class:SyncReactor
+erase	eventqueue.cpp	/^void EQueue::erase(IEvent * ev) $/;"	f	class:EQueue
+erase	eventqueue.h	/^        void erase(IEvent * ev)$/;"	f	class:BlockEQueue
+erase	eventqueue.h	/^        void erase(IEvent * ev)$/;"	f	class:ELQueue
+extfun	extreactor.cpp	/^void EXTReactor::extfun()$/;"	f	class:EXTReactor
+full	eventqueue.h	/^        bool full() const { return _queue.full();}$/;"	f	class:BlockEQueue
+full	eventqueue.h	/^        bool full() const { return _queue.full();}$/;"	f	class:ELQueue
+full	eventqueue.h	/^        bool full() const { return size() >= cap;}$/;"	f	class:EQueue
+getBegin	eventqueue.h	/^        inline IEvent * getBegin() { return _queue.getBegin();}$/;"	f	class:BlockEQueue
+getBegin	eventqueue.h	/^        inline IEvent * getBegin() { return _queue.getBegin();}$/;"	f	class:ELQueue
+getBegin	eventqueue.h	/^        inline IEvent * getBegin() { return begin; }$/;"	f	class:EQueue
+getExtReactor	extreactor.cpp	/^IReactor * EXTReactor::getExtReactor() $/;"	f	class:EXTReactor
+getExtReactor	syncReactor.cpp	/^IReactor * SyncReactor::getExtReactor() $/;"	f	class:SyncReactor
+getRefCnt	baseEvent.h	/^        virtual int getRefCnt() { return _cnt;}$/;"	f	class:EventBase
+get_read_buff	lineEvent.h	/^        inline Buffer & get_read_buff(){ return _readBuffer; }$/;"	f	class:LineEvent
+get_read_buff_flag	lineEvent.h	/^        inline int get_read_buff_flag()$/;"	f	class:LineEvent
+get_sockaddr	lineEvent.h	/^        struct sockaddr_in * get_sockaddr()$/;"	f	class:LineEvent
+get_write_buff	lineEvent.h	/^        inline Buffer & get_write_buff() { return _writeBuffer; }$/;"	f	class:LineEvent
+handle	baseEvent.h	/^        virtual int handle() { return _fd; }$/;"	f	class:EventBase
+initBuffer	lineEvent.cpp	/^void LineEvent::initBuffer(int size)$/;"	f	class:LineEvent
+isError	baseEvent.h	/^        virtual bool isError() { return false;}$/;"	f	class:EventBase
+isReUsed	baseEvent.h	/^        virtual bool isReUsed() { return _reused; }$/;"	f	class:EventBase
+join	extreactor.cpp	/^int EXTReactor::join() $/;"	f	class:EXTReactor
+join	syncReactor.cpp	/^int SyncReactor::join()$/;"	f	class:SyncReactor
+load	extreactor.cpp	/^int EXTReactor::load(const Section &sec)$/;"	f	class:EXTReactor
+load	syncReactor.cpp	/^int SyncReactor::load(const Section & sec)$/;"	f	class:SyncReactor
+maxSize	eventqueue.h	/^        size_t maxSize() const { return _queue.maxSize();}$/;"	f	class:BlockEQueue
+maxSize	eventqueue.h	/^        size_t maxSize() const { return _queue.maxSize();}$/;"	f	class:ELQueue
+maxSize	eventqueue.h	/^        size_t maxSize() const { return cap;}$/;"	f	class:EQueue
+next	baseEvent.h	/^        virtual IEvent * next() { return _next; }$/;"	f	class:EventBase
+pop	eventqueue.cpp	/^IEvent * BlockEQueue::pop()$/;"	f	class:BlockEQueue
+pop	eventqueue.cpp	/^IEvent * EQueue::pop() $/;"	f	class:EQueue
+pop	eventqueue.h	/^        IEvent * pop()$/;"	f	class:ELQueue
+pop_ms	eventqueue.h	/^        IEvent * pop_ms(int msec) { return 0;};$/;"	f	class:BlockEQueue
+pop_ms	eventqueue.h	/^        IEvent * pop_ms(int msec) { return 0;};$/;"	f	class:ELQueue
+pop_ms	eventqueue.h	/^        IEvent * pop_ms(int msec) { return 0;};$/;"	f	class:EQueue
+pops	eventqueue.cpp	/^size_t BlockEQueue::pops(IEvent **ev, size_t items)$/;"	f	class:BlockEQueue
+pops	eventqueue.cpp	/^size_t EQueue::pops(IEvent **ev, size_t items) $/;"	f	class:EQueue
+pops	eventqueue.h	/^        size_t pops(IEvent **ev, size_t items)$/;"	f	class:ELQueue
+pops_ms	eventqueue.h	/^        size_t pops_ms(IEvent **ev, size_t items, int msec) { return 0;};$/;"	f	class:BlockEQueue
+pops_ms	eventqueue.h	/^        size_t pops_ms(IEvent **ev, size_t items, int msec) { return 0;};$/;"	f	class:ELQueue
+pops_ms	eventqueue.h	/^        size_t pops_ms(IEvent **ev, size_t items, int msec) { return 0;};$/;"	f	class:EQueue
+post	extreactor.cpp	/^int EXTReactor::post(IEvent *ev)$/;"	f	class:EXTReactor
+post	syncReactor.cpp	/^int SyncReactor::post(IEvent * ev)$/;"	f	class:SyncReactor
+previous	baseEvent.h	/^        virtual IEvent *previous() { return _pre; }$/;"	f	class:EventBase
+push	eventqueue.cpp	/^size_t BlockEQueue::push(IEvent *ev)$/;"	f	class:BlockEQueue
+push	eventqueue.h	/^        size_t push(IEvent *ev) $/;"	f	class:ELQueue
+push	eventqueue.h	/^        size_t push(IEvent *ev) { return pushs(&ev, 1);}$/;"	f	class:EQueue
+push_ms	eventqueue.h	/^        size_t push_ms(IEvent *ev, int msec) { return 0;}$/;"	f	class:ELQueue
+push_ms	eventqueue.h	/^        size_t push_ms(IEvent *ev, int msec) { return 0;}$/;"	f	class:EQueue
+push_ms	eventqueue.h	/^        size_t push_ms(IEvent *ev, int msec) {return 0;}$/;"	f	class:BlockEQueue
+pushs	eventqueue.cpp	/^size_t BlockEQueue::pushs(IEvent **ev, size_t items)$/;"	f	class:BlockEQueue
+pushs	eventqueue.cpp	/^size_t EQueue::pushs(IEvent **ev, size_t items)$/;"	f	class:EQueue
+pushs	eventqueue.h	/^        size_t pushs(IEvent **ev, size_t items)$/;"	f	class:ELQueue
+pushs_ms	eventqueue.h	/^        size_t pushs_ms(IEvent **ev, size_t items, int msec) { return 0;}$/;"	f	class:ELQueue
+pushs_ms	eventqueue.h	/^        size_t pushs_ms(IEvent **ev, size_t items, int msec) { return 0;}$/;"	f	class:EQueue
+pushs_ms	eventqueue.h	/^        size_t pushs_ms(IEvent **ev, size_t items, int msec){return 0;}$/;"	f	class:BlockEQueue
+reactor	baseEvent.h	/^        virtual IReactor *reactor() { return _reactor; }$/;"	f	class:EventBase
+read_callback	lineEvent.cpp	/^void LineEvent::read_callback()$/;"	f	class:LineEvent
+read_done_callback	lineEvent.cpp	/^void LineEvent::read_done_callback()$/;"	f	class:LineEvent
+registerAccept	baseEvent.cpp	/^int SockEventBase::registerAccept(int fd) $/;"	f	class:SockEventBase
+registerBase	baseEvent.cpp	/^int SockEventBase::registerBase()$/;"	f	class:SockEventBase
+registerRead	baseEvent.cpp	/^int SockEventBase::registerRead(int fd, size_t count)$/;"	f	class:SockEventBase
+registerWrite	baseEvent.cpp	/^int SockEventBase::registerWrite(int fd, size_t count)$/;"	f	class:SockEventBase
+release	baseEvent.cpp	/^bool EventBase::release()$/;"	f	class:EventBase
+result	baseEvent.h	/^        virtual int result() { return _events; }$/;"	f	class:EventBase
+run	extreactor.cpp	/^int EXTReactor::run()$/;"	f	class:EXTReactor
+run	syncReactor.cpp	/^int SyncReactor::run()$/;"	f	class:SyncReactor
+set	baseEvent.cpp	/^void EventBase::set(int hd, int evs, int type, work_handle cb, void *p)$/;"	f	class:EventBase
+setCallback	baseEvent.h	/^        virtual void setCallback(work_handle cb, void *p)$/;"	f	class:EventBase
+setDerived	baseEvent.h	/^        virtual void setDerived(int div) { _devided = div;}$/;"	f	class:EventBase
+setExtReactor	extreactor.cpp	/^IReactor * EXTReactor::setExtReactor(IReactor *) $/;"	f	class:EXTReactor
+setExtReactor	syncReactor.cpp	/^IReactor * SyncReactor::setExtReactor(IReactor * rec) $/;"	f	class:SyncReactor
+setHandle	baseEvent.h	/^        virtual void setHandle(int hd) { _fd = hd;}$/;"	f	class:EventBase
+setMaxEvents	extreactor.cpp	/^void EXTReactor::setMaxEvents(int num)$/;"	f	class:EXTReactor
+setMaxEvents	syncReactor.cpp	/^void SyncReactor::setMaxEvents(int num)$/;"	f	class:SyncReactor
+setMaxSize	eventqueue.h	/^        void setMaxSize(size_t maxsize) $/;"	f	class:BlockEQueue
+setMaxSize	eventqueue.h	/^        void setMaxSize(size_t maxsize) $/;"	f	class:ELQueue
+setMaxSize	eventqueue.h	/^        void setMaxSize(size_t maxsize) { cap = maxsize;}$/;"	f	class:EQueue
+setNext	baseEvent.h	/^        virtual void setNext(IEvent *ev) { _next = ev; }$/;"	f	class:EventBase
+setPrevious	baseEvent.h	/^        virtual void setPrevious(IEvent *ev) { _pre = ev; }$/;"	f	class:EventBase
+setQueue	extreactor.cpp	/^int EXTReactor::setQueue(IEQueue * _q)$/;"	f	class:EXTReactor
+setReUsed	baseEvent.h	/^        virtual void setReUsed(bool re) { _reused = re; }$/;"	f	class:EventBase
+setReactor	baseEvent.h	/^        virtual void setReactor(IReactor *r) { _reactor = r; }$/;"	f	class:EventBase
+setResult	baseEvent.h	/^        virtual void setResult(int evs) { _events = evs;}$/;"	f	class:EventBase
+setSockType	baseEvent.h	/^        void setSockType(int t) { _sockType = t;}$/;"	f	class:SockEventBase
+setStatus	baseEvent.h	/^        virtual void setStatus(int s) { _status = s; }$/;"	f	class:EventBase
+setThread	extreactor.cpp	/^void EXTReactor::setThread(int pnum)$/;"	f	class:EXTReactor
+setThread	syncReactor.h	/^		void setThread(int pnum) { return;};$/;"	f	class:SyncReactor
+setTimeout	baseEvent.h	/^        virtual void setTimeout(int msec) { _to = msec;} $/;"	f	class:EventBase
+setType	baseEvent.h	/^        virtual void setType(int t) { _type = t; }$/;"	f	class:EventBase
+set_read_done_callback	lineEvent.h	/^        inline void set_read_done_callback(LINE_READ_CALLBACK_T read_cb)$/;"	f	class:LineEvent
+set_write_done_callback	lineEvent.h	/^        inline void set_write_done_callback(LINE_WRITE_CALLBACK_T write_cb)$/;"	f	class:LineEvent
+size	eventqueue.h	/^        size_t size() const{ return _queue.size();}$/;"	f	class:BlockEQueue
+size	eventqueue.h	/^        size_t size() const{ return _queue.size();}$/;"	f	class:ELQueue
+size	eventqueue.h	/^        size_t size() const{ return used;}$/;"	f	class:EQueue
+status	baseEvent.h	/^        virtual int status () { return _status;}$/;"	f	class:EventBase
+status	extreactor.cpp	/^int EXTReactor::status() { return _status; }$/;"	f	class:EXTReactor
+status	syncReactor.cpp	/^int SyncReactor::status() { return _status; }$/;"	f	class:SyncReactor
+stop	extreactor.cpp	/^int EXTReactor::stop()$/;"	f	class:EXTReactor
+stop	syncReactor.cpp	/^int SyncReactor::stop()$/;"	f	class:SyncReactor
+stopUntilEmpty	extreactor.cpp	/^int EXTReactor::stopUntilEmpty()$/;"	f	class:EXTReactor
+stopUntilEmpty	syncReactor.cpp	/^int SyncReactor::stopUntilEmpty()$/;"	f	class:SyncReactor
+tcpconnect_callback	lineEvent.h	/^        virtual void tcpconnect_callback() {return;}$/;"	f	class:LineEvent
+timeout	baseEvent.h	/^        virtual timeval * timeout() {return NULL;}$/;"	f	class:EventBase
+type	baseEvent.h	/^        virtual int type() { return _type; }$/;"	f	class:EventBase
+used	eventqueue.h	/^        int used;$/;"	m	class:EQueue
+write_callback	lineEvent.cpp	/^void LineEvent::write_callback()$/;"	f	class:LineEvent
+write_done_callback	lineEvent.cpp	/^void LineEvent::write_done_callback()$/;"	f	class:LineEvent
+~BlockEQueue	eventqueue.cpp	/^BlockEQueue::~BlockEQueue()$/;"	f	class:BlockEQueue
+~EQueue	eventqueue.h	/^        ~EQueue() $/;"	f	class:EQueue
+~EXTReactor	extreactor.cpp	/^EXTReactor::~EXTReactor()$/;"	f	class:EXTReactor
+~EventBase	baseEvent.cpp	/^EventBase::~EventBase() $/;"	f	class:EventBase
+~LineEvent	lineEvent.h	/^        ~LineEvent() {};$/;"	f	class:LineEvent
+~SockEventBase	baseEvent.cpp	/^SockEventBase::~SockEventBase()$/;"	f	class:SockEventBase
+~SyncReactor	syncReactor.cpp	/^SyncReactor::~SyncReactor()$/;"	f	class:SyncReactor

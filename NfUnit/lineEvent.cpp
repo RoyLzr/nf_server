@@ -102,4 +102,47 @@ void LineEvent::write_callback()
     return ;
 }
 
+void LineEvent::accept_callback()
+{
+    int  ret = 0;
+    char ip[40];
+    int  len = 40;
+    int  port = 0;
+    int  cliSock = 0;
+
+    cliSock = net_accept(_fd, (sockaddr *)&_addr, (socklen_t *)&_len);
+    if (cliSock < 0) 
+    {
+        Log :: WARN("ACCEPT %d ERROR %s", _fd, strerror(errno));
+        return;
+    }
+        
+    get_tcp_sockaddr(ip, &port, (sockaddr_in *) (&_addr), _len);
+    Log :: NOTICE("ACCEPT SUCC FROM CLIENT: %s:%d  new fd : %d ", 
+                  ip, port, cliSock);
+    //TODO: add set_sev_sockopt;
+
+    LineEvent * ev = new LineEvent();
+    if(set_fd_noblock(cliSock) < 0)
+    {
+        Log::WARN("LineEvent::accept_callback, set cli sock noblock error"); 
+        return;
+    }
+    if(ev == NULL)
+    {
+        Log::WARN("LineEvent::accept_callback, new LineEvent error, ev is null"); 
+        return;
+    }
+
+    ev->registerRead(cliSock, 0);
+    ev->setReUsed(true);
+    ev->set_read_done_callback(_read_done_callback);    
+    ev->set_write_done_callback(_write_done_callback);
+    ev->set_sockAddr(_addr);
+    ev->set_sockLen(_len);
+
+    _reactor->post(ev); 
+    return;
+}
+
 

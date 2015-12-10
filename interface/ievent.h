@@ -28,6 +28,8 @@ class IEvent : public IRef
             SIGNAL      =      0x08,
             CLOSESOCK   =      0x10,
             ERROR       =      0x20,
+            ACCEPT      =      0x40,   
+            //ex add, reduce accept,del from epoll
         };
         //type
         enum
