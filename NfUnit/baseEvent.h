@@ -107,7 +107,7 @@ class SockEventBase : public EventBase
 
     public:
         SockEventBase();
-        ~SockEventBase();
+        virtual ~SockEventBase();
         
         void setSockType(int t) { _sockType = t;}
         

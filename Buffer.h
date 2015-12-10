@@ -7,12 +7,7 @@
 
 static const bool DELETED = true;
 static const bool UNDELETED = false;
-
-#ifdef WORK
-static const bool FRESHLIMIT = 4096;
-#else
-static const bool FRESHLIMIT = 8;
-#endif
+static const int  FRESHLIMIT = 1024;
 
 
 class Buffer
@@ -46,7 +41,11 @@ class Buffer
 
         int add_handl_num(int handled);
 
-        inline void add_unhandle_num(int size) const
+        int check_empty_space();
+        
+        inline int get_allo_size() { return allo_len;}
+
+        inline void add_unhandle_num(int size)
         {
             end_idx += size;
         }
@@ -58,7 +57,7 @@ class Buffer
 
         inline void * get_empty_cache() const
         {
-            return (char *)cache + allo_len - end_idx - 1;
+            return (char *)cache + end_idx + 1;
         }
 
         inline int get_empty_size() const
@@ -82,11 +81,11 @@ class Buffer
         }
         
         void swap(Buffer &rhs);
-
-    protected:
         
         int fresh_cache(int len);
-
+        
+    protected:
+        
         void * cache;
         int allo_len;
         int str_idx;

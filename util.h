@@ -1,7 +1,7 @@
 #ifndef _UTIL_
 #define _UTIL_
 
-//#define WORK 0x00
+#define WORK 0x00
 
 
 //ev_events

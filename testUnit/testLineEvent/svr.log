@@ -1,0 +1,53 @@
+[DEBUG]  12-10 21:44:50  Post event in syncReactor ev 1
+[WARN]   12-10 21:44:50  syncReactor::post reactor is not runing, store in _queue
+[NOTICE] 12-10 21:44:50  EXTReactor begin running
+[NOTICE] 12-10 21:44:50  SYNC Reactor extReactor begin running
+[DEBUG]  12-10 21:44:50  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:51  wait done 1
+[DEBUG]  12-10 21:44:51  SockEventBase read_callback
+[WARN]   12-10 21:44:51  LineEvent::read_callback                 design Buffer size error,                 not enough to read from net, emptySize : 0
+[NOTICE] 12-10 21:44:51  MEMCACHE EXPAND POOL SPACE : 768
+[NOTICE] 12-10 21:44:51  MEMCACHE EXPAND POOL SPACE : 256
+[DEBUG]  12-10 21:44:51  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:51  wait done 1
+[DEBUG]  12-10 21:44:51  SockEventBase read_callback
+[DEBUG]  12-10 21:44:51  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:52  wait done 1
+[DEBUG]  12-10 21:44:52  SockEventBase read_callback
+[DEBUG]  12-10 21:44:52  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:52  wait done 1
+[DEBUG]  12-10 21:44:52  SockEventBase read_callback
+[DEBUG]  12-10 21:44:52  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:52  wait done 1
+[DEBUG]  12-10 21:44:52  SockEventBase read_callback
+[DEBUG]  12-10 21:44:52  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:52  wait done 1
+[DEBUG]  12-10 21:44:52  SockEventBase read_callback
+[DEBUG]  12-10 21:44:52  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:52  wait done 1
+[DEBUG]  12-10 21:44:52  SockEventBase read_callback
+[DEBUG]  12-10 21:44:52  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:53  wait done 1
+[DEBUG]  12-10 21:44:53  SockEventBase read_callback
+[DEBUG]  12-10 21:44:53  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:53  wait done 1
+[DEBUG]  12-10 21:44:53  SockEventBase read_callback
+[DEBUG]  12-10 21:44:53  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:53  wait done 1
+[DEBUG]  12-10 21:44:53  SockEventBase read_callback
+[DEBUG]  12-10 21:44:53  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:53  wait done 1
+[DEBUG]  12-10 21:44:53  SockEventBase read_callback
+[DEBUG]  12-10 21:44:53  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:53  wait done 1
+[DEBUG]  12-10 21:44:53  SockEventBase read_callback
+[DEBUG]  12-10 21:44:53  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:54  wait done 1
+[DEBUG]  12-10 21:44:54  SockEventBase read_callback
+[DEBUG]  12-10 21:44:54  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:54  wait done 1
+[DEBUG]  12-10 21:44:54  SockEventBase read_callback
+[DEBUG]  12-10 21:44:54  Post event in syncReactor ev 1
+[DEBUG]  12-10 21:44:56  wait done 1
+[DEBUG]  12-10 21:44:56  SockEventBase read_callback
+[DEBUG]  12-10 21:44:56  Post event in syncReactor ev 1
