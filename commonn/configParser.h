@@ -46,6 +46,9 @@ class ConfigParser
 
     bool parser_file(const std::string &file);
     const std::string & get(const std::string sectionName, const std::string keyName) const;
+    
+    const Section     & get(const std::string sectionName) const;
+
     inline void set(const std::string &sectionName, const std::string &keyName, 
         const std::string &value)
     {

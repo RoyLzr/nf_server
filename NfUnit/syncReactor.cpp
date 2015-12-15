@@ -202,6 +202,12 @@ int SyncReactor::epollDispatch()
 int SyncReactor::load(const Section & sec)
 {
     _maxEvents = atoi(sec.get("MaxEvents").c_str());
+    _pNum = atoi(sec.get("ThreadNum").c_str());
+    if(_extReactor != NULL)
+    {
+        _extReactor->setThread(_pNum);
+        _extReactor->setMaxEvents(_maxEvents);
+    }
     return 0;    
 }
 

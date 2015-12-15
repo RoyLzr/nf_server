@@ -51,6 +51,7 @@ int EXTReactor::run()
 	_run = true;
 	_status = IReactor::RUNNING;
     Log::NOTICE("EXTReactor begin running");
+    Log::NOTICE("EXTReactor Work thread num : %d", _threadsnum);
 	if (_threadsnum > 0) 
     {
 		ret = _threadma.run(_threadsnum, TCALLBACK, this);

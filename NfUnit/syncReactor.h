@@ -16,7 +16,10 @@ class SyncReactor : public IReactor
 
         virtual int  load(const Section &);
 
-		void setThread(int pnum) { return;};
+		void setThread(int pNum) 
+        { 
+            _pNum=pNum;
+        }
 
 		virtual void setMaxEvents(int num);
         
@@ -58,6 +61,7 @@ class SyncReactor : public IReactor
         bool _run;
         int  _status;
         bool _emptystop;
+        bool _pNum;
         std::atomic<int>  _events;
     protected:
         int epollDispatch();

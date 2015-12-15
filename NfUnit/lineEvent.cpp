@@ -31,7 +31,8 @@ void LineEvent::read_callback()
     {
         Log::WARN("LineEvent::read_callback \
                 design Buffer size error, \
-                not enough to read from net, emptySize : %d", emptySize);
+                not enough to read from net, emptySize : %d fd :%d", 
+                emptySize, _fd);
         _readBuffer.fresh_cache(512);    
     }
 

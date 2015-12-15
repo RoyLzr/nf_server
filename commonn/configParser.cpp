@@ -1,6 +1,7 @@
 #include "configParser.h"
 
 static const std::string empty_str = "";
+static const Section empty_Sec = Section();
 
 const std::string & 
 Section :: get(const std::string key) const
@@ -63,7 +64,6 @@ ConfigParser :: parser_file(const std::string &file)
     return true;
 }
 
-
 const std::string& 
 ConfigParser :: get(const std::string sectionName, const std::string keyName) const
 {
@@ -74,6 +74,16 @@ ConfigParser :: get(const std::string sectionName, const std::string keyName) co
         return itr->second.get(keyName);
     }
     return empty_str;
+}
+
+const Section & 
+ConfigParser::get(const std::string sectionName) const
+{
+    std::map<std::string, Section>::const_iterator itr;
+    itr = mSections.find(sectionName);
+    if(itr != mSections.end())
+        return itr->second;
+    return empty_Sec;
 }
 
 void 

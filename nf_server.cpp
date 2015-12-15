@@ -1,293 +1,226 @@
 #include "nf_server.h"
 
-NfServer :: NfServer()
+NfSvr :: NfSvr()
 {
-    sev_data = nf_server_create(NULL);
+    _sev_data = nf_server_create();
+    _name     = "Defult";
 }
 
-NfServer :: ~NfServer()
+NfSvr :: NfSvr(IReactor * act)
 {
-    if (sev_data != NULL)
-    {
-        //NfServer :: destroy();
-    }
-    sev_data = NULL;
+    assert(act != NULL);
+
+    _sev_data = nf_server_create();
+    _sev_data->_svr_reactor  = act;
+    _name     = "Defult";
 }
 
-int NfServer :: init(const std::string & logPath)
+NfSvr::~NfSvr()
 {
-    Singleton<ConfigParser>::instance()->parser_file(logPath);
+    if(NULL != _sev_data)
+        delete _sev_data;
+}
 
-    Singleton<ConfigParser>::instance()->scan();
-    int ret;
-    //INIT LOG
-    Log :: init(Singleton<ConfigParser>::instance()->get("server", 
-                "logPath").c_str());
+nf_server_t * 
+NfSvr :: nf_server_create()
+{
 
-    Log :: set_level(atoi(Singleton<ConfigParser>::instance()->get("server", 
-                    "logLevel").c_str()));
+    nf_server_t *sev = (nf_server_t *)malloc(sizeof(nf_server_t));
+    assert(sev != NULL);
+    memset(sev, 0, sizeof(nf_server_t));
+     
+    sev->_svr_type = SYNC;
     
-    //INIT memory pool
-    Allocate :: init();
+    sev->_backlog = 2048;
+    sev->_port = 80;
+    sev->_connect_to = 60;
+    sev->_read_to    = 60;
+    sev->_write_to   = 60;
+    sev->_session_to = 120;
+    
+    sev->_max_session = 500000;
+    sev->_session_cnt = 0;
+    
+    sev->_sock_family   = AF_INET;
+    sev->_listen_socket = -1;
+    sev->_sockopt = 0;
 
-    nf_server_t * sev = sev_data;
+    sev->_svr_reactor = NULL;
+    sev->_status      = INIT;
+    
+    return sev;
+}
 
-    sev->run = 1;
+
+int NfSvr :: init(const Section & sec)
+{
+    int ret = 0;
+    Log::init(sec.get("logPath").c_str());
+    Log::set_level( atoi(sec.get("logLevel").c_str()));
+
+    Allocate::init();
+    
+    nf_server_t * sev = _sev_data;
+
     //conf 相关内容初始化
     //监听端口
-    sev->listen_port = (size_t)atoi((Singleton<ConfigParser>::
-                                     instance()->get("server", "listenPort")).c_str());
+    sev->_port       = (size_t)atoi((sec.get("listenPort").c_str()));
     //超时设置
-    sev->connect_to = (size_t)atoi((Singleton<ConfigParser>::
-                                    instance()->get("server", "connectTo")).c_str());
+    sev->_connect_to = (size_t)atoi((sec.get("connectTo").c_str()));
 
-    sev->read_to = (size_t)atoi((Singleton<ConfigParser>::
-                                 instance()->get("server", "readTo")).c_str());
+    sev->_read_to    = (size_t)atoi((sec.get("readTo").c_str()));
 
-    sev->write_to = (size_t)atoi((Singleton<ConfigParser>::
-                                  instance()->get("server", "writeTo")).c_str());
-
-    //connect 方法
-    sev->connect_type = (size_t)atoi((Singleton<ConfigParser>::
-                                      instance()->get("server", "connectType")).c_str());
+    sev->_write_to   = (size_t)atoi((sec.get("writeTo").c_str()));
     
+    sev->_session_to = (size_t)atoi((sec.get("sessionTo").c_str()));
+
     //server_type
-    sev->server_type = (size_t)atoi((Singleton<ConfigParser>::
-                                     instance()->get("server", "type")).c_str());
+    sev->_svr_type   = (size_t)atoi((sec.get("type").c_str()));
     
-    sev->socksize = (size_t)atoi((Singleton<ConfigParser>::
-                                     instance()->get("reactor", "sock_num")).c_str());
-
-    //线程数
-    sev->thread_num = (size_t)atoi((Singleton<ConfigParser>::
-                                     instance()->get("reactor", "threadNum")).c_str());
-
-    sev->reactor_num = (size_t)atoi((Singleton<ConfigParser>::
-                                     instance()->get("reactor", "reactorNum")).c_str());
-
-    //线程栈
-    //sev->stack_size = 10485760;  //10M
-    sev->stack_size = (size_t)atoi((Singleton<ConfigParser>:: 
-                                    instance()->get("thread", "stackSize")).c_str());
-
-    sev->thread_usr_buf = (size_t)atoi((Singleton<ConfigParser>:: 
-                                    instance()->get("thread", "threadUsrBuf")).c_str());
-  
-    sev->svr_reactor = new NfReactor[sev->reactor_num];
-
-    if(sev->svr_reactor == NULL)
-        return -1;
-    
-    assert(sev->reactor_num > 0);
-
-    if( (ret = sev->svr_reactor[0].init(sev->socksize, sev)) < 0 )
-        return -1;
+    sev->_max_session = (size_t)atoi((sec.get("sockNum").c_str()));
 
     Log :: NOTICE("SVR INIT OK");
     return 0;
 }
 
-int NfServer :: set_server_name(const char * sev_name)
+int NfSvr :: run()
 {
-    if(sev_data == NULL)
-        return -1;
+    int ret = 0;
 
-    strncpy(sev_data->name, sev_name, sizeof(sev_data->name));
-    sev_data->name[sizeof(sev_data->name) - 1] = '\0';
-
-    return 0;
-}
-
-nf_server_t * NfServer :: get_server_data()
-{
-    return sev_data;
-}
-
-int NfServer :: run()
-{
-
-    nf_server_t * sev = sev_data;
-    int ret;
-
-    assert(sev->read_handle != NULL);
-    assert(sev->write_handle != NULL);
-    assert(sev->read_parse_handle != NULL);
-    assert(sev->write_parse_handle != NULL);
+    IReactor        * coreAct = _sev_data->_svr_reactor;
+    SockEventBase   * coreEv  = _sev_data->_acc_event;
     
-
-    if((ret = nf_server_bind(sev_data) ) < 0 )
+    if((ret = nf_server_bind()) < 0 )
     {    
-        Log :: ERROR("nf_server.cpp : 56 BIND ERROR"); 
+        Log :: ERROR("NfSvr::run::nf_server_bind ERROR"); 
         return -1;
     }
 
-    if((ret = nf_server_listen(sev_data)) < 0)
+    if((ret = nf_server_listen()) < 0)
     {    
         Log :: ERROR("SVR LISTEN ERROR"); 
         return -1;
     }
+
+    assert(coreAct != NULL);
+    assert(coreEv  != NULL);
     
-    if((ret = svr_init()) < 0)
-    {    
-        Log :: ERROR("SVR INIT ERROR"); 
-        return -1;
-    }
+    coreEv->registerAccept(_sev_data->_listen_socket);
+    coreEv->setReUsed(true);
 
-    sev_data->need_join = 1; 
+    coreAct->post(coreEv);
+    coreAct->run();
 
-    return svr_run(); 
-}
-
-/*
-int NfServer :: stop()
-{
-    sev_data->run = 0;
-    Log :: NOTICE("SVR STOPPED");
-    //Log :: set_status(2); 
     return 0;
 }
 
-int NfServer :: join()
+int NfSvr :: stop()
 {
-    if(sev_data == NULL)
-        return -1;
-    if(!sev_data->need_join)
-        return 0;
-    return svr_join(); 
+    nf_server_t * sev = _sev_data;
+    sev->_status = STOP;
+    if(sev->_svr_reactor != NULL)
+        (sev->_svr_reactor)->stop();
 }
 
-int NfServer :: destroy()
+int NfSvr :: join()
 {
-    NfServer :: join();    
-    if ( sev_data->sev_socket >= 0)
-        close(sev_data->sev_socket);
+    return 0;
+}
 
-    svr_destroy();   
-    Log :: NOTICE("nf_server.cpp : 97 CLOSE THREAD SUCC \n");
+int NfSvr :: resume()
+{
+    return 0;
+}
 
-    delete sev_data->stratgy;
+int NfSvr :: pause()
+{
+    return 0;
+}
 
-    if( sev_data->pdata != NULL)
-    { 
-        for(size_t i = 0; i < sev_data->pthread_num; i++)
+int NfSvr :: destroy()
+{
+    return 0;
+}
+
+//1. SO_LINGER 2. TCP_NODELAY 3. DEFER_ACCEPT
+int NfSvr::set_sev_socketopt()
+{
+    const int on = 1;
+    nf_server_t * sev = _sev_data;
+    int fd = sev->_listen_socket;
+
+    if(sev->_sockopt & LINGER)
+    {
+        setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &on, sizeof(on));
+    }
+    
+    if(sev->_sockopt & TCP_NODELAY)
+    {
+        struct linger li;
+        memset(&li, 0, sizeof(li)); 
+        li.l_onoff = 1;
+        li.l_linger = 1;
+        setsockopt(fd, SOL_SOCKET, SO_LINGER, (const char*)&li, sizeof(li) );     
+    }
+
+    if(sev->_sockopt & DEFER_ACC)
+    {
+        int timeout = sev->_connect_to;
+        setsockopt(fd, IPPROTO_TCP, TCP_DEFER_ACCEPT, &timeout, sizeof(timeout));
+    }
+
+    return 0; 
+}
+
+int NfSvr::nf_server_bind()
+{
+    //set svr : listen socket 
+    const int on = 1;
+    struct sockaddr_in addr;
+    
+    if(_sev_data->_listen_socket < 0)
+    {
+        if((_sev_data->_listen_socket=socket(PF_INET, SOCK_STREAM, 0))<0)
         {
-            std::cout << i << std::endl;
-            if( sev_data->pdata[i].read_buf != NULL)
-            {    
-                free(sev_data->pdata[i].read_buf);
-                sev_data->pdata[i].read_buf = NULL;
-            }
-            if( sev_data->pdata[i].write_buf != NULL)
-            {
-                free(sev_data->pdata[i].write_buf);
-                sev_data->pdata[i].write_buf = NULL;
-            }
-            if(sev_data->server_type == NFSVR_LFPOOL 
-                    && sev_data->pdata[i].rio.rio_ptr != NULL)
-            {
-                free(sev_data->pdata[i].rio.rio_ptr);
-                sev_data->pdata[i].rio.rio_ptr = NULL;
-            }
+            Log :: ERROR("NF_SVR_CORE : CREATE SOCKET ERROR : %s", strerror(errno));
+            return -1; 
         }
     }
-    Singleton<ConfigParser>::destroy();
-    sleep(1);
-    free(sev_data->pdata);
-    free(sev_data);
-    Log :: NOTICE("nf_server.cpp : 115 CLOSE SERVER SUCC \n");
-    sleep(1);
+    //复用
+    setsockopt(_sev_data->_listen_socket, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(int));
+    set_sev_socketopt();
+    bzero(&addr, sizeof(addr));
+
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_port = htons(_sev_data->_port);
+    
+    if (bind(_sev_data->_listen_socket, (struct sockaddr *) &addr, sizeof(addr)) < 0) 
+    {
+        std::cout << "bind sock: " << strerror(errno) << std::endl;
+        close(_sev_data->_listen_socket);
+        return -1;    
+    }
+    
     return 0;
 }
 
-int NfServer :: pause()
-{   return 0 ;}
-
-int NfServer :: resume()
-{   return 0 ;}
-
-*/
-
-int NfServer :: set_read_handle(ev_handle read_handle)
+int NfSvr::nf_server_listen()
 {
-    if( sev_data == NULL)
-        return -1;
-    sev_data->read_handle = read_handle;
-    return 1;
-}
+    nf_server_t * sev = _sev_data;
+    int backlog = sev->_backlog;
 
-int NfServer :: set_write_handle(ev_handle write_handle)
-{
-    if( sev_data == NULL)
-        return -1;
-    sev_data->write_handle = write_handle;
-    return 1;
-}
+    if(backlog <= 0)
+        backlog = 5;
 
-int NfServer :: set_parse_write_handle(ParseFun * write_handle)
-{
-    if( sev_data == NULL)
-        return -1;
-    sev_data->write_parse_handle = write_handle;
-    return 1;
-}
-
-int NfServer :: set_parse_read_handle(ParseFun * read_handle)
-{
-    if( sev_data == NULL)
-        return -1;
-    sev_data->read_parse_handle = read_handle;
-    return 1;
-}
-
-nf_server_t * 
-NfServer :: nf_server_create(const char * sev_name)
-{
-    nf_server_t *sev = (nf_server_t *)malloc(sizeof(nf_server_t));
-    memset(sev, 0, sizeof(nf_server_t));
-
-    if(sev == NULL)
-        return NULL;
-   
-    sev->server_type = NFSVR_SAPOOL;
-    sev->connect_type = NFSVR_LONG_CONNEC;
-    sev->thread_num = 0;
-    sev->reactor_num = 1;
-    
-    sev->sock_family = AF_INET;
-    sev->backlog = 2048;
-    sev->thread_usr_buf = 1024;
- 
-    sev->stack_size = 10485760;  //10M
-    sev->sev_socket = -1;    
-    
-    sev->listen_prio = 10;
-    sev->work_prio = 5;  
-
-    sev->socksize = 50000; 
-
-    sev->read_to = 60;
-    sev->write_to = 60;
-    sev->connect_to = 60;
-
-    sev->read_handle = NULL;
-    sev->read_parse_handle = NULL;
-    sev->write_handle = NULL;
-    sev->write_parse_handle = NULL;
-    
-    sev->svr_reactor = NULL;
-
-    sev->status = INIT;
-
-    if(sev_name == NULL)
+    if(listen(sev->_listen_socket, backlog) < 0)
     {
-        strncpy(sev->name, "simple server", sizeof(sev->name));
-        sev->name[sizeof(sev->name) - 1] = '\0';
+        Log :: ERROR("SET LISTEN SOCKET ERROR");
+        close(sev->_listen_socket);
+        return -1;
     }
-    else
-    {
-        strncpy(sev->name, sev_name, sizeof(sev->name));
-        sev->name[sizeof(sev->name) - 1] = '\0';
-    } 
-    return sev;
+    Log :: NOTICE("SET LISTEN SOCKET SUCC");
+    
+    return 0;
 }
 
